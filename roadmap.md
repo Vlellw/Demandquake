@@ -94,4 +94,4 @@
 - [x] Remove the Claim button from the startup tab bar (hero Claim remains).
 - [x] Rebalance startup Overview: equal-height panels, compact customer cards with even spacing, no white gap.
 
-- [ ] Workspace edit mode: pencil toggle gates all editable sections (name, tagline, pitch, checklist, assumptions, notes, roadmap); read-only by default.
+- [x] Workspace edit mode: Edit/Done pencil toggle gates name, tagline, concept, checklist, assumptions and notes; read-only by default, verified as the workspace owner.
