@@ -144,11 +144,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {p.is_owner ? <Badge variant="positive">Claimed by you</Badge> : <Badge variant="observed">Shared by {p.owner_name ?? "the founder"}</Badge>}
-              {r.startup_slug && (
-                <Link to="/startup/$slug" params={{ slug: r.startup_slug }} className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline-offset-4 hover:underline">
-                  See the public research page <ExternalLink className="size-3" />
-                </Link>
-              )}
             </div>
             <SaveIndicator state={state} savedAt={savedAt} onRetry={retry} />
           </div>
