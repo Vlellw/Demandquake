@@ -79,7 +79,7 @@ export function PitchPlayer({ slides, ctx, className, exportIndex }: { slides: P
 
   return (
     <div
-      className={cn("brand-surface relative flex min-h-[420px] w-full flex-col overflow-hidden rounded-2xl border border-border-strong shadow-lift sm:aspect-[16/11]", className)}
+      className={cn("brand-surface relative flex min-h-[420px] w-full flex-col overflow-hidden rounded-2xl border border-border-strong shadow-lift", className)}
       style={brandStyle(ctx.brand)}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
@@ -119,7 +119,7 @@ export function PitchPlayer({ slides, ctx, className, exportIndex }: { slides: P
         </span>
       </div>
 
-      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 pb-14 sm:px-10">
+      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 py-6 sm:px-10">
         <AnimatePresence mode="wait">
           <motion.div
             key={index}
@@ -144,7 +144,7 @@ export function PitchPlayer({ slides, ctx, className, exportIndex }: { slides: P
       </div>
 
       {/* controls */}
-      <div className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-1 px-4 pb-3">
+      <div className="relative z-10 flex shrink-0 items-center gap-1 px-4 pb-3">
         {!exporting && <><button onClick={() => go(index - 1)} className="rounded-md p-1.5 text-foreground/70 hover:bg-foreground/10 hover:text-foreground" aria-label="Previous slide">
           <ChevronLeft className="size-4" />
         </button>

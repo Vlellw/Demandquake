@@ -234,7 +234,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
                 customers: (r.customers ?? []).map((c) => c.segment),
                 businessModel: r.business_model?.type ?? null,
               }}
-              className="aspect-[4/3] sm:aspect-[4/3]"
             />
           )}
           {r.startup_slug && <MarketWatch slug={r.startup_slug} project={p} update={update} />}
@@ -389,7 +388,8 @@ function Progress({ label, done, total, detail }: { label: string; done: number;
 function ChecklistSection({ project: p, update }: { project: ProjectDTO; update: Update }) {
   return (
     <section id="checklist" className="panel scroll-mt-24 p-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="section-title text-xl">Recommended actions</h2>
         <span className="font-mono text-[11px] text-muted-foreground">
           {p.checklist.filter((c) => c.done).length} of {p.checklist.length} done
         </span>

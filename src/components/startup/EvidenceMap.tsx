@@ -102,10 +102,10 @@ export function EvidenceMap({
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const { nodes, edges, height } = useMemo(() => {
+  const { nodes, edges } = useMemo(() => {
     const ns: Node[] = [];
     const es: Edge[] = [];
-    if (!cluster) return { nodes: ns, edges: es, height: 400 };
+    if (!cluster) return { nodes: ns, edges: es };
 
     // Group evidence sources by signal type
     const groups = new Map<string, SourceRecord[]>();
@@ -172,7 +172,7 @@ export function EvidenceMap({
     if (compGroupY != null) {
       es.push({ id: "e-comp-startup", source: "g-competitors", target: "startup", animated: true, label: "differentiation", labelStyle: { fill: "var(--muted-foreground)", fontSize: 10 }, labelBgStyle: { fill: "var(--surface)" }, style: { stroke: "var(--uncertain)", strokeDasharray: "5 4", strokeWidth: 1.4 } });
     }
-    return { nodes: ns, edges: es, height: Math.max(420, Math.min(y + 40, 900)) };
+    return { nodes: ns, edges: es };
   }, [cluster, competitors, sources, startup]);
 
   if (!cluster) {
@@ -180,7 +180,7 @@ export function EvidenceMap({
   }
 
   return (
-    <div className="evidence-flow overflow-hidden rounded-xl border border-border bg-surface-sunken" style={{ height }}>
+    <div className="evidence-flow h-[420px] max-h-[60svh] min-h-[280px] overflow-hidden rounded-lg border border-border bg-surface-sunken" aria-label="Evidence map">
       {mounted && (
         <ReactFlow
           nodes={nodes}
@@ -190,19 +190,23 @@ export function EvidenceMap({
             if (node.type === "source") open((node.data as SourceData).source.id);
           }}
           fitView
-          fitViewOptions={{ padding: 0.12 }}
+          fitViewOptions={{ padding: 0.12, minZoom: 0.1, maxZoom: 0.65 }}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
-          panOnScroll={false}
+          panOnScroll
+          panOnDrag
           zoomOnScroll={false}
-          minZoom={0.3}
-          maxZoom={1.6}
+          zoomOnPinch
+          zoomOnDoubleClick
+          preventScrolling
+          minZoom={0.1}
+          maxZoom={2}
           proOptions={{ hideAttribution: false }}
           colorMode="light"
         >
           <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="var(--border-strong)" />
-          <Controls showInteractive={false} />
+          <Controls showInteractive={false} position="bottom-right" fitViewOptions={{ padding: 0.12, minZoom: 0.1, maxZoom: 0.65 }} />
         </ReactFlow>
       )}
     </div>

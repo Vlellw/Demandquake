@@ -37,6 +37,11 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [ ] Compact evidence map with scroll pan and zoom controls; verify real startup view.
+- [ ] Fix workspace pitch content overlapping its controls and add Recommended actions headline.
+- [ ] Remove the source-card grid only beneath Step 2 Evidence; preserve map source access elsewhere.
+- [ ] Add a contextual Back button using the browser's page-opening history without storing private browsing records.
+- [ ] Remove the highlighted Assessment at a glance block from startup inspection.
 - [x] Merge Search and Choose into Search & Discover, followed by Inspect and Claim; completed research, gated ideas, inspection navigation and phone layout verified.
 - [ ] Download the complete workspace pitch as a layout-preserving PDF; verify every exported slide and source links.
 - [x] Keep all journey steps neutral on the public home.
