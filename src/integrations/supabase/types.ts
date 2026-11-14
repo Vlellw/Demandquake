@@ -918,6 +918,16 @@ export type Database = {
         Args: { p_request: string; p_run: string }
         Returns: undefined
       }
+      claim_startup_with_credits: {
+        Args: {
+          p_env: string
+          p_owner_name: string
+          p_payload: Json
+          p_startup: string
+          p_user: string
+        }
+        Returns: Json
+      }
       ensure_credit_wallet: {
         Args: { p_env: string; p_user: string }
         Returns: undefined

@@ -30,6 +30,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthUser } from "@/hooks/use-auth";
 import { DIMENSION_META } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/format";
+import { creditAccountQuery } from "@/lib/credit-queries";
+import { getStripeEnvironment } from "@/lib/stripe";
+import { INITIAL_CREDIT_RULES, canAfford } from "@/lib/credit-rules";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const TABS = ["overview", "evidence", "landscape", "assessment", "updates", "plan"] as const;
 type Tab = (typeof TABS)[number];
@@ -108,7 +112,8 @@ function StartupPage() {
   const { slug } = Route.useParams();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/startup/$slug" });
-  const detail = useSuspenseQuery(startupDetailQuery(slug)).data!;
+  const { data: detail } = useSuspenseQuery(startupDetailQuery(slug));
+  if (!detail) throw notFound();
   const st = detail.startup;
   const { user, ready } = useAuthUser();
   const { data: myProjects } = useQuery({ ...myProjectsQuery, enabled: !!user });
@@ -116,6 +121,12 @@ function StartupPage() {
   const scanFn = useServerFn(startMarketScan);
   const queryClient = useQueryClient();
   const [claiming, setClaiming] = useState(false);
+  const [claimConfirm, setClaimConfirm] = useState(false);
+  const claimBusy = useRef(false);
+  const account = useQuery({ ...creditAccountQuery(user?.id ?? ''), enabled: Boolean(user) });
+  const wallet = account.data?.wallet;
+  const claimCost = INITIAL_CREDIT_RULES.claim;
+  const affordable = wallet ? canAfford(wallet.balance, wallet.reserved, claimCost) : false;
   const [scanning, setScanning] = useState(false);
   const autoClaimed = useRef(false);
   const tab: Tab = search.tab ?? "overview";
@@ -144,15 +155,25 @@ function StartupPage() {
       navigate({ to: "/auth", search: { redirect: `/startup/${slug}?claim=1` } });
       return;
     }
+    setClaimConfirm(true);
+  }
+
+  async function confirmClaim() {
+    if (claimBusy.current || !affordable) return;
+    claimBusy.current = true;
     setClaiming(true);
     try {
-      const res = await claimFn({ data: { startupId: st.id } });
+      const res = await claimFn({ data: { startupId: st.id, environment: getStripeEnvironment() } });
+      setClaimConfirm(false);
+      await queryClient.invalidateQueries({ queryKey: ["credit-account"] });
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success(res.created ? `${st.name} is now in your workspace` : "Opening your workspace");
       navigate({ to: "/workspace/$projectId", params: { projectId: res.projectId } });
     } catch (err) {
       console.error(err);
-      toast.error("Couldn’t claim this startup. Please try again.");
+      toast.error(err instanceof Error ? err.message : "Couldn’t claim this startup. No credits were charged.");
+    } finally {
+      claimBusy.current = false;
       setClaiming(false);
     }
   }
@@ -230,7 +251,7 @@ function StartupPage() {
                   </Button>
                 ) : (
                   <Button size="lg" onClick={claim} disabled={claiming || !ready} className="bg-background font-bold text-foreground hover:bg-accent">
-                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup
+                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup · 5 credits
                   </Button>
                 )}
                 <Button variant="glass" size="lg" onClick={scan} disabled={scanning}>
@@ -448,12 +469,24 @@ function StartupPage() {
               </Button>
             ) : (
               <Button variant="glass" size="lg" onClick={claim} disabled={claiming || !ready}>
-                {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building
+                {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building · 5 credits
               </Button>
             )}
           </div>
         </section>
       </div>
+      <Dialog open={claimConfirm} onOpenChange={open => { if (!claiming) setClaimConfirm(open); }}>
+        <DialogContent>
+          <DialogTitle>Claim {st.name}</DialogTitle>
+          <DialogDescription>A successful claim costs 5 credits and creates your private workspace. Failed claims cost nothing.</DialogDescription>
+          <p className="text-sm">Available: {wallet ? (wallet.balance - wallet.reserved).toLocaleString('en-US') : '…'} credits</p>
+          {wallet && !affordable && <p role="alert" className="text-negative">You need 5 available credits to claim this startup.</p>}
+          <div className="flex flex-wrap justify-end gap-3">
+            <Button variant="outline" disabled={claiming} onClick={() => setClaimConfirm(false)}>Cancel</Button>
+            {wallet && !affordable ? <Button asChild><Link to="/credits">Buy credits</Link></Button> : <Button disabled={claiming || !affordable} onClick={confirmClaim}>{claiming && <Loader2 className="animate-spin" />}Confirm · 5 credits</Button>}
+          </div>
+        </DialogContent>
+      </Dialog>
     </SourceProvider>
   );
 }

@@ -41,7 +41,7 @@ function toProject(r: Record<string, unknown>, userId: string): ProjectDTO {
 
 export const claimStartup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { startupId: string }) => ({ startupId: uuid.parse(d.startupId) }))
+  .inputValidator((d: { startupId: string; environment: 'sandbox' | 'live' }) => z.object({ startupId: uuid, environment: z.enum(['sandbox', 'live']) }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: existing } = await supabase
@@ -62,13 +62,14 @@ export const claimStartup = createServerFn({ method: "POST" })
       : { data: [] };
 
     const payload = buildProjectFromStartup(st as unknown as StartupForClaim, sources ?? [], new Date().toISOString());
-    const { data: created, error: insErr } = await supabase
-      .from("projects")
-      .insert({ ...payload, user_id: userId, owner_name: nameFromClaims(context.claims as Record<string, unknown>) } as never)
-      .select("id")
-      .single();
-    if (insErr) throw insErr;
-    return { projectId: created.id, created: true };
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const { data: result, error: claimError } = await supabaseAdmin.rpc('claim_startup_with_credits', {
+      p_user: userId, p_env: data.environment, p_startup: st.id,
+      p_owner_name: nameFromClaims(context.claims as Record<string, unknown>),
+      p_payload: payload as unknown as Database['public']['Tables']['projects']['Row']['brand'],
+    });
+    if (claimError) throw new Error(claimError.message);
+    return z.object({ projectId: uuid, created: z.boolean(), cost: z.number() }).parse(result);
   });
 
 export const listMyProjects = createServerFn({ method: "GET" })

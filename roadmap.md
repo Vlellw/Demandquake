@@ -24,6 +24,7 @@
 - [x] Every page restyled (startup profile + tabs, research run, market scan, workspace list/detail, how it works, sign-in, reset password, invite, 404) and charts on the light theme; phone layouts and accessibility contrast checked
 
 ## Ready next
+- [x] Five-credit startup claims: atomic workspace creation and charge, confirmation, duplicate/failure protection. Verified 25 → 20 credits, one charge, existing workspace opens without another charge, and direct workspace inserts are blocked.
 - [x] Credit wallets and auditable history, 25 welcome credits, 5-credit successful discovery with confirmation, atomic idempotent reservations and settlement, public package page and protected admin controls. Verified a signed-in cached search: 25 → 20 credits, one ledger entry, no phone overflow.
 - Credit payments: provider and four products created, embedded checkout and signed webhook fulfillment/refund handling implemented. Blocked: provisioned payment secrets are missing from the app runtime, so purchase/decline/refund end-to-end checks and tax configuration are unverified. Live onboarding is also required; do not claim real purchases work.
 - Admin allocation: verified-email allowlist configured for the requested account. Blocked: that account does not exist in app auth yet; signup and email verification are required before the million-credit grant and admin checks.

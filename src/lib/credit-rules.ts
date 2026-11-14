@@ -1,4 +1,4 @@
-export const INITIAL_CREDIT_RULES = { welcome: 25, discovery: 5, admin: 1_000_000 };
+export const INITIAL_CREDIT_RULES = { welcome: 25, discovery: 5, claim: 5, admin: 1_000_000 };
 export const INITIAL_PACKAGES = [
   { id: 'starter', credits: 100, amount: 500 },
   { id: 'explorer', credits: 500, amount: 2000 },
