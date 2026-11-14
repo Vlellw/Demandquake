@@ -200,7 +200,8 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
                   top: (hoverNode.y ?? 0) > h / 2 ? (hoverNode.y ?? 0) - hoverNode.r - 120 : (hoverNode.y ?? 0) + hoverNode.r + 10,
                 }}
               >
-                <p className="text-[10px] font-bold uppercase tracking-[0.06em]" style={{ color: industryColor(hoverNode.d.industry) }}>
+                <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
+                  <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: industryColor(hoverNode.d.industry) }} />
                   {hoverNode.d.industry} · {hoverNode.d.geography}
                 </p>
                 <p className="mt-1 text-sm font-semibold leading-snug text-foreground">{hoverNode.d.title}</p>
@@ -261,7 +262,8 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
     >
       <div className="flex items-start gap-3 border-b border-border p-5">
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.06em]" style={{ color: industryColor(node.industry) }}>
+          <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-muted-foreground">
+            <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: industryColor(node.industry) }} />
             {node.industry} · {node.category}
           </p>
           <h3 className="mt-1 font-display text-lg font-bold leading-snug text-foreground">{node.title}</h3>

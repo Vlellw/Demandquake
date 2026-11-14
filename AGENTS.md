@@ -41,3 +41,4 @@ use the editor.
 - Server stages keep at most 5 outbound requests in flight per invocation (the hosted runtime queues beyond 6, letting per-call timeouts expire).
 - Market re-checks run from the founder's browser (workspace auto-scan when evidence is over a week old), not a scheduled callback, because scheduled callbacks are cancelled after a few seconds while a scan takes ~30s.
 - Shared workspaces: membership lives in `project_members` (joined only through `accept_project_invite`), RLS lets members read/update but only owners delete or invite, and a trigger locks `user_id`/`startup_id`/`owner_name`. Saves are conditional on `updated_at` and conflicts three-way merge by item id (`project-merge.ts`), so co-founders never overwrite each other.
+- Inner pages open with `Breadcrumbs` and build headings and key figures from `SectionHeading` / `StatRule` (`src/components/common`), so every page keeps the same Lindström-style structure.

@@ -19,11 +19,12 @@
 - [x] "Picked for you" on discover for signed-in founders (same industry or concrete region as their claimed startups)
 - [x] Co-founder collaboration: invite links, shared editing with conflict-free merging, live sync, remove/leave, activity entries
 
-## In progress
-- [ ] Lindström-style redesign: light design system, Libre Franklin, pill buttons, utility bar + header with search, photo hero carousel, centered section headings, stat counters, article-style cards, mosaic, navy band, footer
-- [ ] Newcomer-friendly cleanup: plain-language labels, how-it-works steps, simpler cards, clear next steps on every page
-- [ ] Restyle every page (startup profile, research run, market change, workspace, method, sign-in, invite) and charts for the light theme
+- [x] Lindström-style redesign: light design system, Libre Franklin, pill buttons, utility bar + header with search, photo hero carousel, centered section headings, stat counters, article-style cards, mosaic, navy band, footer
+- [x] Newcomer-friendly cleanup: plain-language labels, how-it-works phases, simpler cards, breadcrumbs and clear next steps on every page
+- [x] Every page restyled (startup profile + tabs, research run, market scan, workspace list/detail, how it works, sign-in, reset password, invite, 404) and charts on the light theme; phone layouts and accessibility contrast checked
 
 ## Ready next
+- Guided first visit: a short dismissible "how to read this page" tour on the first startup page a newcomer opens
+- Real photography: swap the generated start-page photos for licensed or team-supplied images
 - Server-side scheduled monitoring (needs background execution; scheduled callbacks end after a few seconds, so scans currently run while a founder visits)
 - Shareable OG images per startup (generated brand card)

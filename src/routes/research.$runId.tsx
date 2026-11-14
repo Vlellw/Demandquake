@@ -277,7 +277,8 @@ function ResearchPage() {
                     <motion.div key={c.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="panel p-4">
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="font-mono text-[10px] uppercase tracking-wider" style={{ color: industryColor(c.industry) }}>
+                          <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: industryColor(c.industry) }} />
                             Problem #{c.rank + 1} · {c.category}
                           </p>
                           <h3 className="mt-1 font-display text-base font-semibold leading-snug text-foreground">{c.title}</h3>
