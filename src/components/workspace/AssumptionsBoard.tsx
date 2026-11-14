@@ -54,7 +54,6 @@ export function AssumptionsBoard({ assumptions, onChange }: {
           <ul className="space-y-3">
             {visible.map((a) => {
               const current = statuses.find((s) => s.value === a.status) ?? statuses[0];
-              const Icon = current.icon;
               return (
                 <li key={a.id} className="min-w-0 rounded-md border border-border bg-surface p-4 sm:p-5">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -64,7 +63,7 @@ export function AssumptionsBoard({ assumptions, onChange }: {
                       if (status) onChange(assumptions.map((item) => item.id === a.id ? { ...item, status } : item));
                     }}>
                       <SelectTrigger aria-label={`Status for ${a.text}`} className={`w-40 shrink-0 ${current.tone}`}>
-                        <span className="flex items-center gap-2"><Icon className="size-4 shrink-0" /><SelectValue /></span>
+                        <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {statuses.map(({ value, label, icon: StatusIcon, tone }) => (
