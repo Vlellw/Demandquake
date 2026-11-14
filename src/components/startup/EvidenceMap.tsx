@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -10,7 +10,8 @@ import {
   type NodeProps,
   BackgroundVariant,
 } from "@xyflow/react";
-import { Sparkles, Globe2 } from "lucide-react";
+import { Sparkles, Globe2, LockKeyhole, UnlockKeyhole } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type { ClusterDTO } from "@/lib/dto";
 import type { Brand, Competitor, SourceRecord } from "@/lib/types";
 import { SIGNAL_META, signalLabel } from "@/lib/taxonomy";
@@ -100,7 +101,24 @@ export function EvidenceMap({
 }) {
   const { sources, open } = useSources();
   const [mounted, setMounted] = useState(false);
+  const [interactive, setInteractive] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
   useEffect(() => setMounted(true), []);
+  useEffect(() => {
+    if (!interactive) return;
+    const outside = (event: PointerEvent) => {
+      if (event.target instanceof Node && !mapRef.current?.contains(event.target)) setInteractive(false);
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setInteractive(false);
+    };
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", escape);
+    return () => {
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", escape);
+    };
+  }, [interactive]);
 
   const { nodes, edges } = useMemo(() => {
     const ns: Node[] = [];
@@ -180,9 +198,21 @@ export function EvidenceMap({
   }
 
   return (
-    <div className="evidence-flow h-[420px] max-h-[60svh] min-h-[280px] overflow-hidden rounded-lg border border-border bg-surface-sunken" aria-label="Evidence map">
+    <div ref={mapRef} className="evidence-flow relative h-[420px] max-h-[60svh] min-h-[280px] overflow-hidden rounded-lg border border-border bg-surface-sunken" aria-label="Evidence map" onDoubleClick={() => setInteractive(true)}>
+      {!interactive && <div className="absolute inset-0 z-10 touch-pan-y" aria-hidden="true" />}
+      <Button
+        variant="outline"
+        size="icon"
+        className="absolute right-3 top-3 z-20 bg-background"
+        aria-label={interactive ? "Lock map" : "Activate map"}
+        title={interactive ? "Lock map · Escape" : "Double-click the map to interact"}
+        onClick={() => setInteractive((value) => !value)}
+      >
+        {interactive ? <UnlockKeyhole /> : <LockKeyhole />}
+      </Button>
       {mounted && (
         <ReactFlow
+          className={interactive ? "" : "pointer-events-none"}
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
@@ -194,12 +224,12 @@ export function EvidenceMap({
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
-          panOnScroll
-          panOnDrag
+          panOnScroll={interactive}
+          panOnDrag={interactive}
           zoomOnScroll={false}
-          zoomOnPinch
-          zoomOnDoubleClick
-          preventScrolling
+          zoomOnPinch={interactive}
+          zoomOnDoubleClick={false}
+          preventScrolling={interactive}
           minZoom={0.1}
           maxZoom={2}
           proOptions={{ hideAttribution: false }}
