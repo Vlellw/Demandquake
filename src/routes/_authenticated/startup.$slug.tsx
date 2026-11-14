@@ -33,8 +33,6 @@ import { MarketLandscape } from "@/components/startup/MarketLandscape";
 import { AssessmentPanel } from "@/components/startup/AssessmentPanel";
 import { OpportunityTimeline } from "@/components/startup/OpportunityTimeline";
 import { BusinessPlanPanel } from "@/components/startup/BusinessPlanPanel";
-import { SourceStream } from "@/components/research/SourceStream";
-import { AssessmentStrip } from "@/components/discovery/StartupCard";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -305,7 +303,7 @@ function StartupPage() {
         </section>
 
         <section aria-label="Startup overview" className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
-          <Overview detail={detail} onTab={goTab} />
+          <Overview detail={detail} />
         </section>
 
         {/* TABS */}
@@ -315,12 +313,9 @@ function StartupPage() {
               <div className="min-w-0 flex-1 overflow-x-auto">
                 <TabsList variant="line" className="h-14">
                   {TABS.map((t) => {
-                    const checked = ESSENTIAL.has(t) && visited.includes(t as InspectionTab);
                     return (
                       <TabsTrigger key={t} variant="line" value={t} className="gap-1.5">
-                        {checked && <CheckCircle2 className="size-3.5 text-positive" aria-hidden="true" />}
                         {TAB_LABEL[t]}
-                        {checked && <span className="sr-only">(checked)</span>}
                         {t === "evidence" && (
                           <span className="rounded-[3px] bg-observed px-1.5 text-[10px] font-bold leading-4 text-observed-foreground">{evidence.length}</span>
                         )}
@@ -383,11 +378,6 @@ function StartupPage() {
                   </ul>
                 </section>
               )}
-              <section className="panel p-5">
-                <div className="mt-4">
-                  <SourceStream sources={evidence} limit={40} />
-                </div>
-              </section>
               <RelatedProblems industry={st.industry} clusterId={detail.cluster?.id ?? null} />
             </TabsContent>
 
@@ -474,17 +464,6 @@ function StartupPage() {
               <BusinessPlanPanel model={st.business_model} plan={st.business_plan} validation={st.validation_steps} customers={st.customers} />
             </TabsContent>
 
-            <NextCheck
-              tab={tab}
-              visited={visited}
-              done={progress.done}
-              total={progress.total}
-              claimed={claimed}
-              onGo={goTab}
-              onClaim={claim}
-              claimCost={claimCost}
-              workspaceId={existing?.id ?? null}
-            />
           </div>
         </Tabs>
 
@@ -582,7 +561,7 @@ function StartupPage() {
   );
 }
 
-function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab) => void }) {
+function Overview({ detail }: { detail: StartupDetailDTO }) {
   const st = detail.startup;
   return (
     <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
@@ -658,15 +637,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
           </ul>
         </section>
 
-        <button onClick={() => onTab("assessment")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
-          <div className="flex items-center justify-between">
-            <h3 className="font-display text-xl font-semibold text-foreground">Assessment at a glance</h3>
-          </div>
-          <div className="mt-4">
-            <AssessmentStrip card={{ assessment: st.assessment }} />
-          </div>
-          <p className="mt-4 line-clamp-4 text-sm text-muted-foreground">{st.assessment.summary}</p>
-        </button>
 
       </div>
     </div>

@@ -1,10 +1,9 @@
 import { motion } from "motion/react";
 import { FlaskConical, ShieldQuestion } from "lucide-react";
 import type { Assessment, Hypothesis, SourceRecord } from "@/lib/types";
-import { DIMENSION_META, LEVEL_META, signalLabel } from "@/lib/taxonomy";
+import { DIMENSION_META, LEVEL_META } from "@/lib/taxonomy";
 import { LevelMeter, levelTextClass } from "@/components/common/LevelMeter";
-import { InferredTag, ObservedTag } from "@/components/common/Provenance";
-import { typeColor } from "@/components/research/ResearchConstellation";
+import { InferredTag } from "@/components/common/Provenance";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/format";
 import { Cite } from "./SourceDrawer";
@@ -13,22 +12,11 @@ import { cn } from "@/lib/utils";
 export function AssessmentPanel({
   assessment,
   hypotheses,
-  evidence,
 }: {
   assessment: Assessment;
   hypotheses: Hypothesis[];
   evidence: SourceRecord[];
 }) {
-  const counts = new Map<string, number>();
-  for (const s of evidence) {
-    const t = s.signal_type ?? "news";
-    counts.set(t, (counts.get(t) ?? 0) + 1);
-  }
-  const composition = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-  const dated = evidence.filter((s) => s.published_at).length;
-  const domains = new Set(evidence.map((s) => s.domain)).size;
-  const recent = evidence.filter((s) => s.published_at && Date.now() - new Date(s.published_at).getTime() < 1000 * 60 * 60 * 24 * 180).length;
-
   return (
     <div className="space-y-6">
       <section className="panel-raised p-6">
@@ -91,49 +79,7 @@ export function AssessmentPanel({
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-        <section className="panel p-5">
-          <div className="flex items-center justify-between">
-            <ObservedTag count={evidence.length} />
-          </div>
-          <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-foreground/5">
-            {composition.map(([t, n]) => (
-              <motion.span
-                key={t}
-                initial={{ width: 0 }}
-                whileInView={{ width: `${(n / Math.max(1, evidence.length)) * 100}%` }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                style={{ background: typeColor(t) }}
-                className="h-full"
-              />
-            ))}
-          </div>
-          <ul className="mt-4 space-y-2">
-            {composition.map(([t, n]) => (
-              <li key={t} className="flex items-center gap-2 text-sm">
-                <span className="size-2.5 rounded-sm" style={{ background: typeColor(t) }} />
-                <span className="text-foreground/90">{signalLabel(t)}</span>
-                <span className="ml-auto font-mono text-xs text-muted-foreground">{n}</span>
-              </li>
-            ))}
-          </ul>
-          <dl className="mt-5 grid grid-cols-3 gap-2 border-t border-border pt-4 text-center">
-            <div>
-              <dt className="data-label">Domains</dt>
-              <dd className="mt-1 font-display text-xl font-semibold text-foreground">{domains}</dd>
-            </div>
-            <div>
-              <dt className="data-label">Dated</dt>
-              <dd className="mt-1 font-display text-xl font-semibold text-foreground">{dated}</dd>
-            </div>
-            <div>
-              <dt className="data-label">Last 6 mo.</dt>
-              <dd className="mt-1 font-display text-xl font-semibold text-foreground">{recent}</dd>
-            </div>
-          </dl>
-        </section>
-
+      <div>
         <section className="panel p-5">
           <div className="flex items-center justify-between">
             <InferredTag />

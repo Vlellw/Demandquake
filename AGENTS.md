@@ -62,3 +62,4 @@ use the editor.
 - Banner artwork uses a shared version in storage paths and URLs; stale versions regenerate lazily so prompt changes replace cached images without breaking old URLs.
 - Pitch PDFs render static copies of the shared player in the browser, one complete slide per page; prepare the Blob before the save click to preserve mobile download activation and private workspace access.
 - Evidence maps use React Flow's built-in scroll/drag pan, pinch zoom and zoom/fit controls in a compact viewport; keep gesture handling in the SDK so trackpads and touch remain consistent.
+- Back uses TanStack browser history, not stored browsing records, to preserve real navigation and avoid duplicating private URLs.
