@@ -1,0 +1,356 @@
+import { useEffect, useState } from "react";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { motion } from "motion/react";
+import { ArrowLeft, Clock3, Hourglass, Loader2, RotateCcw, Search, Sparkles, TriangleAlert } from "lucide-react";
+import { runDetailQuery } from "@/lib/queries";
+import { retryDiscovery } from "@/lib/research.functions";
+import { useRunDriver } from "@/hooks/use-run-driver";
+import { StageRail, stageIndex } from "@/components/research/StageRail";
+import { SourceStream, intentLabel } from "@/components/research/SourceStream";
+import { ResearchConstellation } from "@/components/research/ResearchConstellation";
+import { StartupCard } from "@/components/discovery/StartupCard";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ObservedTag, InferredTag } from "@/components/common/Provenance";
+import { SourceFavicon } from "@/components/common/SourceFavicon";
+import { industryColor } from "@/lib/taxonomy";
+import { timeAgo } from "@/lib/format";
+import type { RunDetailDTO } from "@/lib/dto";
+import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/research/$runId")({
+  loader: async ({ context, params }) => {
+    const data = await context.queryClient.ensureQueryData(runDetailQuery(params.runId));
+    if (!data) throw notFound();
+    return { query: data.run.query };
+  },
+  head: ({ loaderData }) => ({
+    meta: [
+      { title: loaderData ? `Live research: ${loaderData.query} — Demandquake` : "Live research — Demandquake" },
+      { name: "description", content: "Watch Demandquake research the live web and turn evidence into startup opportunities." },
+      { property: "og:title", content: loaderData ? `Live research: ${loaderData.query}` : "Live research — Demandquake" },
+      { property: "og:description", content: "Live web sources, problem clusters and generated startups — with provenance." },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: ResearchPage,
+  notFoundComponent: () => (
+    <div className="mx-auto max-w-md px-4 py-24 text-center">
+      <p className="font-display text-2xl text-foreground">Research run not found</p>
+      <Button asChild variant="outline" className="mt-6">
+        <Link to="/">Back to discovery</Link>
+      </Button>
+    </div>
+  ),
+});
+
+function useElapsed(fromIso: string, toIso: string | null) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (toIso) return;
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [toIso]);
+  const end = toIso ? new Date(toIso).getTime() : now;
+  const secs = Math.max(0, Math.round((end - new Date(fromIso).getTime()) / 1000));
+  return `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, "0")}`;
+}
+
+function ResearchPage() {
+  const { runId } = Route.useParams();
+  const initial = useSuspenseQuery(runDetailQuery(runId)).data!;
+  const live = useQuery({
+    ...runDetailQuery(runId),
+    refetchInterval: (q) => {
+      const st = q.state.data?.run.status;
+      return st === "complete" || st === "failed" ? false : 2500;
+    },
+  });
+  const detail = (live.data ?? initial) as RunDetailDTO;
+  const { run } = detail;
+  const { driverError, restart } = useRunDriver(runId, run.status);
+  const retry = useServerFn(retryDiscovery);
+  const queryClient = useQueryClient();
+  const [retrying, setRetrying] = useState(false);
+  const elapsed = useElapsed(run.created_at, run.completed_at ?? (run.status === "failed" ? run.updated_at : null));
+  const idx = stageIndex(detail);
+  const evidence = detail.sources.filter((s) => s.origin === "web" || s.origin === "news");
+  const competitors = detail.sources.filter((s) => s.origin === "competitor");
+  const waitingUntil = run.stats.rate_wait_until ? new Date(run.stats.rate_wait_until).getTime() : 0;
+  const [, tick] = useState(0);
+  useEffect(() => {
+    if (!waitingUntil || waitingUntil < Date.now()) return;
+    const t = setInterval(() => tick((x) => x + 1), 1000);
+    return () => clearInterval(t);
+  }, [waitingUntil]);
+  const waitSecs = Math.max(0, Math.round((waitingUntil - Date.now()) / 1000));
+
+  async function onRetry() {
+    setRetrying(true);
+    try {
+      await retry({ data: { runId } });
+      await queryClient.invalidateQueries({ queryKey: ["run", runId] });
+      restart();
+    } finally {
+      setRetrying(false);
+    }
+  }
+
+  const isDone = run.status === "complete";
+  const isFailed = run.status === "failed" || Boolean(driverError);
+
+  return (
+    <div className="relative">
+      <div className="bg-hero pointer-events-none absolute inset-x-0 top-0 h-[420px]" />
+      <div className="relative mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+          <ArrowLeft className="size-4" /> Discovery
+        </Link>
+
+        <header className="mt-5 flex flex-wrap items-start justify-between gap-6">
+          <div className="max-w-3xl">
+            <div className="flex flex-wrap items-center gap-2">
+              {isDone ? (
+                <Badge variant="positive">Research complete</Badge>
+              ) : isFailed ? (
+                <Badge variant="negative">Needs attention</Badge>
+              ) : (
+                <Badge variant="live">
+                  <span className="relative mr-1 flex size-1.5">
+                    <span className="absolute inline-flex size-full animate-ping rounded-full bg-primary opacity-70" />
+                    <span className="relative inline-flex size-1.5 rounded-full bg-primary" />
+                  </span>
+                  Researching the live web
+                </Badge>
+              )}
+              <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
+                <Clock3 className="size-3.5" /> {elapsed}
+              </span>
+              <span className="font-mono text-xs text-faint">started {timeAgo(run.created_at)}</span>
+            </div>
+            <h1 className="mt-3 font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl">“{run.query}”</h1>
+            {run.plan.interpretation && <p className="mt-3 text-muted-foreground">{run.plan.interpretation}</p>}
+            <div className="mt-3 flex flex-wrap gap-2">
+              {(run.plan.industry || run.industry) && (
+                <Badge variant="outline">
+                  <span className="size-1.5 rounded-full" style={{ background: industryColor(run.plan.industry ?? run.industry) }} />
+                  {run.plan.industry ?? run.industry}
+                </Badge>
+              )}
+              {(run.plan.geography || run.geography) && <Badge variant="outline">{run.plan.geography ?? run.geography}</Badge>}
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border text-center">
+            {[
+              { label: "Sources", value: evidence.length },
+              { label: "Problems", value: detail.clusters.length },
+              { label: "Startups", value: detail.startups.length },
+            ].map((s) => (
+              <div key={s.label} className="bg-surface px-5 py-3">
+                <p className="eyebrow">{s.label}</p>
+                <p className="mt-1 font-display text-2xl font-semibold text-foreground">{s.value}</p>
+              </div>
+            ))}
+          </div>
+        </header>
+
+        {waitSecs > 0 && !isDone && !isFailed && (
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex items-center gap-3 rounded-xl border border-inferred/30 bg-inferred/[0.07] px-4 py-3 text-sm text-foreground/90">
+            <Hourglass className="size-4 text-inferred" />
+            Queued behind the Context.dev request limit to protect live research — resuming in about {waitSecs}s.
+          </motion.div>
+        )}
+
+        {isFailed && (
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-negative/30 bg-negative/[0.07] px-4 py-3">
+            <TriangleAlert className="size-4 text-negative" />
+            <p className="flex-1 text-sm text-foreground/90">{driverError ?? run.error ?? "This research step failed."} No results were invented — completed steps are kept.</p>
+            <Button variant="outline" size="sm" onClick={onRetry} disabled={retrying}>
+              {retrying ? <Loader2 className="animate-spin" /> : <RotateCcw />} Retry step
+            </Button>
+          </div>
+        )}
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
+          <aside className="panel h-fit p-5 lg:sticky lg:top-20">
+            <p className="eyebrow mb-4">Pipeline</p>
+            <StageRail detail={detail} />
+            <div className="mt-6 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
+              <p className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-observed" /> Observed — from Context.dev
+              </p>
+              <p className="flex items-center gap-1.5">
+                <span className="size-2 rounded-full border border-dashed border-inferred" /> AI synthesis — to validate
+              </p>
+              {run.stats.credits_used ? <p className="pt-1 font-mono text-faint">{run.stats.credits_used} research credits used</p> : null}
+            </div>
+          </aside>
+
+          <div className="min-w-0 space-y-6">
+            {isDone && detail.startups.length > 0 && (
+              <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="panel-raised p-6">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="eyebrow text-primary">Published</p>
+                    <h2 className="mt-1 font-display text-2xl font-semibold text-foreground">
+                      {detail.startups.length} unclaimed startup{detail.startups.length === 1 ? "" : "s"} discovered
+                    </h2>
+                  </div>
+                  <InferredTag label="AI-generated concepts" />
+                </div>
+                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                  {detail.startups.map((s, i) => (
+                    <StartupCard key={s.id} card={s} index={i} />
+                  ))}
+                </div>
+              </motion.section>
+            )}
+
+            {/* Plan */}
+            {run.plan.searches && run.plan.searches.length > 0 && (
+              <section className="panel p-5">
+                <div className="flex items-center justify-between">
+                  <p className="eyebrow">Research plan</p>
+                  <InferredTag label="AI planned" />
+                </div>
+                <div className="mt-4 grid gap-2 md:grid-cols-2">
+                  {run.plan.searches.map((q, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3"
+                    >
+                      <Search className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <div className="min-w-0">
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {intentLabel(q.intent)} · {run.stats.by_intent?.[q.intent] != null ? `${run.stats.by_intent[q.intent]} sources` : idx > 1 ? "0 sources" : "queued"}
+                        </p>
+                        <p className="mt-0.5 text-sm text-foreground/90">{q.query}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {run.plan.news_query && (
+                    <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3 md:col-span-2">
+                      <Sparkles className="mt-0.5 size-4 shrink-0 text-observed" />
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                          News search · {run.stats.news != null ? `${run.stats.news} articles` : "queued"}
+                        </p>
+                        <p className="mt-0.5 text-sm text-foreground/90">{run.plan.news_query}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* Constellation */}
+            {detail.clusters.length > 0 && (
+              <section className="panel p-5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="eyebrow">From signals to startups</p>
+                    <h2 className="mt-1 font-display text-lg font-semibold text-foreground">How separate sources combined into opportunities</h2>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Hover a source or problem to trace its connections</p>
+                </div>
+                <div className="mt-4">
+                  <ResearchConstellation sources={detail.sources} clusters={detail.clusters} startups={detail.startups} />
+                </div>
+              </section>
+            )}
+
+            {/* Clusters */}
+            {detail.clusters.length > 0 && (
+              <section className="grid gap-3 md:grid-cols-2">
+                {detail.clusters.map((c) => {
+                  const compSources = competitors.filter((s) => c.competitor_source_ids.includes(s.id));
+                  return (
+                    <motion.div key={c.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="panel p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-mono text-[10px] uppercase tracking-wider" style={{ color: industryColor(c.industry) }}>
+                            Problem #{c.rank + 1} · {c.category}
+                          </p>
+                          <h3 className="mt-1 font-display text-base font-semibold leading-snug text-foreground">{c.title}</h3>
+                        </div>
+                        <GenerationChip status={c.generation_status} />
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground">{c.summary}</p>
+                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+                        <ObservedTag label="Sources" count={c.source_ids.length} />
+                        <Badge variant="outline" className="capitalize">{c.evidence_strength}</Badge>
+                      </div>
+                      {compSources.length > 0 && (
+                        <div className="mt-3 border-t border-border pt-3">
+                          <p className="data-label">Existing solutions checked</p>
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {compSources.slice(0, 6).map((s) => (
+                              <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground">
+                                <SourceFavicon domain={s.domain} className="size-3" /> {s.domain}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {c.generation_error && <p className="mt-2 text-xs text-negative">{c.generation_error}</p>}
+                    </motion.div>
+                  );
+                })}
+              </section>
+            )}
+
+            {/* Sources */}
+            <section className="panel p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="eyebrow">Live evidence</p>
+                  <h2 className="mt-1 font-display text-lg font-semibold text-foreground">Sources retrieved by Context.dev</h2>
+                </div>
+                <ObservedTag label="Observed" count={evidence.length} />
+              </div>
+              <div className="mt-4">
+                {evidence.length === 0 ? (
+                  <SkeletonSources active={!isFailed} />
+                ) : (
+                  <SourceStream sources={evidence} limit={isDone ? 12 : 24} />
+                )}
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GenerationChip({ status }: { status: string }) {
+  if (status === "done") return <Badge variant="positive">Startup generated</Badge>;
+  if (status === "running")
+    return (
+      <Badge variant="live">
+        <Loader2 className="animate-spin" /> Generating
+      </Badge>
+    );
+  if (status === "pending") return <Badge variant="outline">Queued</Badge>;
+  if (status === "failed") return <Badge variant="negative">Failed</Badge>;
+  return <Badge variant="secondary">Mapped only</Badge>;
+}
+
+function SkeletonSources({ active }: { active: boolean }) {
+  return (
+    <div className="grid gap-2 sm:grid-cols-2">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className={cn("h-[86px] overflow-hidden rounded-lg border border-border bg-surface-sunken/60", active && "shimmer-line")} />
+      ))}
+      <p className="col-span-full pt-1 text-center text-xs text-muted-foreground">
+        {active ? "Searching complaints, regulations, news and technology shifts…" : "No sources were retrieved."}
+      </p>
+    </div>
+  );
+}

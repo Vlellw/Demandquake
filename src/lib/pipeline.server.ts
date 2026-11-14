@@ -725,7 +725,14 @@ type GenOut = {
   problem: { statement: string; who_is_affected: string; why_now: string; facts: { claim: string; refs: string[] }[] };
   solution: { summary: string; features: { title: string; description: string; addresses: string }[] };
   customers: { segment: string; description: string; pain: string; buyer: string }[];
-  business_model: { type: string; pricing_hypothesis: string; revenue_streams: string[]; unit_of_value: string };
+  business_model: {
+    type: string;
+    pricing_hypothesis: string;
+    revenue_streams: string[];
+    unit_of_value: string;
+    target_scope: Competitor["scope"];
+    target_segment: Competitor["segment"];
+  };
   competitors: {
     name: string;
     ref: string;
@@ -810,6 +817,7 @@ Hard rules on provenance:
 - pitch: exactly 5 slides in this order: problem, evidence, solution, customer, opportunity. Headlines ≤ 9 words; body ≤ 32 words. Punchy, concrete, readable in 6-10 seconds.
 - name: a fresh, brandable startup name (one or two words, no generic "AI"-suffix clichés). tagline: one sentence pitch ≤ 14 words.
 - brand.hue: integer 0-359 that fits the brand mood. brand.glyph: one of the allowed logomark shapes. brand.motto: 2-5 words.
+- business_model.target_scope / target_segment: where this startup intends to position itself on the same scope (point / suite / platform) and segment (smb / mid_market / enterprise) axes used for competitors, ideally in visible whitespace.
 - features: 3-4. customers: 2-3 segments. validation_steps: 4 concrete experiments. hypotheses: 4-6 key assumptions that must be tested. business_plan.roadmap: 3 phases. monitor_queries: 2 natural-language news queries to watch for future developments affecting this opportunity.
 - Never write ref labels (like S2 or C1) inside prose text. Put citations ONLY in the ref/refs fields; prose should read naturally (e.g. \"Reuters reports…\").`,
     input: `Original research request: ${run.query}
@@ -848,6 +856,8 @@ ${competitorBlock.length ? competitorBlock.join("\n\n") : "(competitor search re
         pricing_hypothesis: s.str(),
         revenue_streams: s.arr(s.str()),
         unit_of_value: s.str(),
+        target_scope: s.enm(SCOPES),
+        target_segment: s.enm(SEGMENTS),
       }),
       competitors: s.arr(
         s.obj({

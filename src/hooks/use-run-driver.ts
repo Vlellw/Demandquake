@@ -1,0 +1,75 @@
+import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { advanceDiscovery } from "@/lib/research.functions";
+
+const TERMINAL = new Set(["complete", "failed"]);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Drives a discovery run forward from the browser: each call performs one pipeline stage
+ * on the server. During startup generation several workers run in parallel.
+ */
+export function useRunDriver(runId: string, status: string | undefined, enabled = true) {
+  const advance = useServerFn(advanceDiscovery);
+  const queryClient = useQueryClient();
+  const [driverError, setDriverError] = useState<string | null>(null);
+  const [generation, setGeneration] = useState(0);
+  const running = useRef(false);
+
+  useEffect(() => {
+    if (!enabled || !status || TERMINAL.has(status) || running.current) return;
+    running.current = true;
+    let cancelled = false;
+    setDriverError(null);
+
+    const worker = async (id: number) => {
+      let networkFailures = 0;
+      while (!cancelled) {
+        try {
+          const res = await advance({ data: { runId } });
+          await queryClient.invalidateQueries({ queryKey: ["run", runId] });
+          if (!res.ok) {
+            setDriverError(res.error);
+            return;
+          }
+          networkFailures = 0;
+          if (TERMINAL.has(res.status)) return;
+          // Only the generation phase benefits from parallel workers
+          if (id > 0 && res.status !== "generating") {
+            await sleep(2500);
+            continue;
+          }
+          if (res.busy) await sleep(2500);
+        } catch (err) {
+          console.error("[research] advance failed", err);
+          networkFailures++;
+          if (networkFailures >= 3) {
+            setDriverError("Lost connection to the research engine. Your progress is saved — retry to continue.");
+            return;
+          }
+          await sleep(3000 * networkFailures);
+        }
+      }
+    };
+
+    Promise.all([worker(0), worker(1), worker(2)]).finally(() => {
+      running.current = false;
+      if (!cancelled) {
+        queryClient.invalidateQueries({ queryKey: ["run", runId] });
+        queryClient.invalidateQueries({ queryKey: ["startups"] });
+        queryClient.invalidateQueries({ queryKey: ["radar"] });
+        queryClient.invalidateQueries({ queryKey: ["stats"] });
+        queryClient.invalidateQueries({ queryKey: ["runs", "recent"] });
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      running.current = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runId, enabled, generation, status && TERMINAL.has(status)]);
+
+  return { driverError, restart: () => setGeneration((g) => g + 1) };
+}

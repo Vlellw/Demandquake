@@ -106,6 +106,9 @@ export interface BusinessModel {
   pricing_hypothesis: string;
   revenue_streams: string[];
   unit_of_value: string;
+  /** AI-proposed position on the competitor landscape axes (absent on older profiles). */
+  target_scope?: "point" | "suite" | "platform";
+  target_segment?: "smb" | "mid_market" | "enterprise";
 }
 
 export type Coverage = "yes" | "partial" | "no" | "unknown";
