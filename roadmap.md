@@ -90,3 +90,4 @@
 - [x] AI banner images for startup cards/hero (Gemini 3.1 Flash Lite Image), generated once per startup, stored in private storage, served via /api/public/banner, lazy backfill from cards; step-3 tabs restored per Vlad
 - [x] Remove the Observed claims panel from the Evidence tab.
 - [x] Remove the Claim button from the startup tab bar (hero Claim remains).
+- [x] Rebalance startup Overview: equal-height panels, compact customer cards with even spacing, no white gap.

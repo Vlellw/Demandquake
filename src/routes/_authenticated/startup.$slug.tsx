@@ -532,9 +532,9 @@ function StartupPage() {
 function Overview({ detail }: { detail: StartupDetailDTO }) {
   const st = detail.startup;
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
-      <div className="space-y-6">
-        <section className="panel p-6">
+    <div className="grid items-stretch gap-6 lg:grid-cols-[1.35fr_1fr]">
+      <div className="flex flex-col space-y-6">
+        <section className="panel flex-1 p-6">
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-display text-xl font-semibold text-foreground">The problem</h3>
             <InferredTag label="AI synthesis of sources" />
@@ -579,15 +579,15 @@ function Overview({ detail }: { detail: StartupDetailDTO }) {
 
       </div>
 
-      <div className="space-y-6">
-        <section className="panel p-6">
+      <div className="flex flex-col space-y-6">
+        <section className="panel flex flex-1 flex-col p-6">
           <div className="flex items-center justify-between gap-2">
             <h3 className="font-display text-xl font-semibold text-foreground">Target customers</h3>
             <InferredTag />
           </div>
-          <ul className="mt-4 space-y-3">
+          <ul className="mt-4 flex flex-1 flex-col justify-evenly gap-3">
             {st.customers.map((c) => (
-              <li key={c.segment} className="rounded-xl border border-border p-4">
+              <li key={c.segment} className="rounded-xl border border-border bg-muted/30 p-5">
                 <p className="font-display text-base font-semibold text-foreground">{c.segment}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{c.description}</p>
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
@@ -604,8 +604,6 @@ function Overview({ detail }: { detail: StartupDetailDTO }) {
             ))}
           </ul>
         </section>
-
-
       </div>
     </div>
   );
