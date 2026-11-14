@@ -37,4 +37,4 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
-- [ ] AI banner images for startup cards/hero (Gemini 3.1 Flash Lite Image), cached per startup; step-3 tabs restored per Vlad
+- [x] AI banner images for startup cards/hero (Gemini 3.1 Flash Lite Image), generated once per startup, stored in private storage, served via /api/public/banner, lazy backfill from cards; step-3 tabs restored per Vlad
