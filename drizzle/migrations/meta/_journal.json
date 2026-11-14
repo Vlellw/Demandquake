@@ -71,6 +71,13 @@
       "when": 1794667266238,
       "tag": "0009_restrict_competitor_caches_to_service",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794667351729,
+      "tag": "0010_scope_public_credit_catalog_reads",
+      "breakpoints": true
     }
   ]
 }
