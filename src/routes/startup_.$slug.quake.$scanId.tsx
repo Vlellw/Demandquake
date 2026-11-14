@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
@@ -17,7 +18,7 @@ import { SourceProvider, Cite } from "@/components/startup/SourceDrawer";
 import { SourceStream } from "@/components/research/SourceStream";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { formatDate, formatDateTime, timeAgo } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/startup_/$slug/quake/$scanId")({
@@ -227,7 +228,7 @@ function QuakePage() {
             </section>
 
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-5">
-              <p className="text-sm text-muted-foreground">The startup profile, timeline and assessment now reflect this scan. Completed {timeAgo(scan.completed_at)}.</p>
+              <p className="text-sm text-muted-foreground">The startup profile, timeline and assessment now reflect this scan. Completed <TimeAgo iso={scan.completed_at} />.</p>
               <Button asChild variant="hero">
                 <Link to="/startup/$slug" params={{ slug }} search={{ tab: "updates" }}>
                   View updated timeline <ArrowRight />

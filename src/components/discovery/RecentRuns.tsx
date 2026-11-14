@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { CheckCircle2, CircleDashed, Loader2, TriangleAlert } from "lucide-react";
 import type { RunDTO } from "@/lib/dto";
-import { timeAgo } from "@/lib/format";
+
 
 export function RecentRuns({ runs }: { runs: RunDTO[] }) {
   if (runs.length === 0) return null;
@@ -37,7 +38,7 @@ export function RecentRuns({ runs }: { runs: RunDTO[] }) {
                   {r.stats.sources ? `${r.stats.sources} src` : ""}
                   {r.stats.startups ? ` · ${r.stats.startups} startups` : ""}
                 </span>
-                <span className="shrink-0 font-mono text-[11px] text-faint">{timeAgo(r.created_at)}</span>
+                <span className="shrink-0 font-mono text-[11px] text-faint"><TimeAgo iso={r.created_at} /></span>
               </Link>
             </li>
           );

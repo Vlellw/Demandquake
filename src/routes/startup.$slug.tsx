@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -37,7 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthUser } from "@/hooks/use-auth";
 import { DIMENSION_META, industryColor } from "@/lib/taxonomy";
-import { formatDate, timeAgo } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 
 const TABS = ["overview", "evidence", "landscape", "assessment", "updates", "plan"] as const;
 type Tab = (typeof TABS)[number];
@@ -182,7 +183,7 @@ function StartupPage() {
           <div className="brand-surface pointer-events-none absolute inset-0 opacity-50" />
           <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" />
           <div className="relative mx-auto grid max-w-[1400px] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:py-12">
-            <div className="flex flex-col">
+            <div className="flex min-w-0 flex-col">
               <Link to="/" className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
                 <ArrowLeft className="size-4" /> All opportunities
               </Link>
@@ -242,6 +243,7 @@ function StartupPage() {
               </div>
             </div>
 
+            <div className="min-w-0">
             <PitchPlayer
               slides={st.pitch.slides}
               ctx={{
@@ -255,6 +257,7 @@ function StartupPage() {
                 businessModel: st.business_model_type,
               }}
             />
+            </div>
           </div>
         </section>
 
@@ -373,7 +376,7 @@ function StartupPage() {
                           <VerdictBadge verdict={s.verdict} status={s.status} />
                           <span className="min-w-0 flex-1 truncate text-sm text-foreground/90">{s.headline ?? (s.status === "failed" ? "Scan failed" : "Scan in progress")}</span>
                           <span className="font-mono text-[11px] text-muted-foreground">
-                            {s.changes.length} change{s.changes.length === 1 ? "" : "s"} · {timeAgo(s.created_at)}
+                            {s.changes.length} change{s.changes.length === 1 ? "" : "s"} · <TimeAgo iso={s.created_at} />
                           </span>
                         </Link>
                       </li>

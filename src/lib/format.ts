@@ -16,17 +16,21 @@ export function timeAgo(iso: string | null | undefined, now = Date.now()): strin
 
 export function formatDate(iso: string | null | undefined, opts?: Intl.DateTimeFormatOptions): string {
   if (!iso) return "Undated";
-  return new Date(iso).toLocaleDateString("en-GB", opts ?? { day: "numeric", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("en-GB", { timeZone: "UTC", ...(opts ?? { day: "numeric", month: "short", year: "numeric" }) });
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString("en-GB", {
-    day: "numeric",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  // Fixed UTC so server-rendered and browser-rendered text always match.
+  return (
+    new Date(iso).toLocaleString("en-GB", {
+      timeZone: "UTC",
+      day: "numeric",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }) + " UTC"
+  );
 }
 
 export function pluralize(n: number, word: string, plural?: string): string {

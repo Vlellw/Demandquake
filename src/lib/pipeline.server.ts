@@ -20,7 +20,7 @@ import {
   type TimelineEvent,
   type DimensionKey,
 } from "./types";
-import { computeEvidenceStrength, normalizeQueryKey, normalizeUrl, slugify, randomSuffix, cleanRefLabels } from "./research-utils";
+import { computeEvidenceStrength, normalizeQueryKey, normalizeUrl, slugify, randomSuffix, cleanRefLabels, replaceBrandName } from "./research-utils";
 
 const db = supabaseAdmin;
 const STALE_MS = 4 * 60 * 1000;
@@ -777,6 +777,9 @@ export async function generateStartup(run: RunRow, clusterId: string) {
     .limit(12);
   for (const r of (datedRows ?? []) as SourceRow[]) if (!byId.has(r.id)) byId.set(r.id, r);
 
+  const { data: nameRows } = await db.from("startups").select("name").order("created_at", { ascending: false }).limit(300);
+  const takenNames = (nameRows ?? []).map((r) => r.name);
+
   const refToId = new Map<string, string>();
   const evidenceBlock: string[] = [];
   let i = 1;
@@ -822,6 +825,7 @@ Hard rules on provenance:
 - Never write ref labels (like S2 or C1) inside prose text. Put citations ONLY in the ref/refs fields; prose should read naturally (e.g. \"Reuters reports…\").`,
     input: `Original research request: ${run.query}
 Industry: ${cluster.industry}; Geography: ${cluster.geography}
+Startup names already taken (never reuse or closely imitate): ${takenNames.join(", ") || "(none)"}
 
 PROBLEM CLUSTER
 Title: ${cluster.title}
@@ -1009,8 +1013,70 @@ ${competitorBlock.length ? competitorBlock.join("\n\n") : "(competitor search re
     .single();
   if (insErr) throw insErr;
 
+  await ensureUniqueName(startup.id, name);
+
   await db
     .from("clusters")
     .update({ generation_status: "done", startup_id: startup.id, generation_error: null })
     .eq("id", cluster.id);
+}
+
+const RENAMEABLE_FIELDS = [
+  "tagline",
+  "problem",
+  "solution",
+  "customers",
+  "business_model",
+  "differentiation",
+  "assessment",
+  "validation_steps",
+  "pitch",
+  "business_plan",
+  "hypotheses",
+] as const;
+
+
+/**
+ * Parallel generation can produce the same brand name twice. The newer startup renames itself
+ * (and every mention of the old name in its generated copy) so the catalog never shows duplicates.
+ */
+export async function ensureUniqueName(startupId: string, name: string) {
+  const { data: same } = await db
+    .from("startups")
+    .select("id")
+    .ilike("name", name)
+    .order("created_at", { ascending: true })
+    .order("id", { ascending: true });
+  if (!same || same.length < 2 || same[0]?.id === startupId) return;
+
+  const { data: row } = await db.from("startups").select("*").eq("id", startupId).single();
+  if (!row) return;
+  const { data: all } = await db.from("startups").select("name").limit(1000);
+  const taken = new Set((all ?? []).map((r) => r.name.toLowerCase()));
+  let next: string | undefined;
+  try {
+    const out = await generateJSON<{ names: string[] }>({
+      name: "startup_rename",
+      effort: "low",
+      instructions:
+        "Propose 5 fresh, brandable startup names (one or two words, no generic AI-suffix clichés) for the concept below. Each must differ clearly from every taken name.",
+      input: `Concept: ${row.tagline}\nCurrent (taken) name: ${name}\nTaken names: ${[...taken].join(", ")}`,
+      schema: s.obj({ names: s.arr(s.str()) }),
+    });
+    next = out.names.map((n) => n.trim().slice(0, 60)).find((n) => n.length > 1 && !taken.has(n.toLowerCase()));
+  } catch (err) {
+    console.error("[pipeline] rename failed", err);
+  }
+  if (!next) {
+    let k = 2;
+    while (taken.has(`${name} ${k}`.toLowerCase())) k++;
+    next = `${name} ${k}`;
+  }
+  const patch: Record<string, unknown> = { name: next, slug: `${slugify(next)}-${randomSuffix()}` };
+  for (const f of RENAMEABLE_FIELDS) {
+    const v = (row as Record<string, unknown>)[f];
+    if (v == null) continue;
+    patch[f] = replaceBrandName(v, name, next);
+  }
+  await db.from("startups").update(patch as never).eq("id", startupId);
 }

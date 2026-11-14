@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { ArrowUpRight, Briefcase, CheckCircle2, FlaskConical, Radar } from "lucide-react";
 import { myProjectsQuery } from "@/lib/queries";
 import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { Button } from "@/components/ui/button";
-import { timeAgo } from "@/lib/format";
+
 import { projectProgress } from "@/lib/project-progress";
 
 export const Route = createFileRoute("/_authenticated/workspace/")({
@@ -82,7 +83,7 @@ function WorkspaceList() {
                     <ProgressRow icon={<CheckCircle2 className="size-3.5" />} label="Validation checklist" done={pr.checksDone} total={pr.checks} />
                     <ProgressRow icon={<FlaskConical className="size-3.5" />} label="Assumptions tested" done={pr.tested} total={pr.assumptions} />
                   </div>
-                  <p className="relative mt-auto pt-5 font-mono text-[11px] text-muted-foreground">Updated {timeAgo(p.updated_at)}</p>
+                  <p className="relative mt-auto pt-5 font-mono text-[11px] text-muted-foreground">Updated <TimeAgo iso={p.updated_at} /></p>
                 </Link>
               </motion.div>
             );

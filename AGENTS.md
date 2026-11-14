@@ -28,3 +28,12 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules (Demandquake)
+
+- Research runs advance stage-by-stage through `advanceRun` (`src/lib/pipeline.server.ts`), driven by client polling hooks (`use-run-driver`, `use-scan-driver`); workers are stateless, so all progress lives in the database.
+- External calls stay server-only in `*.server.ts` modules (`contextdev.server.ts`, `ai.server.ts`); browser code reaches them only through `createServerFn` wrappers in `*.functions.ts`.
+- Pure, testable rules (evidence strength, freshness, URL normalisation, redirects, claim defaults, progress, brand renaming) live in `src/lib/research-utils.ts`, `safe-redirect.ts`, `claim.ts`, `project-progress.ts`, covered by `src/test/rules.test.ts`.
+- Relative times render through `<TimeAgo>` and absolute dates format in fixed UTC (`src/lib/format.ts`) so server and browser text match during hydration.
+- Generated startup names must be unique: generation is told the taken names and `ensureUniqueName` renames the newer duplicate after insert, because clusters generate in parallel.
+- `Badge` renders a `<span>` so it can sit inside paragraphs without invalid nesting.

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -16,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
 import { industryColor } from "@/lib/taxonomy";
-import { timeAgo } from "@/lib/format";
+
 import type { RunDetailDTO } from "@/lib/dto";
 import { cn } from "@/lib/utils";
 
@@ -129,7 +130,7 @@ function ResearchPage() {
               <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
                 <Clock3 className="size-3.5" /> {elapsed}
               </span>
-              <span className="font-mono text-xs text-faint">started {timeAgo(run.created_at)}</span>
+              <span className="font-mono text-xs text-faint">started <TimeAgo iso={run.created_at} /></span>
             </div>
             <h1 className="mt-3 font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl">“{run.query}”</h1>
             {run.plan.interpretation && <p className="mt-3 text-muted-foreground">{run.plan.interpretation}</p>}
@@ -201,7 +202,7 @@ function ResearchPage() {
                   </div>
                   <InferredTag label="AI-generated concepts" />
                 </div>
-                <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-5 grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
                   {detail.startups.map((s, i) => (
                     <StartupCard key={s.id} card={s} index={i} />
                   ))}

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -44,7 +45,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { DIMENSION_META, signalLabel } from "@/lib/taxonomy";
-import { formatDate, formatDateTime, timeAgo } from "@/lib/format";
+import { formatDate, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/workspace/$projectId")({
@@ -239,7 +240,7 @@ function SaveIndicator({ state, savedAt, onRetry }: { state: SaveState; savedAt:
   if (state === "saved")
     return (
       <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-positive">
-        <Check className="size-3" /> Saved {savedAt ? timeAgo(savedAt) : ""}
+        <Check className="size-3" /> Saved {savedAt ? <TimeAgo iso={savedAt} /> : null}
       </span>
     );
   return <span className="font-mono text-[11px] text-faint">Changes save automatically</span>;

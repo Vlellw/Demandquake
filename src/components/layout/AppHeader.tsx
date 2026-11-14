@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Briefcase, LogOut, Radar, Sparkles } from "lucide-react";
+import { Briefcase, LogOut, Menu, Radar, Sparkles } from "lucide-react";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,7 +36,7 @@ export function AppHeader() {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/75 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-6 px-4 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-3 px-4 sm:gap-6 sm:px-6">
         <Link to="/" className="shrink-0" aria-label="Demandquake home">
           <DemandquakeLogo />
         </Link>
@@ -89,6 +89,24 @@ export function AppHeader() {
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
+                <Menu className="size-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-52 md:hidden">
+              <DropdownMenuItem onSelect={() => navigate({ to: "/" })}>
+                <Radar className="size-4" /> Discover
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate({ to: "/method" })}>
+                <Sparkles className="size-4" /> Method
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => navigate({ to: "/workspace" })}>
+                <Briefcase className="size-4" /> My startups
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>

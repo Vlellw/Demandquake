@@ -99,3 +99,17 @@ export function cleanRefLabels<T>(value: T, key?: string): T {
   }
   return value;
 }
+
+function escapeRegExp(v: string) {
+  return v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Replaces whole-word mentions of a brand name inside any string or JSON value (case-insensitive). */
+export function replaceBrandName<T>(value: T, oldName: string, nextName: string): T {
+  if (!oldName.trim()) return value;
+  const pattern = new RegExp(`\\b${escapeRegExp(oldName)}\\b`, "gi");
+  if (typeof value === "string") return value.replace(pattern, () => nextName) as T;
+  if (value == null || typeof value !== "object") return value;
+  const safeNext = JSON.stringify(nextName).slice(1, -1);
+  return JSON.parse(JSON.stringify(value).replace(pattern, () => safeNext)) as T;
+}

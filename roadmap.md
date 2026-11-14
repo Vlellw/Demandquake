@@ -8,14 +8,15 @@
 - [x] Startup intelligence profile (pitch, identity, evidence map, landscape, assessment, timeline, business plan)
 - [x] Opportunity Quake market scan (before/after assessment, new sources, implications)
 - [x] Method page
+- [x] Auth (email, Google, Lovable) + claim flow + founder workspace — verified signed-in end to end
+- [x] Populated with real discoveries: 5 research runs, 15 unique startups
+- [x] End-to-end checks, page metadata, rule tests, mobile layout pass (phone menu, pitch player, card footers)
+- [x] Hydration-safe relative times; unique startup names
 
 ## In progress
-- [ ] Auth (email, Google, Lovable) + claim flow + founder workspace — built, verifying signed-in flow
-- [ ] Populate with real discoveries (3 topics re-running after AI credit outage)
-- [ ] Verify end to end, head metadata, tests, mobile layout pass
+- [ ] Competitor logos/colors via Context.dev Brand lookup
 
 ## Ready next
-- Competitor logos/colors via Context.dev Brand lookup
 - Scheduled monitoring via Context.dev search monitors
 - Workspace: "rescan from workspace" that logs scan results into founder activity
 - Shareable OG images per startup (generated brand card)

@@ -75,7 +75,7 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
 
   return (
     <div
-      className={cn("brand-surface relative flex aspect-[4/3] min-h-[340px] flex-col overflow-hidden rounded-2xl border border-border-strong shadow-lift sm:aspect-[16/11]", className)}
+      className={cn("brand-surface relative flex min-h-[420px] w-full flex-col overflow-hidden rounded-2xl border border-border-strong shadow-lift sm:aspect-[16/11]", className)}
       style={brandStyle(ctx.brand)}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
@@ -108,9 +108,10 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
       </div>
       <div className="relative z-10 flex items-center gap-2 px-5 pt-3">
         <StartupMark brand={ctx.brand} size="sm" />
-        <span className="font-display text-sm font-semibold text-foreground">{ctx.name}</span>
-        <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/60">
-          {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")} · {KIND_LABEL[slide.kind]}
+        <span className="min-w-0 truncate font-display text-sm font-semibold text-foreground">{ctx.name}</span>
+        <span className="ml-auto shrink-0 font-mono text-[10px] uppercase tracking-[0.16em] text-foreground/60">
+          {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          <span className="hidden sm:inline"> · {KIND_LABEL[slide.kind]}</span>
         </span>
       </div>
 
@@ -158,7 +159,7 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
         <button onClick={() => go(index + 1)} className="rounded-md p-1.5 text-foreground/70 hover:bg-foreground/10 hover:text-foreground" aria-label="Next slide">
           <ChevronRight className="size-4" />
         </button>
-        <span className="ml-auto font-mono text-[10px] text-foreground/50">AI-generated pitch · ~{Math.round((total * SLIDE_MS) / 1000)}s</span>
+        <span className="ml-auto truncate font-mono text-[10px] text-foreground/50">AI-generated pitch · ~{Math.round((total * SLIDE_MS) / 1000)}s</span>
       </div>
     </div>
   );

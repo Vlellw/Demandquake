@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { motion } from "motion/react";
 import { ArrowUpRight, FileSearch, Swords, Users } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
@@ -7,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { DIMENSION_KEYS, type Level } from "@/lib/types";
 import { DIMENSION_META, LEVEL_META, industryColor } from "@/lib/taxonomy";
 import { freshnessOf } from "@/lib/research-utils";
-import { timeAgo } from "@/lib/format";
+
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +29,7 @@ export function FreshnessBadge({ iso, prefix = "Researched" }: { iso: string; pr
           bucket === "24h" ? "bg-positive" : bucket === "7d" ? "bg-inferred" : bucket === "30d" ? "bg-uncertain" : "bg-faint",
         )}
       />
-      {prefix} {timeAgo(iso)}
+      {prefix} <TimeAgo iso={iso} />
     </span>
   );
 }
@@ -107,11 +108,17 @@ export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?:
             </div>
             <AssessmentStrip card={card} />
           </div>
-          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-            <FreshnessBadge iso={card.last_scanned_at ?? card.research_at} prefix={card.last_scanned_at ? "Scanned" : "Researched"} />
-            <div className="flex items-center gap-1.5">
-              {card.business_model_type && <Badge variant="outline">{card.business_model_type}</Badge>}
-              <Badge variant="live">Unclaimed</Badge>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border pt-3">
+            <span className="whitespace-nowrap">
+              <FreshnessBadge iso={card.last_scanned_at ?? card.research_at} prefix={card.last_scanned_at ? "Scanned" : "Researched"} />
+            </span>
+            <div className="flex min-w-0 items-center gap-1.5">
+              {card.business_model_type && (
+                <Badge variant="outline" className="block max-w-36 truncate">
+                  {card.business_model_type}
+                </Badge>
+              )}
+              <Badge variant="live" className="whitespace-nowrap">Unclaimed</Badge>
             </div>
           </div>
         </div>

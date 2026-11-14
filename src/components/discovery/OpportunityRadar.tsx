@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { forceCollide, forceManyBody, forceSimulation, forceX, forceY, type SimulationNodeDatum } from "d3-force";
@@ -7,7 +8,7 @@ import { ArrowUpRight, ExternalLink, Info, Loader2, X } from "lucide-react";
 import type { RadarNodeDTO } from "@/lib/dto";
 import { clusterSignalsQuery } from "@/lib/queries";
 import { industryColor, signalLabel } from "@/lib/taxonomy";
-import { timeAgo } from "@/lib/format";
+
 import { Badge } from "@/components/ui/badge";
 import { StartupMark } from "@/components/brand/StartupMark";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
@@ -325,7 +326,7 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
                     >
                       <SourceFavicon domain={src.domain} className="size-3.5" />
                       <span className="truncate">{src.domain}</span>
-                      <span className="text-faint">· {src.published_at ? timeAgo(src.published_at) : `retrieved ${timeAgo(src.retrieved_at)}`}</span>
+                      <span className="text-faint">· {src.published_at ? <TimeAgo iso={src.published_at} /> : <>retrieved <TimeAgo iso={src.retrieved_at} /></>}</span>
                       <ExternalLink className="ml-auto size-3 shrink-0" />
                     </a>
                   )}
@@ -336,7 +337,7 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
         </div>
         {node.run_query && (
           <p className="text-[11px] text-faint">
-            Found by discovery: “{node.run_query}” · {timeAgo(node.created_at)}
+            Found by discovery: “{node.run_query}” · <TimeAgo iso={node.created_at} />
           </p>
         )}
       </div>

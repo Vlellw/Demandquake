@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { TimeAgo } from "@/components/common/TimeAgo";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Loader2, MapPin, Factory } from "lucide-react";
@@ -8,7 +9,7 @@ import { EXAMPLE_QUERIES, GEOGRAPHIES, INDUSTRIES } from "@/lib/taxonomy";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SeismicField } from "@/components/common/SeismicField";
-import { timeAgo } from "@/lib/format";
+
 
 export function SearchHero({ stats }: { stats: { startups: number; sources: number; domains: number; lastResearchAt: string | null } }) {
   const [query, setQuery] = useState("");
@@ -151,7 +152,7 @@ export function SearchHero({ stats }: { stats: { startups: number; sources: numb
             { label: "Unclaimed startups", value: stats.startups.toLocaleString() },
             { label: "Sources analyzed", value: stats.sources.toLocaleString() },
             { label: "Distinct domains", value: stats.domains.toLocaleString() },
-            { label: "Last live research", value: stats.lastResearchAt ? timeAgo(stats.lastResearchAt) : "—" },
+            { label: "Last live research", value: stats.lastResearchAt ? <TimeAgo iso={stats.lastResearchAt} /> : "—" },
           ].map((s) => (
             <div key={s.label} className="bg-surface/80 px-4 py-3 text-center backdrop-blur">
               <dt className="eyebrow">{s.label}</dt>

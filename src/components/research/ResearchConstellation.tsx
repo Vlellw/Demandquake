@@ -159,7 +159,7 @@ export function ResearchConstellation({
               <text x={p.x} y={p.y + 4} textAnchor="middle" className="fill-foreground font-mono text-[11px] font-semibold">
                 {c.source_ids.length}
               </text>
-              <foreignObject x={p.x + r + 8} y={p.y - 20} width={170} height={44}>
+              <foreignObject x={p.x + r + 8} y={p.y - 32} width={170} height={30}>
                 <p className="line-clamp-2 text-[11px] leading-tight text-foreground/90">{c.title}</p>
               </foreignObject>
             </motion.g>
