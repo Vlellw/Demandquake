@@ -14,14 +14,10 @@ import {
   ExternalLink,
   FlaskConical,
   Loader2,
-  ListChecks,
   MessageSquarePlus,
-  NotebookPen,
   Plus,
   Radar,
   Trash2,
-  UserPlus,
-  X,
 } from "lucide-react";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { projectQuery, startupScansQuery } from "@/lib/queries";
@@ -59,14 +55,7 @@ import { DIMENSION_META, signalLabel } from "@/lib/taxonomy";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-interface WorkspaceSearch {
-  welcome?: true | undefined;
-}
-
 export const Route = createFileRoute("/_authenticated/workspace/$projectId")({
-  validateSearch: (s: Record<string, unknown>): WorkspaceSearch => ({
-    welcome: s["welcome"] === true || s["welcome"] === "1" || s["welcome"] === 1 ? true : undefined,
-  }),
   loader: async ({ context, params }) => {
     const p = await context.queryClient.ensureQueryData(projectQuery(params.projectId));
     if (!p) throw notFound();
@@ -150,7 +139,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
       ) : n === 2 && r.startup_slug ? (
         <Link to="/startup/$slug" params={{ slug: r.startup_slug }} className={cls}>{content}</Link>
       ) : undefined} />
-      <WelcomePanel project={p} />
       <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-[1300px] px-4 pb-8 pt-8 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
@@ -275,76 +263,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
 }
 
 type Update = ReturnType<typeof useProjectSaver>["update"];
-
-/** Step 3 done: shown once after a successful claim, pointing at the three things to do first. */
-function WelcomePanel({ project: p }: { project: ProjectDTO }) {
-  const { welcome } = Route.useSearch();
-  const navigate = useNavigate({ from: "/workspace/$projectId" });
-  if (!welcome) return null;
-  const dismiss = () => navigate({ search: {}, replace: true, resetScroll: false });
-  const jump = (id: string, focus?: string) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (focus) window.setTimeout(() => document.getElementById(focus)?.focus({ preventScroll: true }), 450);
-  };
-  const actions = [
-    {
-      icon: ListChecks,
-      title: "Work through the checklist",
-      body: `${p.checklist.filter((c) => c.done).length} of ${p.checklist.length} validation steps done. Start with the first customer conversation.`,
-      cta: "Open the checklist",
-      go: () => jump("checklist"),
-    },
-    {
-      icon: UserPlus,
-      title: "Invite a co-founder",
-      body: "Create an invite link. Co-founders edit the same workspace and see your changes live.",
-      cta: "Invite someone",
-      go: () => jump("team"),
-    },
-    {
-      icon: NotebookPen,
-      title: "Write your first note",
-      body: "Log what you learn from customers. Notes sit next to the market scans in your activity.",
-      cta: "Add a note",
-      go: () => jump("notes", "workspace-note"),
-    },
-  ];
-  return (
-    <section aria-labelledby="welcome-heading" className="border-b border-border bg-surface-sunken">
-      <div className="mx-auto max-w-[1300px] px-4 py-8 sm:px-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 id="welcome-heading" className="section-title mt-2 text-2xl sm:text-[1.75rem]">
-              {p.name} is yours to build. Start here:
-            </h2>
-          </div>
-          <Button variant="ghost" size="icon" onClick={dismiss} aria-label="Close the welcome panel">
-            <X />
-          </Button>
-        </div>
-        <ol className="mt-6 grid gap-4 md:grid-cols-3">
-          {actions.map(({ icon: Icon, title, body, cta, go }, i) => (
-            <li key={title} className="flex flex-col rounded-[4px] bg-background p-5 shadow-panel">
-              <div className="flex items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-full border-2 border-primary text-primary" aria-hidden="true">
-                  <Icon className="size-4" />
-                </span>
-                <p className="font-display text-base font-bold text-foreground">
-                  <span className="text-primary">{i + 1}.</span> {title}{" "}
-                  <InfoTip align="start" label={`About ${title.toLowerCase()}`}>{body}</InfoTip>
-                </p>
-              </div>
-              <div className="flex-1" />
-              <Button variant="outline" size="sm" className="mt-4 self-start" onClick={go}>
-                {cta} <ArrowRight />
-              </Button>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
 
 function SaveIndicator({ state, savedAt, onRetry }: { state: SaveState; savedAt: string | null; onRetry: () => void }) {
   if (state === "saving")
