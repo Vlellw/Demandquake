@@ -561,49 +561,49 @@ function StartupPage() {
 function Overview({ detail }: { detail: StartupDetailDTO }) {
   const st = detail.startup;
   return (
-    <div className="grid items-stretch gap-6 lg:grid-cols-[1.35fr_1fr]">
-      <div className="flex flex-col space-y-6">
-        <section className="panel flex-1 p-6">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="font-display text-xl font-semibold text-foreground">The problem</h3>
+    <div className="grid items-start gap-8 lg:grid-cols-2 lg:gap-10">
+      <div className="min-w-0">
+        <section className="border-t-2 border-primary pt-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-display text-xl font-semibold text-primary">The problem</h3>
             <InferredTag label="AI synthesis of sources" />
           </div>
-          <p className="mt-3 font-display text-xl leading-snug text-foreground">{st.problem.statement}</p>
-          <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-            <div>
-              <dt className="data-label">Who is affected</dt>
-              <dd className="mt-1 text-sm text-foreground/85">{st.problem.who_is_affected}</dd>
+          <p className="mt-5 border-l-2 border-primary/30 bg-muted/50 px-5 py-4 text-lg leading-relaxed text-foreground">{st.problem.statement}</p>
+          <dl className="mt-5 divide-y divide-border">
+            <div className="pb-5">
+              <dt className="flex items-center gap-2 text-sm font-semibold text-primary"><Users className="size-4 shrink-0" />Who is affected</dt>
+              <dd className="mt-2 text-sm leading-relaxed text-foreground">{st.problem.who_is_affected}</dd>
             </div>
-            <div>
-              <dt className="data-label flex items-center gap-1">
-                <CalendarClock className="size-3" /> Why now
+            <div className="pt-5">
+              <dt className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <CalendarClock className="size-4 shrink-0" /> Why now
               </dt>
-              <dd className="mt-1 text-sm text-foreground/85">{st.problem.why_now}</dd>
+              <dd className="mt-2 text-sm leading-relaxed text-foreground">{st.problem.why_now}</dd>
             </div>
           </dl>
         </section>
 
       </div>
 
-      <div className="flex flex-col space-y-6">
-        <section className="panel flex flex-1 flex-col p-6">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="font-display text-xl font-semibold text-foreground">Target customers</h3>
+      <div className="min-w-0">
+        <section className="border-t-2 border-primary pt-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-display text-xl font-semibold text-primary">Target customers</h3>
             <InferredTag />
           </div>
-          <ul className="mt-4 flex flex-1 flex-col justify-evenly gap-3">
+          <ul className="mt-5 divide-y divide-border">
             {st.customers.map((c) => (
-              <li key={c.segment} className="rounded-xl border border-border bg-muted/30 p-5">
-                <p className="font-display text-base font-semibold text-foreground">{c.segment}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{c.description}</p>
-                <div className="mt-3 grid grid-cols-2 gap-3 text-xs">
+              <li key={c.segment} className="py-5 first:pt-0 last:pb-0">
+                <p className="font-display text-base font-semibold leading-snug text-foreground">{c.segment}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.description}</p>
+                <div className="mt-4 grid gap-4 bg-muted/50 p-4 sm:grid-cols-2">
                   <div>
-                    <p className="data-label">Pain</p>
-                    <p className="mt-0.5 text-foreground/85">{c.pain}</p>
+                    <p className="text-xs font-semibold text-primary">Pain</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-foreground">{c.pain}</p>
                   </div>
-                  <div>
-                    <p className="data-label">Buyer</p>
-                    <p className="mt-0.5 text-foreground/85">{c.buyer}</p>
+                  <div className="border-t border-border pt-4 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+                    <p className="text-xs font-semibold text-primary">Buyer</p>
+                    <p className="mt-1.5 text-sm leading-relaxed text-foreground">{c.buyer}</p>
                   </div>
                 </div>
               </li>
