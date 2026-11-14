@@ -137,7 +137,9 @@ export function MarketLandscape({
             ))}
           </div>
           <p className="mt-3 text-[11px] text-muted-foreground">
-            Competitors are named in live sources; their placement and the proposed position for {startup.name} are AI interpretation.
+            {proposed
+              ? `Competitors are named in live sources; their placement and the proposed position for ${startup.name} (dashed) are AI interpretation.`
+              : "Competitors are named in live sources; their placement on these axes is AI interpretation."}
           </p>
         </section>
 

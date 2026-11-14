@@ -69,8 +69,8 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
     return () => cancelAnimationFrame(raf);
   }, [active, index, total, go]);
 
-  if (total === 0) return null;
-  const slide = slides[index];
+  const slide = slides[index] ?? slides[0];
+  if (total === 0 || !slide) return null;
   const finished = !playing && index === total - 1 && progress >= 1;
 
   return (

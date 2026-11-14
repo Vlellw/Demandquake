@@ -20,7 +20,7 @@ function useWidth<T extends HTMLElement>() {
   const [w, setW] = useState(800);
   useEffect(() => {
     if (!ref.current) return;
-    const ro = new ResizeObserver(([e]) => setW(e.contentRect.width));
+    const ro = new ResizeObserver(([e]) => e && setW(e.contentRect.width));
     ro.observe(ref.current);
     return () => ro.disconnect();
   }, []);
@@ -39,7 +39,7 @@ export function OpportunityTimeline({ events, scans, compact = false }: { events
   const left = compact ? 120 : 160;
   const H = lanes.length * laneH + 44;
 
-  const { x, ticks } = useMemo(() => {
+  const { x, ticks, fmt } = useMemo(() => {
     const dates = events.map(eventDate).concat(scans.map((s) => new Date(s.created_at)), [new Date()]);
     const min = new Date(Math.min(...dates.map((d) => d.getTime())));
     const max = new Date();
@@ -47,7 +47,9 @@ export function OpportunityTimeline({ events, scans, compact = false }: { events
     const sc = scaleTime()
       .domain([new Date(min.getTime() - pad), new Date(max.getTime() + pad * 0.6)])
       .range([left, Math.max(left + 200, width - 16)]);
-    return { x: sc, ticks: sc.ticks(Math.max(3, Math.floor((width - left) / 110))) };
+    const spanDays = (max.getTime() - min.getTime()) / 86_400_000;
+    const fmt: Intl.DateTimeFormatOptions = spanDays < 120 ? { day: "numeric", month: "short" } : { month: "short", year: "2-digit" };
+    return { x: sc, ticks: sc.ticks(Math.max(3, Math.floor((width - left) / 110))), fmt };
   }, [events, scans, width, left]);
 
   const sorted = [...events].sort((a, b) => eventDate(b).getTime() - eventDate(a).getTime());
@@ -73,7 +75,7 @@ export function OpportunityTimeline({ events, scans, compact = false }: { events
             <g key={t.getTime()}>
               <line x1={x(t)} x2={x(t)} y1={8} y2={H - 28} stroke="oklch(1 0 0 / 0.06)" />
               <text x={x(t)} y={H - 12} textAnchor="middle" className="fill-faint font-mono text-[10px]">
-                {formatDate(t.toISOString(), { month: "short", year: "2-digit" })}
+                {formatDate(t.toISOString(), fmt)}
               </text>
             </g>
           ))}

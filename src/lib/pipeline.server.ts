@@ -404,7 +404,7 @@ async function stageSearch(run: RunRow) {
         if (seen.has(key)) continue;
         seen.add(key);
         kept++;
-        byIntent.news = (byIntent.news ?? 0) + 1;
+        byIntent["news"] = (byIntent["news"] ?? 0) + 1;
         rows.push({
           run_id: run.id,
           url: a.url,

@@ -2,7 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import type { Json } from "@/integrations/supabase/types";
+import type { Database } from "@/integrations/supabase/types";
 import type { ProjectDTO } from "./dto";
 import { buildProjectFromStartup, type StartupForClaim } from "./claim";
 
@@ -10,20 +10,20 @@ const uuid = z.string().uuid();
 
 function toProject(r: Record<string, unknown>): ProjectDTO {
   return {
-    id: r.id as string,
-    startup_id: (r.startup_id as string) ?? null,
-    name: r.name as string,
-    tagline: (r.tagline as string) ?? null,
-    concept: (r.concept as string) ?? null,
-    brand: (r.brand as ProjectDTO["brand"]) ?? { hue: 40, glyph: "orbit", motto: "" },
-    assumptions: (r.assumptions as ProjectDTO["assumptions"]) ?? [],
-    checklist: (r.checklist as ProjectDTO["checklist"]) ?? [],
-    roadmap: (r.roadmap as ProjectDTO["roadmap"]) ?? [],
-    updates: (r.updates as ProjectDTO["updates"]) ?? [],
-    pitch: (r.pitch as ProjectDTO["pitch"]) ?? { slides: [] },
-    research: (r.research as ProjectDTO["research"]) ?? {},
-    created_at: r.created_at as string,
-    updated_at: r.updated_at as string,
+    id: r["id"] as string,
+    startup_id: (r["startup_id"] as string) ?? null,
+    name: r["name"] as string,
+    tagline: (r["tagline"] as string) ?? null,
+    concept: (r["concept"] as string) ?? null,
+    brand: (r["brand"] as ProjectDTO["brand"]) ?? { hue: 40, glyph: "orbit", motto: "" },
+    assumptions: (r["assumptions"] as ProjectDTO["assumptions"]) ?? [],
+    checklist: (r["checklist"] as ProjectDTO["checklist"]) ?? [],
+    roadmap: (r["roadmap"] as ProjectDTO["roadmap"]) ?? [],
+    updates: (r["updates"] as ProjectDTO["updates"]) ?? [],
+    pitch: (r["pitch"] as ProjectDTO["pitch"]) ?? { slides: [] },
+    research: (r["research"] as ProjectDTO["research"]) ?? {},
+    created_at: r["created_at"] as string,
+    updated_at: r["updated_at"] as string,
   };
 }
 
@@ -149,7 +149,7 @@ export const updateProject = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("projects")
-      .update(data.patch as unknown as Record<string, Json>)
+      .update(data.patch as unknown as Database["public"]["Tables"]["projects"]["Update"])
       .eq("id", data.projectId)
       .eq("user_id", context.userId)
       .select("updated_at")

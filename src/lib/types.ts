@@ -210,11 +210,11 @@ export type RunStatus =
   | "failed";
 
 export interface ResearchPlan {
-  interpretation?: string;
-  industry?: string;
-  geography?: string;
-  searches?: { intent: string; query: string }[];
-  news_query?: string;
+  interpretation?: string | undefined;
+  industry?: string | undefined;
+  geography?: string | undefined;
+  searches?: { intent: string; query: string }[] | undefined;
+  news_query?: string | undefined;
 }
 
 export interface RunStats {

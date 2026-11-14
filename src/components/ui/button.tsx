@@ -19,6 +19,8 @@ const buttonVariants = cva(
           "border border-border bg-foreground/5 text-foreground backdrop-blur-md hover:bg-foreground/10",
         ghost: "text-muted-foreground hover:bg-accent hover:text-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        google:
+          "border border-google-border bg-google font-google text-[14px] leading-5 font-medium text-google-foreground pl-3 pr-3 gap-2.5 hover:brightness-125 [&_svg]:size-[18px]",
       },
       size: {
         default: "h-9 px-4 py-2",

@@ -6,6 +6,7 @@
 @source "../src";
 @import "tw-animate-css";
 @import "@xyflow/react/dist/style.css";
+@import "@lovable.dev/cloud-auth-js/styles.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -64,6 +65,10 @@
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-uncertain: var(--uncertain);
+  --color-google: var(--google);
+  --color-google-foreground: var(--google-foreground);
+  --color-google-border: var(--google-border);
+  --font-google: "Google Sans", "Geist", ui-sans-serif, system-ui, sans-serif;
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
@@ -137,6 +142,11 @@
   --positive: oklch(0.79 0.16 155);
   --negative: oklch(0.7 0.18 24);
   --uncertain: oklch(0.74 0.055 262);
+
+  /* Google sign-in button, dark theme per Google branding (#131314 / #8E918F / #E3E3E3) */
+  --google: oklch(0.188 0.002 286);
+  --google-foreground: oklch(0.918 0 0);
+  --google-border: oklch(0.65 0.005 160);
 
   --chart-1: oklch(0.74 0.175 50);
   --chart-2: oklch(0.8 0.115 205);

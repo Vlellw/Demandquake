@@ -10,11 +10,38 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as MethodRouteImport } from './routes/method'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ResearchRunIdRouteImport } from './routes/research.$runId'
+import { Route as StartupSlugRouteImport } from './routes/startup.$slug'
+import { Route as AuthenticatedWorkspaceIndexRouteImport } from './routes/_authenticated/workspace.index'
+import { Route as AuthenticatedWorkspaceProjectIdRouteImport } from './routes/_authenticated/workspace.$projectId'
+import { Route as StartupSlugQuakeScanIdRouteImport } from './routes/startup_.$slug.quake.$scanId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MethodRoute = MethodRouteImport.update({
+  id: '/method',
+  path: '/method',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResearchRunIdRoute = ResearchRunIdRouteImport.update({
@@ -22,31 +49,110 @@ const ResearchRunIdRoute = ResearchRunIdRouteImport.update({
   path: '/research/$runId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StartupSlugRoute = StartupSlugRouteImport.update({
+  id: '/startup/$slug',
+  path: '/startup/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedWorkspaceIndexRoute =
+  AuthenticatedWorkspaceIndexRouteImport.update({
+    id: '/workspace/',
+    path: '/workspace/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWorkspaceProjectIdRoute =
+  AuthenticatedWorkspaceProjectIdRouteImport.update({
+    id: '/workspace/$projectId',
+    path: '/workspace/$projectId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const StartupSlugQuakeScanIdRoute = StartupSlugQuakeScanIdRouteImport.update({
+  id: '/startup_/$slug/quake/$scanId',
+  path: '/startup/$slug/quake/$scanId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/method': typeof MethodRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
+  '/startup/$slug': typeof StartupSlugRoute
+  '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
+  '/workspace/': typeof AuthenticatedWorkspaceIndexRoute
+  '/startup/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/method': typeof MethodRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
+  '/startup/$slug': typeof StartupSlugRoute
+  '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
+  '/workspace': typeof AuthenticatedWorkspaceIndexRoute
+  '/startup/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/method': typeof MethodRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
+  '/startup/$slug': typeof StartupSlugRoute
+  '/_authenticated/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
+  '/_authenticated/workspace/': typeof AuthenticatedWorkspaceIndexRoute
+  '/startup_/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/research/$runId'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/method'
+    | '/reset-password'
+    | '/research/$runId'
+    | '/startup/$slug'
+    | '/workspace/$projectId'
+    | '/workspace/'
+    | '/startup/$slug/quake/$scanId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/research/$runId'
-  id: '__root__' | '/' | '/research/$runId'
+  to:
+    | '/'
+    | '/auth'
+    | '/method'
+    | '/reset-password'
+    | '/research/$runId'
+    | '/startup/$slug'
+    | '/workspace/$projectId'
+    | '/workspace'
+    | '/startup/$slug/quake/$scanId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/method'
+    | '/reset-password'
+    | '/research/$runId'
+    | '/startup/$slug'
+    | '/_authenticated/workspace/$projectId'
+    | '/_authenticated/workspace/'
+    | '/startup_/$slug/quake/$scanId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  MethodRoute: typeof MethodRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ResearchRunIdRoute: typeof ResearchRunIdRoute
+  StartupSlugRoute: typeof StartupSlugRoute
+  StartupSlugQuakeScanIdRoute: typeof StartupSlugQuakeScanIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,6 +164,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/method': {
+      id: '/method'
+      path: '/method'
+      fullPath: '/method'
+      preLoaderRoute: typeof MethodRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/research/$runId': {
       id: '/research/$runId'
       path: '/research/$runId'
@@ -65,12 +199,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResearchRunIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/startup/$slug': {
+      id: '/startup/$slug'
+      path: '/startup/$slug'
+      fullPath: '/startup/$slug'
+      preLoaderRoute: typeof StartupSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/workspace/': {
+      id: '/_authenticated/workspace/'
+      path: '/workspace'
+      fullPath: '/workspace/'
+      preLoaderRoute: typeof AuthenticatedWorkspaceIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workspace/$projectId': {
+      id: '/_authenticated/workspace/$projectId'
+      path: '/workspace/$projectId'
+      fullPath: '/workspace/$projectId'
+      preLoaderRoute: typeof AuthenticatedWorkspaceProjectIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/startup_/$slug/quake/$scanId': {
+      id: '/startup_/$slug/quake/$scanId'
+      path: '/startup/$slug/quake/$scanId'
+      fullPath: '/startup/$slug/quake/$scanId'
+      preLoaderRoute: typeof StartupSlugQuakeScanIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedWorkspaceProjectIdRoute: typeof AuthenticatedWorkspaceProjectIdRoute
+  AuthenticatedWorkspaceIndexRoute: typeof AuthenticatedWorkspaceIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedWorkspaceProjectIdRoute: AuthenticatedWorkspaceProjectIdRoute,
+  AuthenticatedWorkspaceIndexRoute: AuthenticatedWorkspaceIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  MethodRoute: MethodRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ResearchRunIdRoute: ResearchRunIdRoute,
+  StartupSlugRoute: StartupSlugRoute,
+  StartupSlugQuakeScanIdRoute: StartupSlugQuakeScanIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

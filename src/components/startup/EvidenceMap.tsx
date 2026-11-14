@@ -20,7 +20,7 @@ import { formatDate } from "@/lib/format";
 import { typeColor } from "@/components/research/ResearchConstellation";
 import { useSources } from "./SourceDrawer";
 
-type SourceData = { source: SourceRecord; onOpen: (id: string) => void };
+type SourceData = { source: SourceRecord };
 type GroupData = { label: string; count: number; color: string; kind: "observed" | "competitor" };
 type ProblemData = { title: string; summary: string; strength: string };
 type StartupData = { name: string; tagline: string; brand: Brand };
@@ -28,10 +28,7 @@ type StartupData = { name: string; tagline: string; brand: Brand };
 function SourceNode({ data }: NodeProps<Node<SourceData>>) {
   const s = data.source;
   return (
-    <button
-      onClick={() => data.onOpen(s.id)}
-      className="prov-observed w-[230px] rounded-lg p-2.5 text-left transition-colors hover:border-observed/70"
-    >
+    <div className="prov-observed w-[230px] cursor-pointer rounded-lg p-2.5 text-left transition-colors hover:border-observed/70" title="Open source">
       <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
         <SourceFavicon domain={s.domain} className="size-3" />
         <span className="truncate">{s.publisher ?? s.domain}</span>
@@ -39,7 +36,7 @@ function SourceNode({ data }: NodeProps<Node<SourceData>>) {
       </div>
       <p className="mt-1 line-clamp-2 text-[11.5px] font-medium leading-snug text-foreground/90">{s.title}</p>
       <Handle type="source" position={Position.Right} />
-    </button>
+    </div>
   );
 }
 
@@ -90,7 +87,7 @@ function StartupNode({ data }: NodeProps<Node<StartupData>>) {
   );
 }
 
-const nodeTypes = { source: SourceNode, group: GroupNode, problem: ProblemNode, startup: StartupNode };
+const nodeTypes = { source: SourceNode, evgroup: GroupNode, problem: ProblemNode, startup: StartupNode };
 
 export function EvidenceMap({
   cluster,
@@ -130,7 +127,7 @@ export function EvidenceMap({
     for (const [type, list] of groups) {
       const startY = y;
       for (const src of list.slice(0, 5)) {
-        ns.push({ id: `s-${src.id}`, type: "source", position: { x: 0, y }, data: { source: src, onOpen: open } });
+        ns.push({ id: `s-${src.id}`, type: "source", position: { x: 0, y }, data: { source: src } });
         es.push({ id: `e-${src.id}-${type}`, source: `s-${src.id}`, target: `g-${type}`, style: { stroke: typeColor(type), strokeWidth: 1.4, opacity: 0.7 } });
         y += rowGap;
       }
@@ -138,7 +135,7 @@ export function EvidenceMap({
       groupYs.push({ key: type, y: gy });
       ns.push({
         id: `g-${type}`,
-        type: "group",
+        type: "evgroup",
         position: { x: 300, y: gy + 4 },
         data: { label: SIGNAL_META[type as keyof typeof SIGNAL_META]?.label ?? signalLabel(type), count: list.length, color: typeColor(type), kind: "observed" },
       });
@@ -151,14 +148,14 @@ export function EvidenceMap({
       y += 20;
       const startY = y;
       for (const src of compSources) {
-        ns.push({ id: `s-${src.id}`, type: "source", position: { x: 0, y }, data: { source: src, onOpen: open } });
+        ns.push({ id: `s-${src.id}`, type: "source", position: { x: 0, y }, data: { source: src } });
         es.push({ id: `e-${src.id}-comp`, source: `s-${src.id}`, target: "g-competitors", style: { stroke: "var(--uncertain)", strokeWidth: 1.4, opacity: 0.7 } });
         y += rowGap;
       }
       compGroupY = startY + ((compSources.length - 1) * rowGap) / 2;
       ns.push({
         id: "g-competitors",
-        type: "group",
+        type: "evgroup",
         position: { x: 300, y: compGroupY + 4 },
         data: { label: "Existing solutions & their limits", count: compSources.length, color: "var(--uncertain)", kind: "competitor" },
       });
@@ -176,7 +173,7 @@ export function EvidenceMap({
       es.push({ id: "e-comp-startup", source: "g-competitors", target: "startup", animated: true, label: "differentiation", labelStyle: { fill: "var(--muted-foreground)", fontSize: 10 }, labelBgStyle: { fill: "var(--surface)" }, style: { stroke: "var(--uncertain)", strokeDasharray: "5 4", strokeWidth: 1.4 } });
     }
     return { nodes: ns, edges: es, height: Math.max(420, Math.min(y + 40, 900)) };
-  }, [cluster, competitors, sources, open, startup]);
+  }, [cluster, competitors, sources, startup]);
 
   if (!cluster) {
     return <p className="text-sm text-muted-foreground">The problem cluster behind this startup is no longer available.</p>;
@@ -189,6 +186,9 @@ export function EvidenceMap({
           nodes={nodes}
           edges={edges}
           nodeTypes={nodeTypes}
+          onNodeClick={(_, node) => {
+            if (node.type === "source") open((node.data as SourceData).source.id);
+          }}
           fitView
           fitViewOptions={{ padding: 0.12 }}
           nodesDraggable={false}

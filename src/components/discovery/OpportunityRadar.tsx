@@ -27,6 +27,7 @@ function useSize<T extends HTMLElement>() {
     if (!ref.current) return;
     const el = ref.current;
     const ro = new ResizeObserver(([entry]) => {
+      if (!entry) return;
       setSize({ w: Math.round(entry.contentRect.width), h: Math.round(entry.contentRect.height) });
     });
     ro.observe(el);

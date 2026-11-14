@@ -71,7 +71,7 @@ export interface CallMeta {
 async function call<T>(
   path: string,
   body: unknown,
-  opts: { timeoutMs?: number; onWait?: WaitReporter } = {},
+  opts: { timeoutMs?: number; onWait?: WaitReporter | undefined } = {},
 ): Promise<{ data: T; meta: CallMeta }> {
   const timeoutMs = opts.timeoutMs ?? 45_000;
   const apiKey = process.env["CONTEXT_DEV_API_KEY"];
@@ -152,10 +152,10 @@ export interface WebResult {
 export async function webSearch(opts: {
   query: string;
   numResults?: number;
-  freshness?: "last_24_hours" | "last_week" | "last_month" | "last_year";
+  freshness?: "last_24_hours" | "last_week" | "last_month" | "last_year" | undefined;
   excludeDomains?: string[];
   highlightChars?: number;
-  onWait?: WaitReporter;
+  onWait?: WaitReporter | undefined;
 }): Promise<{ results: WebResult[]; meta: CallMeta }> {
   const body: Record<string, unknown> = {
     query: opts.query.slice(0, 480),
@@ -163,8 +163,8 @@ export async function webSearch(opts: {
     highlightsOptions: { enabled: true, maxCharacters: opts.highlightChars ?? 1200 },
     timeoutOpts: { milliseconds: 30_000, behavior: "return-partial" },
   };
-  if (opts.freshness) body.freshness = opts.freshness;
-  if (opts.excludeDomains?.length) body.excludeDomains = opts.excludeDomains;
+  if (opts.freshness) body["freshness"] = opts.freshness;
+  if (opts.excludeDomains?.length) body["excludeDomains"] = opts.excludeDomains;
 
   const { data, meta } = await call<{
     results?: Array<{
@@ -207,13 +207,13 @@ export async function newsSearch(opts: {
   query: string;
   limit?: number;
   fromMs?: number;
-  onWait?: WaitReporter;
+  onWait?: WaitReporter | undefined;
 }): Promise<{ articles: NewsArticle[]; meta: CallMeta }> {
   const body: Record<string, unknown> = {
     searchBy: { type: "natural_language", query: opts.query.slice(0, 900) },
     limit: opts.limit ?? 10,
   };
-  if (opts.fromMs) body.filterBy = { date: { from: Math.floor(opts.fromMs) } };
+  if (opts.fromMs) body["filterBy"] = { date: { from: Math.floor(opts.fromMs) } };
 
   const { data, meta } = await call<{
     data?: Array<{

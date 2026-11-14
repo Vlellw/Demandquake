@@ -37,5 +37,5 @@ export function LevelMeter({ level, className, showLabel = true, compact = false
 }
 
 export function levelTextClass(level: Level): string {
-  return toneText[(LEVEL_META[level] ?? LEVEL_META.unknown).tone];
+  return toneText[(LEVEL_META[level] ?? LEVEL_META.unknown).tone] ?? "text-uncertain";
 }

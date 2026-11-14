@@ -134,7 +134,10 @@ async function fetchStage(scan: ScanRow): Promise<string> {
   if (error) throw error;
 
   const problem = (startup.problem as { statement?: string }) ?? {};
-  const queries = (startup.monitor_queries?.length ? startup.monitor_queries : [problem.statement ?? startup.name]).slice(0, 2);
+  const queries: [string, ...string[]] = [
+    ...(startup.monitor_queries?.length ? startup.monitor_queries : [problem.statement ?? startup.name]).slice(0, 2),
+  ] as [string, ...string[]];
+  if (!queries[0]) queries[0] = startup.name;
   const fromMs = Date.now() - scan.window_days * 24 * 3600_000;
 
   // Two requests per scan keeps market monitoring within the Context.dev per-minute limit.
