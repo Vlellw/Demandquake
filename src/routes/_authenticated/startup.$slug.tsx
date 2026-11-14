@@ -27,7 +27,6 @@ import { startMarketScan } from "@/lib/research.functions";
 import type { StartupDetailDTO } from "@/lib/dto";
 import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
 import { useStartupBanner } from "@/hooks/use-startup-banner";
-import { PitchPlayer } from "@/components/startup/PitchPlayer";
 import { SourceProvider, Cite, type Citation } from "@/components/startup/SourceDrawer";
 import { EvidenceMap } from "@/components/startup/EvidenceMap";
 import { MarketLandscape } from "@/components/startup/MarketLandscape";
@@ -56,11 +55,10 @@ import { INSPECTION_STEPS, nextInspection, type InspectionTab } from "@/lib/jour
 import { IMPLICATION_META } from "@/lib/taxonomy";
 import { cn } from "@/lib/utils";
 
-const TABS = ["overview", "evidence", "landscape", "assessment", "updates", "plan"] as const;
+const TABS = ["evidence", "landscape", "assessment", "updates", "plan"] as const;
 type Tab = (typeof TABS)[number];
 
 const TAB_LABEL: Record<Tab, string> = {
-  overview: "Overview",
   evidence: "Evidence",
   landscape: "Competitors",
   assessment: "Assessment",
@@ -152,10 +150,10 @@ function StartupPage() {
   const affordable = wallet ? canAfford(wallet.balance, wallet.reserved, claimCost) : false;
   const [scanning, setScanning] = useState(false);
   const autoClaimed = useRef(false);
-  const tab: Tab = search.tab ?? "overview";
+  const tab: Tab = search.tab ?? "evidence";
   const { visited, progress } = useInspection(slug, tab);
   function goTab(t: Tab) {
-    navigate({ search: (p) => ({ ...p, tab: t === "overview" ? undefined : t }), replace: true, resetScroll: false });
+    navigate({ search: (p) => ({ ...p, tab: t === "evidence" ? undefined : t }), replace: true, resetScroll: false });
     document.getElementById("inspect")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -164,7 +162,6 @@ function StartupPage() {
     const ids = new Set(st.evidence_source_ids);
     return detail.sources.filter((s) => ids.has(s.id) && s.origin !== "competitor");
   }, [detail, st.evidence_source_ids]);
-  const domains = useMemo(() => [...new Set(evidence.map((s) => s.domain))], [evidence]);
   // Evidence first so citation numbers read 1…n for the core sources.
   const orderedSources = useMemo(() => {
     const ids = new Set(evidence.map((s) => s.id));
@@ -273,7 +270,7 @@ function StartupPage() {
 
         {/* HERO: brand-colored block with the pitch on the right */}
         <section className="brand-banner relative overflow-hidden" style={bannerBackground(st.brand, banner)}>
-          <div className="relative mx-auto grid max-w-[1400px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:py-14">
+          <div className="relative mx-auto grid max-w-[1400px] gap-10 px-4 py-10 sm:px-6 lg:items-center lg:py-14">
             <div className="flex min-w-0 flex-col">
               <div className="mt-4 flex items-center gap-4">
                 <StartupMark brand={st.brand} size="xl" className="border-transparent shadow-lift" />
@@ -312,21 +309,6 @@ function StartupPage() {
               </div>
             </div>
 
-            <div className="min-w-0">
-              <PitchPlayer
-                slides={st.pitch.slides}
-                ctx={{
-                  name: st.name,
-                  tagline: st.tagline,
-                  brand: st.brand,
-                  evidenceCount: evidence.length,
-                  domains,
-                  features: st.solution.features.map((f) => f.title),
-                  customers: st.customers.map((c) => c.segment),
-                  businessModel: st.business_model_type,
-                }}
-              />
-            </div>
           </div>
         </section>
 
@@ -351,8 +333,13 @@ function StartupPage() {
           </div>
         </section>
 
+        <section aria-labelledby="overview-heading" className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
+          <h2 id="overview-heading" className="section-title mb-6 text-2xl">Overview</h2>
+          <Overview detail={detail} onTab={goTab} />
+        </section>
+
         {/* TABS */}
-        <Tabs value={tab} onValueChange={(v) => navigate({ search: (prev) => ({ ...prev, tab: v === "overview" ? undefined : (v as Tab) }), replace: true, resetScroll: false })}>
+        <Tabs value={tab} onValueChange={(v) => navigate({ search: (prev) => ({ ...prev, tab: v === "evidence" ? undefined : (v as Tab) }), replace: true, resetScroll: false })}>
           <div id="inspect" className="sticky top-16 z-30 scroll-mt-16 border-b border-border bg-background">
             <div className="mx-auto flex max-w-[1400px] items-center gap-6 px-4 sm:px-6">
               <div className="min-w-0 flex-1 overflow-x-auto">
@@ -395,10 +382,6 @@ function StartupPage() {
           </div>
 
           <div className="mx-auto max-w-[1400px] px-4 pb-8 pt-4 sm:px-6">
-            <TabsContent value="overview" className="mt-0">
-              <Overview detail={detail} onTab={(t) => navigate({ search: (p) => ({ ...p, tab: t }), resetScroll: false })} />
-            </TabsContent>
-
             <TabsContent value="evidence" className="mt-0 space-y-6">
               <section className="panel p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -636,6 +619,7 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
       <div className="space-y-6">
         <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
+            <h3 className="font-display text-xl font-semibold text-foreground">The problem</h3>
             <InferredTag label="AI synthesis of sources" />
           </div>
           <p className="mt-3 font-display text-xl leading-snug text-foreground">{st.problem.statement}</p>
@@ -678,6 +662,7 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
 
         <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
+            <h3 className="font-display text-xl font-semibold text-foreground">The proposed solution</h3>
             <InferredTag />
           </div>
           <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">{st.solution.summary}</p>
@@ -699,6 +684,7 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
       <div className="space-y-6">
         <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
+            <h3 className="font-display text-xl font-semibold text-foreground">Target customers</h3>
             <InferredTag />
           </div>
           <ul className="mt-4 space-y-3">
@@ -723,7 +709,7 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
 
         <button onClick={() => onTab("assessment")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
           <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Details →</span>
+            <h3 className="font-display text-xl font-semibold text-foreground">Assessment at a glance</h3>
           </div>
           <div className="mt-4">
             <AssessmentStrip card={{ assessment: st.assessment }} />

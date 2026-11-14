@@ -51,3 +51,5 @@ use the editor.
 - Admin bootstrap uses a service-only allowlist matched to a verified auth email; ordinary browser requests can never assign roles or edit balances.
 - Discover state (industry, view, filters, overview tab, jump-to-search request) lives in validated URL search params defined in `src/lib/journey.ts`, so every journey step is linkable and back-button safe; Step 2 check-offs are per-browser localStorage hints, never billing or account data.
 - Workspace assumptions use a dedicated list component with status filters and explicit selectors, connected to the existing project saver; this keeps long hypotheses readable without accidental status changes.
+
+- Startup inspection keeps Overview outside the tab control and defaults to Evidence; Overview counts as viewed on page entry because it remains visible above every panel.

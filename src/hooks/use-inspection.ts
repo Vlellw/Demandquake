@@ -19,7 +19,7 @@ export function useInspection(slug: string, tab: string) {
     }
     setState((prev) => {
       const base = storageOk ? parseVisited(stored) : prev.slug === slug ? prev.visited : [];
-      return { slug, visited: markVisited(base, tab) };
+      return { slug, visited: markVisited(markVisited(base, "overview"), tab) };
     });
   }, [slug, tab]);
 
