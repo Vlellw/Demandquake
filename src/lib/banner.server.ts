@@ -25,7 +25,9 @@ function bannerPrompt(s: BannerSubject): string {
   return [
     `Create purely abstract, nonverbal background artwork evoking this topic: ${s.industry ?? "business innovation"}.`,
     s.industry ? `Industry: ${s.industry}.` : "",
-    `Style: premium editorial illustration, soft gradients and subtle geometric shapes evoking the industry,`,
+    `Style: premium abstract editorial artwork with layered textures, flowing color fields and subtle geometric patterns spread across the entire width.`,
+    `Mood: ${["airy and serene", "energetic and luminous", "quiet and atmospheric", "crisp and rhythmic", "dreamlike and fluid"][hue % 5]}. Allow complementary accent colors and varied tonal depth.`,
+    `No single focal object, central subject, product, icon, person or literal industry object. All-over balanced composition, with no element dominating the scene.`,
     `dominant color around HSL hue ${hue}, darker toward the edges so white text stays readable on top.`,
     `STRICT: zero typography anywhere. No text, letters, words, numbers, slogans, captions, labels, logos, watermarks, UI screens, signs, documents or pseudo-lettering. Do not render a company name or any written language. Use only abstract shapes and color.`,
   ]

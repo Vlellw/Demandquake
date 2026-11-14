@@ -37,6 +37,8 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [ ] Generate missing startup backgrounds and verify every profile; use varied abstract moods without text or a focal object.
+- [ ] Remove highlighted method-page item (image-31).
 - [x] Strengthen text-free background prompts and correct Trellivo artwork.
 - [x] Remove highlighted AI summary heading on Discover; retain inline AI idea label.
 - [x] Remove the completed-inspection claim banner.
