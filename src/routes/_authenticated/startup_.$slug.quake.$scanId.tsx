@@ -100,14 +100,12 @@ function QuakePage() {
   const relevantIds = new Set(scan.changes.map((c) => c.source_id));
   const scanSources = detail.sources;
   const verdict = VERDICT_COPY[scan.verdict ?? "unchanged"] ?? UNCHANGED;
-  const intensity = done ? Math.min(1, scan.changes.length / 4) : 0.8;
 
   return (
     <SourceProvider sources={allSources} citations={changeCitations}>
       <div style={brandStyle(st.brand)}>
-        <section className="relative overflow-hidden border-b border-border">
+        <section className="relative overflow-hidden">
           <div className="bg-hero pointer-events-none absolute inset-0" />
-          <SeismicField className="pointer-events-none absolute inset-x-0 bottom-0 h-40 w-full opacity-60" intensity={intensity} />
           <div className="relative mx-auto max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
             <div className="flex flex-wrap items-center gap-3">
               <StartupMark brand={st.brand} size="md" />
@@ -164,6 +162,8 @@ function QuakePage() {
             )}
           </div>
         </section>
+
+        {done && <SeismicField className="h-16 w-full" />}
 
         {done && (
           <div className="mx-auto max-w-[1200px] space-y-8 px-4 py-10 sm:px-6">

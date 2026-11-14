@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Move the market scan cardiograph from behind the statistics to replace the divider above What changed; signed-in scan page verified.
 - [x] Sweep completion handling across research, scan details, workspace manual/automatic scans and credit settlement; 23 regression tests and signed-in completed research/scan requests verified; settled records unchanged.
 - [x] Keep Edit wording in both modes; use a light inactive fill and navy active fill. Preview builds pass; signed-in toggle recheck unavailable because the injected account has no accessible workspace.
 - [x] Remove double-circle outlines through the shared InfoTip; single circle and working explanation verified on the home page.
