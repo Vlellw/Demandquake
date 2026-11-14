@@ -93,3 +93,5 @@
 - [x] Remove the Observed claims panel from the Evidence tab.
 - [x] Remove the Claim button from the startup tab bar (hero Claim remains).
 - [x] Rebalance startup Overview: equal-height panels, compact customer cards with even spacing, no white gap.
+
+- [ ] Workspace edit mode: pencil toggle gates all editable sections (name, tagline, pitch, checklist, assumptions, notes, roadmap); read-only by default.

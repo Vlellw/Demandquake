@@ -15,6 +15,7 @@ import {
   FlaskConical,
   Loader2,
   MessageSquarePlus,
+  Pencil,
   Plus,
   Radar,
   Trash2,
@@ -115,6 +116,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
   }
   const del = useServerFn(deleteProject);
   const [deleting, setDeleting] = useState(false);
+  const [editing, setEditing] = useState(false);
   const pr = projectProgress(p);
   const r = p.research;
 
@@ -154,12 +156,25 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
                 <Input
                   aria-label="Startup name"
                   value={p.name}
+                  readOnly={!editing}
                   onChange={(e) => update({ name: e.target.value.slice(0, 80) })}
                   onBlur={() => !p.name.trim() && update({ name: initial.name }, { immediate: true })}
-                  className="h-auto flex-1 rounded-[4px] border-transparent bg-transparent px-0 font-display text-4xl font-bold text-primary shadow-none hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2 md:text-[2.6rem]"
+                  className={cn(
+                    "h-auto flex-1 rounded-[4px] border-transparent bg-transparent px-0 font-display text-4xl font-bold text-primary shadow-none md:text-[2.6rem]",
+                    editing ? "hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2" : "cursor-default",
+                  )}
                 />
+                <Button
+                  variant={editing ? "hero" : "outline"}
+                  size="sm"
+                  onClick={() => setEditing((v) => !v)}
+                  aria-pressed={editing}
+                  aria-label={editing ? "Finish editing" : "Edit this workspace"}
+                >
+                  {editing ? <><Check /> Done</> : <><Pencil /> Edit</>}
+                </Button>
                 <InfoTip align="start" label="How this workspace works">
-                  Click the name or pitch to edit. Work through the checklist, test your assumptions and plan the roadmap below — everything saves
+                  Press Edit to change the name, pitch, checklist, assumptions and notes — everything saves
                   automatically{shared ? " and your co-founders see your changes." : "."}
                 </InfoTip>
               </div>
@@ -167,10 +182,14 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
                 aria-label="Tagline"
                 rows={1}
                 value={p.tagline ?? ""}
+                readOnly={!editing}
                 onChange={(e) => update({ tagline: e.target.value.replace(/\s*\n\s*/g, " ").slice(0, 240) })}
                 onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), e.currentTarget.blur())}
-                placeholder="One-line pitch"
-                className="mt-1 min-h-0 resize-none rounded-[4px] border-transparent bg-transparent px-0 py-1 text-lg text-foreground shadow-none [field-sizing:content] hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2 md:text-lg"
+                placeholder={editing ? "One-line pitch" : ""}
+                className={cn(
+                  "mt-1 min-h-0 resize-none rounded-[4px] border-transparent bg-transparent px-0 py-1 text-lg text-foreground shadow-none [field-sizing:content] md:text-lg",
+                  editing ? "hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2" : "cursor-default",
+                )}
               />
             </div>
           </div>
@@ -189,16 +208,17 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           <section className="panel p-5">
             <Textarea
               value={p.concept ?? ""}
+              readOnly={!editing}
               onChange={(e) => update({ concept: e.target.value.slice(0, 8000) })}
               rows={7}
-              placeholder="Refine the concept in your own words…"
-              className="mt-3 resize-y bg-surface-sunken/60 text-[15px] leading-relaxed"
+              placeholder={editing ? "Refine the concept in your own words…" : ""}
+              className={cn("mt-3 resize-y bg-surface-sunken/60 text-[15px] leading-relaxed", !editing && "cursor-default")}
             />
             <p className="mt-1.5 text-right font-mono text-[10px] text-faint">{(p.concept ?? "").length}/8000</p>
           </section>
 
-          <ChecklistSection project={p} update={update} />
-          <AssumptionsBoard assumptions={p.assumptions} onChange={(assumptions) => update({ assumptions }, { immediate: true })} />
+          <ChecklistSection project={p} update={update} editing={editing} />
+          <AssumptionsBoard assumptions={p.assumptions} readOnly={!editing} onChange={(assumptions) => update({ assumptions }, { immediate: true })} />
         </div>
 
         <aside className="min-w-0 space-y-6">
@@ -224,7 +244,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           <div id="team" className="scroll-mt-24">
             <TeamPanel project={p} currentUserId={user?.id ?? null} onLeft={onLeft} />
           </div>
-          <ActivityLog project={p} update={update} author={shared && user ? displayName(user) : null} />
+          <ActivityLog project={p} update={update} editing={editing} author={shared && user ? displayName(user) : null} />
           {p.is_owner && (
           <section className="panel border-negative/20 p-5">
             <p className="mt-2 text-sm text-muted-foreground">
@@ -299,7 +319,7 @@ function Progress({ label, done, total, detail }: { label: string; done: number;
   );
 }
 
-function ChecklistSection({ project: p, update }: { project: ProjectDTO; update: Update }) {
+function ChecklistSection({ project: p, update, editing }: { project: ProjectDTO; update: Update; editing: boolean }) {
   return (
     <section id="checklist" className="panel scroll-mt-24 p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -313,6 +333,7 @@ function ChecklistSection({ project: p, update }: { project: ProjectDTO; update:
           <li key={c.id} className={cn("flex gap-3 rounded-xl border p-4 transition-colors", c.done ? "border-positive/25 bg-positive/[0.04]" : "border-border")}>
             <Checkbox
               checked={c.done}
+              disabled={!editing}
               onCheckedChange={(v) => update({ checklist: p.checklist.map((x) => (x.id === c.id ? { ...x, done: v === true } : x)) }, { immediate: true })}
               className="mt-0.5"
               aria-label={`Mark "${c.title}" done`}
@@ -615,7 +636,7 @@ function UpdateLink({ url }: { url: string }) {
   );
 }
 
-function ActivityLog({ project: p, update, author }: { project: ProjectDTO; update: Update; author: string | null }) {
+function ActivityLog({ project: p, update, editing, author }: { project: ProjectDTO; update: Update; editing: boolean; author: string | null }) {
   const [note, setNote] = useState("");
   const sorted = useMemo(() => [...p.updates].sort((a, b) => b.at.localeCompare(a.at)), [p.updates]);
   function add() {
@@ -629,26 +650,28 @@ function ActivityLog({ project: p, update, author }: { project: ProjectDTO; upda
   }
   return (
     <section id="notes" className="panel scroll-mt-24 p-5">
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          add();
-        }}
-        className="mt-3 space-y-2"
-      >
-        <Textarea
-          id="workspace-note"
-          aria-label="New note"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          rows={3}
-          placeholder="Log a customer conversation, insight or decision…"
-          maxLength={2000}
-        />
-        <Button type="submit" size="sm" variant="outline" disabled={!note.trim()}>
-          <MessageSquarePlus /> Add note
-        </Button>
-      </form>
+      {editing && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            add();
+          }}
+          className="mt-3 space-y-2"
+        >
+          <Textarea
+            id="workspace-note"
+            aria-label="New note"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={3}
+            placeholder="Log a customer conversation, insight or decision…"
+            maxLength={2000}
+          />
+          <Button type="submit" size="sm" variant="outline" disabled={!note.trim()}>
+            <MessageSquarePlus /> Add note
+          </Button>
+        </form>
+      )}
       <ol className="mt-4 space-y-3 border-l border-border pl-4">
         {sorted.map((u) => (
           <li key={u.id} className="relative">

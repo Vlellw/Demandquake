@@ -14,8 +14,9 @@ const statuses = [
   { value: "invalidated", label: "Invalidated", icon: XCircle, tone: "text-negative" },
 ] as const;
 
-export function AssumptionsBoard({ assumptions, onChange }: {
+export function AssumptionsBoard({ assumptions, readOnly = false, onChange }: {
   assumptions: ProjectAssumption[];
+  readOnly?: boolean;
   onChange: (assumptions: ProjectAssumption[]) => void;
 }) {
   const [draft, setDraft] = useState("");
@@ -59,24 +60,32 @@ export function AssumptionsBoard({ assumptions, onChange }: {
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <Badge variant="inferred">Assumption</Badge>
                     <div className="flex items-center gap-2">
-                    <Select value={a.status} onValueChange={(value) => {
-                      const status = statuses.find((s) => s.value === value)?.value;
-                      if (status) onChange(assumptions.map((item) => item.id === a.id ? { ...item, status } : item));
-                    }}>
-                      <SelectTrigger aria-label={`Status for ${a.text}`} className={`w-40 shrink-0 ${current.tone}`}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statuses.map(({ value, label, icon: StatusIcon, tone }) => (
-                          <SelectItem key={value} value={value}>
-                            <span className={`flex items-center gap-2 ${tone}`}><StatusIcon className="size-4" />{label}</span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button variant="ghost" size="icon" title="Delete assumption" aria-label={`Delete assumption: ${a.text}`} onClick={() => {
-                      if (window.confirm("Delete this assumption?")) onChange(assumptions.filter((item) => item.id !== a.id));
-                    }}><Trash2 className="size-4 text-negative" /></Button>
+                    {readOnly ? (
+                      <span className={`flex items-center gap-2 text-sm font-semibold ${current.tone}`}>
+                        <current.icon className="size-4" />{current.label}
+                      </span>
+                    ) : (
+                      <>
+                        <Select value={a.status} onValueChange={(value) => {
+                          const status = statuses.find((s) => s.value === value)?.value;
+                          if (status) onChange(assumptions.map((item) => item.id === a.id ? { ...item, status } : item));
+                        }}>
+                          <SelectTrigger aria-label={`Status for ${a.text}`} className={`w-40 shrink-0 ${current.tone}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {statuses.map(({ value, label, icon: StatusIcon, tone }) => (
+                              <SelectItem key={value} value={value}>
+                                <span className={`flex items-center gap-2 ${tone}`}><StatusIcon className="size-4" />{label}</span>
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="icon" title="Delete assumption" aria-label={`Delete assumption: ${a.text}`} onClick={() => {
+                          if (window.confirm("Delete this assumption?")) onChange(assumptions.filter((item) => item.id !== a.id));
+                        }}><Trash2 className="size-4 text-negative" /></Button>
+                      </>
+                    )}
                     </div>
                   </div>
                   <p className="break-words text-base leading-relaxed text-foreground">{a.text}</p>
@@ -93,10 +102,12 @@ export function AssumptionsBoard({ assumptions, onChange }: {
           {visible.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">{filter === "all" ? "No assumptions added yet." : `No ${filter} assumptions.`}</p>}
         </TabsContent>
       </Tabs>
-      <form onSubmit={(e) => { e.preventDefault(); add(); }} className="flex flex-col gap-2 sm:flex-row">
-        <Input aria-label="New assumption" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Add an assumption…" maxLength={600} className="min-w-0 flex-1" />
-        <Button type="submit" variant="outline" disabled={!draft.trim()}><Plus /> Add assumption</Button>
-      </form>
+      {!readOnly && (
+        <form onSubmit={(e) => { e.preventDefault(); add(); }} className="flex flex-col gap-2 sm:flex-row">
+          <Input aria-label="New assumption" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Add an assumption…" maxLength={600} className="min-w-0 flex-1" />
+          <Button type="submit" variant="outline" disabled={!draft.trim()}><Plus /> Add assumption</Button>
+        </form>
+      )}
     </section>
   );
 }
