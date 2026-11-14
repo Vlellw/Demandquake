@@ -37,4 +37,12 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Strengthen text-free background prompts and correct Trellivo artwork.
+- [x] Remove highlighted AI summary heading on Discover; retain inline AI idea label.
+- [x] Remove the completed-inspection claim banner.
+- [x] Remove competitor and evidence-strength tags from spotlight cards.
+- [x] Replace Researched with Sources in the Discover card footer.
+- [x] Remove startup key-number band.
+- [x] Remove The proposed solution from Overview.
+- [x] Remove landscape/timeline previews and Overview headline; keep tab panels.
 - [x] AI banner images for startup cards/hero (Gemini 3.1 Flash Lite Image), generated once per startup, stored in private storage, served via /api/public/banner, lazy backfill from cards; step-3 tabs restored per Vlad

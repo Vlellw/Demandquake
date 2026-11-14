@@ -53,3 +53,5 @@ use the editor.
 - Workspace assumptions use a dedicated list component with status filters and explicit selectors, connected to the existing project saver; this keeps long hypotheses readable without accidental status changes.
 
 - Startup inspection keeps Overview outside the tab control and defaults to Evidence; Overview counts as viewed on page entry because it remains visible above every panel.
+
+- Corrected existing startup artwork is selected centrally in bannerBackground so cards and profiles share the same replacement without exposing private storage.

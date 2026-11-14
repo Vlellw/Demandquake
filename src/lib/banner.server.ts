@@ -23,11 +23,11 @@ export const bannerUrl = (startupId: string) => `/api/public/banner/${startupId}
 function bannerPrompt(s: BannerSubject): string {
   const hue = Math.max(0, Math.min(359, Math.round(Number(s.brand?.hue ?? 40))));
   return [
-    `Abstract wide banner background artwork for a startup called "${s.name}" working on: ${s.tagline}.`,
+    `Create purely abstract, nonverbal background artwork evoking this topic: ${s.industry ?? "business innovation"}.`,
     s.industry ? `Industry: ${s.industry}.` : "",
     `Style: premium editorial illustration, soft gradients and subtle geometric shapes evoking the industry,`,
     `dominant color around HSL hue ${hue}, darker toward the edges so white text stays readable on top.`,
-    `No text, no letters, no words, no logos, no people, no watermarks.`,
+    `STRICT: zero typography anywhere. No text, letters, words, numbers, slogans, captions, labels, logos, watermarks, UI screens, signs, documents or pseudo-lettering. Do not render a company name or any written language. Use only abstract shapes and color.`,
   ]
     .filter(Boolean)
     .join(" ");

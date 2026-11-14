@@ -34,10 +34,9 @@ import { AssessmentPanel } from "@/components/startup/AssessmentPanel";
 import { OpportunityTimeline } from "@/components/startup/OpportunityTimeline";
 import { BusinessPlanPanel } from "@/components/startup/BusinessPlanPanel";
 import { SourceStream } from "@/components/research/SourceStream";
-import { FreshnessBadge, AssessmentStrip } from "@/components/discovery/StartupCard";
+import { AssessmentStrip } from "@/components/discovery/StartupCard";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { Button } from "@/components/ui/button";
-import { StatRule } from "@/components/common/StatRule";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthUser } from "@/hooks/use-auth";
@@ -312,29 +311,7 @@ function StartupPage() {
           </div>
         </section>
 
-        {/* KEY NUMBERS */}
-        <section aria-label="Key numbers" className="bg-surface-sunken">
-          <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
-            <dl className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-x-10">
-              <StatRule label="Live sources" value={evidence.length} />
-              <StatRule label="Competitors" value={st.competitors.length} />
-              <StatRule label="Market scans" value={detail.scans.length} />
-              <StatRule label="Founders building" value={st.claim_count} />
-            </dl>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-center">
-              <FreshnessBadge iso={st.research_at} />
-              {st.last_scanned_at && <FreshnessBadge iso={st.last_scanned_at} prefix="Last scanned" />}
-              {detail.run && (
-                <Link to="/research/$runId" params={{ runId: detail.run.id }} className="text-xs font-semibold text-primary underline-offset-4 hover:underline">
-                  Found by the research “{detail.run.query}”
-                </Link>
-              )}
-            </div>
-          </div>
-        </section>
-
-        <section aria-labelledby="overview-heading" className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
-          <h2 id="overview-heading" className="section-title mb-6 text-2xl">Overview</h2>
+        <section aria-label="Startup overview" className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
           <Overview detail={detail} onTab={goTab} />
         </section>
 
@@ -660,25 +637,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
           )}
         </section>
 
-        <section className="panel p-6">
-          <div className="flex items-center justify-between gap-2">
-            <h3 className="font-display text-xl font-semibold text-foreground">The proposed solution</h3>
-            <InferredTag />
-          </div>
-          <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">{st.solution.summary}</p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {st.solution.features.map((f, i) => (
-              <div key={f.title} className="brand-border rounded-xl border bg-surface-sunken/60 p-4">
-                <p className="brand-text font-mono text-[10px] uppercase tracking-wider">Feature {i + 1}</p>
-                <p className="mt-1 font-display text-base font-semibold text-foreground">{f.title}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{f.description}</p>
-                <p className="mt-2 border-t border-border pt-2 text-xs text-foreground/70">
-                  <span className="text-muted-foreground">Addresses:</span> {f.addresses}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       <div className="space-y-6">
@@ -717,42 +675,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
           <p className="mt-4 line-clamp-4 text-sm text-muted-foreground">{st.assessment.summary}</p>
         </button>
 
-        <button onClick={() => onTab("landscape")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Landscape →</span>
-          </div>
-          {st.competitors.length === 0 ? (
-            <p className="mt-3 text-sm text-muted-foreground">No named competitors surfaced in live sources — validate with buyers.</p>
-          ) : (
-            <ul className="mt-3 space-y-2">
-              {st.competitors.slice(0, 4).map((c) => (
-                <li key={c.name} className="text-sm">
-                  <span className="font-medium text-foreground">{c.name}</span>
-                  <span className="text-muted-foreground"> — gap: {c.gap}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </button>
-
-        {st.timeline.length > 0 && (
-          <button onClick={() => onTab("updates")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Timeline →</span>
-            </div>
-            <ul className="mt-3 space-y-2.5">
-              {[...st.timeline]
-                .sort((a, b) => new Date(b.date ?? b.discovered_at).getTime() - new Date(a.date ?? a.discovered_at).getTime())
-                .slice(0, 3)
-                .map((e) => (
-                  <li key={e.id} className="flex gap-3 text-sm">
-                    <span className="w-16 shrink-0 font-mono text-[11px] text-muted-foreground">{e.date ? formatDate(e.date, { month: "short", year: "numeric" }) : "Undated"}</span>
-                    <span className="text-foreground/90">{e.title}</span>
-                  </li>
-                ))}
-            </ul>
-          </button>
-        )}
       </div>
     </div>
   );
@@ -801,32 +723,7 @@ function NextCheck({
       </div>
     );
   }
-  return (
-    <div className="mt-10 flex flex-col gap-4 rounded-[4px] border-l-4 border-positive bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-      <div className="flex min-w-0 items-start gap-3">
-        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-positive" aria-hidden="true" />
-        <div>
-          <p className="font-display text-lg font-bold text-foreground">
-            {claimed ? "All checks done — keep going in your workspace" : `All ${total} checks done — you’re ready for step 4`}
-          </p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
-            {claimed ? "Your checklist, assumptions and notes are waiting there." : "Claim the idea to get a private workspace, or keep reading the business plan first."}
-          </p>
-        </div>
-      </div>
-      {claimed && workspaceId ? (
-        <Button asChild>
-          <Link to="/workspace/$projectId" params={{ projectId: workspaceId }}>
-            Open workspace <ArrowRight />
-          </Link>
-        </Button>
-      ) : (
-        <Button onClick={onClaim}>
-          <Flag /> Claim · {claimCost} credits
-        </Button>
-      )}
-    </div>
-  );
+  return null;
 }
 
 /** Market signals in context: the latest finished scan drawn as a seismograph, one spike per change. */

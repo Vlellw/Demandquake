@@ -1,12 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { ArrowRight, CalendarClock, FileSearch, Sparkles, Swords, Target, Users } from "lucide-react";
+import { ArrowRight, CalendarClock, FileSearch, Target, Users } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
 import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
 import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { Badge } from "@/components/ui/badge";
-import { FreshnessBadge } from "@/components/discovery/StartupCard";
-import { EVIDENCE_LABEL } from "@/lib/journey";
 
 /**
  * Step 1 spotlight: one idea explained in plain words — the problem found, who has it and why now —
@@ -49,14 +47,11 @@ export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDT
         </div>
 
         <div className="flex flex-1 flex-col p-5">
-          <p className="line-clamp-2 text-[0.95rem] font-semibold leading-snug text-foreground">{card.tagline}</p>
+          <p className="line-clamp-2 text-[0.95rem] font-semibold leading-snug text-foreground">{card.tagline} <span className="text-xs text-inferred">(AI idea)</span></p>
 
           {rows.length > 0 && (
             <div className="mt-4 border-t border-border pt-4">
-              <p className="mb-3 inline-flex items-center gap-1 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-inferred">
-                <Sparkles className="size-3" aria-hidden="true" /> AI summary of the sources
-              </p>
-              <dl className="space-y-3">
+              <dl className="space-y-3" aria-label="AI summary of sources">
                 {rows.map(({ icon: Icon, label, text }) => (
                   <div key={label} className="flex gap-3">
                     <span className="grid size-8 shrink-0 place-items-center rounded-full border border-ink/25 text-primary" aria-hidden="true">
@@ -72,20 +67,8 @@ export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDT
             </div>
           )}
 
-          <div className="mt-5 flex flex-wrap gap-1.5">
-            <Badge variant="observed">
-              <FileSearch /> {card.evidence_count} sources
-            </Badge>
-            <Badge variant="outline">
-              <Swords /> {card.competitor_count} competitors
-            </Badge>
-            {card.evidence_strength && EVIDENCE_LABEL[card.evidence_strength] && (
-              <Badge variant="default">{EVIDENCE_LABEL[card.evidence_strength]}</Badge>
-            )}
-          </div>
-
           <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-5">
-            <FreshnessBadge iso={card.last_scanned_at ?? card.research_at} prefix={card.last_scanned_at ? "Scanned" : "Researched"} />
+            <Badge variant="observed"><FileSearch /> {card.evidence_count} sources</Badge>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-ink px-4 py-1.5 text-xs font-bold text-foreground transition-colors group-hover:bg-ink group-hover:text-ink-foreground">
               Inspect the evidence <ArrowRight className="size-3.5" />
             </span>
