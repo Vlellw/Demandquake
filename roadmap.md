@@ -24,7 +24,9 @@
 - [x] Every page restyled (startup profile + tabs, research run, market scan, workspace list/detail, how it works, sign-in, reset password, invite, 404) and charts on the light theme; phone layouts and accessibility contrast checked
 
 ## Ready next
-- Credit monetization: secure per-user balances and ledger, configurable costs, 5-credit successful discovery searches, Stripe Checkout and verified webhooks, packages, purchase/history pages, admin management and a 1,000,000-credit admin grant. Waiting for Stripe setup confirmation, seller country, admin account identity and initial signup allocation.
+- [x] Credit wallets and auditable history, 25 welcome credits, 5-credit successful discovery with confirmation, atomic idempotent reservations and settlement, public package page and protected admin controls. Verified a signed-in cached search: 25 → 20 credits, one ledger entry, no phone overflow.
+- Credit payments: provider and four products created, embedded checkout and signed webhook fulfillment/refund handling implemented. Blocked: provisioned payment secrets are missing from the app runtime, so purchase/decline/refund end-to-end checks and tax configuration are unverified. Live onboarding is also required; do not claim real purchases work.
+- Admin allocation: verified-email allowlist configured for the requested account. Blocked: that account does not exist in app auth yet; signup and email verification are required before the million-credit grant and admin checks.
 - Guided first visit: a short dismissible "how to read this page" tour on the first startup page a newcomer opens
 - Real photography: swap the generated start-page photos for licensed or team-supplied images
 - Server-side scheduled monitoring (needs background execution; scheduled callbacks end after a few seconds, so scans currently run while a founder visits)

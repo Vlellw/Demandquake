@@ -57,6 +57,7 @@ export function useRunDriver(runId: string, status: string | undefined, enabled 
       running.current = false;
       if (!cancelled) {
         queryClient.invalidateQueries({ queryKey: ["run", runId] });
+        queryClient.invalidateQueries({ queryKey: ["credit-account"] });
         queryClient.invalidateQueries({ queryKey: ["startups"] });
         queryClient.invalidateQueries({ queryKey: ["radar"] });
         queryClient.invalidateQueries({ queryKey: ["stats"] });

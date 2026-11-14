@@ -15,6 +15,7 @@ import {
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { displayName, useAuthUser } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
+import { CreditBalance } from '@/components/credits/CreditBalance';
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -62,10 +63,11 @@ export function AppHeader() {
     <>
       <div className="bg-ink text-ink-foreground">
         <div className="mx-auto flex h-8 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
-          <p className="hidden truncate text-[0.6875rem] text-ink-foreground/80 sm:block">
+          <p className="hidden truncate text-[0.6875rem] text-ink-foreground/80 lg:block">
             Startup ideas built from real problems found on the live web
           </p>
-          <div className="ml-auto flex items-center gap-5">
+          <div className="ml-auto flex min-w-0 items-center gap-3 sm:gap-5">
+            {ready && user && <CreditBalance userId={user.id} />}
             {ready && !user && (
               <Link to="/auth" className={utilityLink}>
                 <CircleUserRound className="size-4" /> Sign in
@@ -75,7 +77,7 @@ export function AppHeader() {
               <DropdownMenu>
                 <DropdownMenuTrigger className={cn(utilityLink, "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-foreground/60")}>
                   <CircleUserRound className="size-4" />
-                  <span className="max-w-40 truncate">{displayName(user)}</span>
+                  <span className="max-w-20 truncate sm:max-w-40">{displayName(user)}</span>
                   <ChevronDown className="size-3.5" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-60">

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useRef, useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { ArrowRight, Factory, Loader2, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +7,11 @@ import { startDiscovery } from "@/lib/research.functions";
 import { EXAMPLE_QUERIES, GEOGRAPHIES, INDUSTRIES } from "@/lib/taxonomy";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAuthUser } from '@/hooks/use-auth';
+import { creditCatalogQuery, creditAccountQuery } from '@/lib/credit-queries';
+import { getStripeEnvironment } from '@/lib/stripe';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { SectionHeading } from "@/components/common/SectionHeading";
 
 
@@ -17,6 +22,14 @@ export function SearchHero() {
   const [geography, setGeography] = useState<string>("any");
   const [pending, setPending] = useState(false);
   const start = useServerFn(startDiscovery);
+  const { user } = useAuthUser();
+  const catalog = useQuery(creditCatalogQuery());
+  const account = useQuery({ ...creditAccountQuery(user?.id ?? ''), enabled: Boolean(user) });
+  const cost = catalog.data?.settings['discovery'];
+  const qc = useQueryClient();
+  const inFlight = useRef(false);
+  const requestId = useRef<string | null>(null);
+  const [confirmation, setConfirmation] = useState<{ text: string; force: boolean } | null>(null);
   const navigate = useNavigate();
 
   async function submit(q: string, force = false) {
@@ -25,20 +38,33 @@ export function SearchHero() {
       toast.error("Describe what to research in a few more words.");
       return;
     }
+    if (!user) { toast.error('Sign in to start research.'); return; }
+    if (cost === undefined) { toast.error('Credit pricing is unavailable.'); return; }
+    setConfirmation({ text, force });
+  }
+
+  async function confirmSearch() {
+    if (!confirmation || cost === undefined || inFlight.current) return;
+    inFlight.current = true;
+    const { text, force } = confirmation;
     setPending(true);
+    requestId.current ??= crypto.randomUUID();
     try {
       const res = await start({
         data: {
           query: text,
           industry: industry === "any" ? null : industry,
           geography: geography === "any" ? null : geography,
-          force,
+          force, environment: getStripeEnvironment(), requestId: requestId.current, expectedCost: cost,
         },
       });
       if (!res.ok) {
         toast.error(res.error);
         return;
       }
+      requestId.current = null;
+      setConfirmation(null);
+      await qc.invalidateQueries({ queryKey: ['credit-account'] });
       if (res.reused === "cached") {
         toast("Showing recent research for this exact query", {
           description: "Live results from the last 12 hours are reused to save research credits.",
@@ -51,6 +77,7 @@ export function SearchHero() {
       toast.error("Could not start the discovery. Please try again.");
     } finally {
       setPending(false);
+      inFlight.current = false;
     }
   }
 
@@ -67,6 +94,8 @@ export function SearchHero() {
           description="Describe a market or a group of customers in your own words. We read the live web and publish the startups we find here."
         />
 
+        <Dialog open={Boolean(confirmation)} onOpenChange={(open) => { if (!open && !pending) { setConfirmation(null); requestId.current = null; } }}><DialogContent><DialogTitle>Confirm research</DialogTitle><DialogDescription>{cost} credits for a successful search. Failed research is not charged.</DialogDescription><p className="text-sm">{confirmation?.text}</p><Button disabled={pending || !account.data || account.data.wallet.balance-account.data.wallet.reserved < (cost ?? 0)} onClick={confirmSearch}>{pending ? 'Starting…' : `Confirm · ${cost} credits`}</Button>{account.data && account.data.wallet.balance-account.data.wallet.reserved < (cost ?? 0) && <p className="text-sm text-negative">Insufficient credits. <Link to="/credits" className="underline">Buy Credits</Link></p>}</DialogContent></Dialog>
+        <p className="mt-6 text-center text-sm text-muted-foreground">{cost === undefined ? 'Loading credit cost…' : `${cost} credits per successful search · failed research is free`}{!user && <> · <Link to="/auth" className="underline">Sign in to research</Link></>}</p>
         <form
           className="mx-auto mt-10 max-w-3xl"
           onSubmit={(e) => {

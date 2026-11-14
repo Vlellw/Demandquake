@@ -6,6 +6,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
 import { Clock3, Hourglass, Loader2, RotateCcw, Search, Sparkles, TriangleAlert } from "lucide-react";
 import { runDetailQuery } from "@/lib/queries";
+import { getStripeEnvironment } from '@/lib/stripe';
+import { useAuthUser } from '@/hooks/use-auth';
 import { retryDiscovery } from "@/lib/research.functions";
 import { useRunDriver } from "@/hooks/use-run-driver";
 import { StageRail, stageIndex } from "@/components/research/StageRail";
@@ -74,7 +76,8 @@ function ResearchPage() {
   });
   const detail = (live.data ?? initial) as RunDetailDTO;
   const { run } = detail;
-  const { driverError, restart } = useRunDriver(runId, run.status);
+  const { user } = useAuthUser();
+  const { driverError, restart } = useRunDriver(runId, run.status, Boolean(user));
   const retry = useServerFn(retryDiscovery);
   const queryClient = useQueryClient();
   const [retrying, setRetrying] = useState(false);
@@ -94,7 +97,7 @@ function ResearchPage() {
   async function onRetry() {
     setRetrying(true);
     try {
-      await retry({ data: { runId } });
+      await retry({ data: { runId, environment: getStripeEnvironment() } });
       await queryClient.invalidateQueries({ queryKey: ["run", runId] });
       restart();
     } finally {
@@ -188,7 +191,7 @@ function ResearchPage() {
               <p className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full border border-dashed border-inferred" /> AI synthesis — to validate
               </p>
-              {run.stats.credits_used ? <p className="pt-1 text-muted-foreground">{run.stats.credits_used} research credits used</p> : null}
+              {run.stats.credits_used ? <p className="pt-1 text-muted-foreground">{run.stats.credits_used} Context.dev provider credits used (not your account balance)</p> : null}
             </div>
           </aside>
 

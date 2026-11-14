@@ -17,6 +17,7 @@ import { Route as MethodRouteImport } from './routes/method'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ResearchRunIdRouteImport } from './routes/research.$runId'
 import { Route as StartupSlugRouteImport } from './routes/startup.$slug'
+import { Route as AuthenticatedCreditsAdminRouteImport } from './routes/_authenticated/credits.admin'
 import { Route as AuthenticatedCreditsHistoryRouteImport } from './routes/_authenticated/credits.history'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedWorkspaceIndexRouteImport } from './routes/_authenticated/workspace.index'
@@ -63,6 +64,12 @@ const StartupSlugRoute = StartupSlugRouteImport.update({
   path: '/startup/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCreditsAdminRoute =
+  AuthenticatedCreditsAdminRouteImport.update({
+    id: '/credits/admin',
+    path: '/credits/admin',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedCreditsHistoryRoute =
   AuthenticatedCreditsHistoryRouteImport.update({
     id: '/credits/history',
@@ -107,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
   '/startup/$slug': typeof StartupSlugRoute
+  '/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
@@ -122,6 +130,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
   '/startup/$slug': typeof StartupSlugRoute
+  '/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
@@ -139,6 +148,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
   '/startup/$slug': typeof StartupSlugRoute
+  '/_authenticated/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/_authenticated/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/research/$runId'
     | '/startup/$slug'
+    | '/credits/admin'
     | '/credits/history'
     | '/invite/$token'
     | '/workspace/$projectId'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/research/$runId'
     | '/startup/$slug'
+    | '/credits/admin'
     | '/credits/history'
     | '/invite/$token'
     | '/workspace/$projectId'
@@ -187,6 +199,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/research/$runId'
     | '/startup/$slug'
+    | '/_authenticated/credits/admin'
     | '/_authenticated/credits/history'
     | '/_authenticated/invite/$token'
     | '/_authenticated/workspace/$projectId'
@@ -266,6 +279,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StartupSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/credits/admin': {
+      id: '/_authenticated/credits/admin'
+      path: '/credits/admin'
+      fullPath: '/credits/admin'
+      preLoaderRoute: typeof AuthenticatedCreditsAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/credits/history': {
       id: '/_authenticated/credits/history'
       path: '/credits/history'
@@ -312,6 +332,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCreditsAdminRoute: typeof AuthenticatedCreditsAdminRoute
   AuthenticatedCreditsHistoryRoute: typeof AuthenticatedCreditsHistoryRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedWorkspaceProjectIdRoute: typeof AuthenticatedWorkspaceProjectIdRoute
@@ -319,6 +340,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCreditsAdminRoute: AuthenticatedCreditsAdminRoute,
   AuthenticatedCreditsHistoryRoute: AuthenticatedCreditsHistoryRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedWorkspaceProjectIdRoute: AuthenticatedWorkspaceProjectIdRoute,

@@ -16,7 +16,7 @@ export const createCreditCheckout = createServerFn({ method: 'POST' }).middlewar
       const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
       const stripe = createStripeClient(data.environment);
       const { data: { user } } = await context.supabase.auth.getUser();
-      const customerId = await resolveOrCreateCustomer(stripe, { userId: context.userId, email: user?.email });
+      const customerId = await resolveOrCreateCustomer(stripe, { userId: context.userId, ...(user?.email && { email: user.email }) });
       const prices = await stripe.prices.list({ lookup_keys: [pkg.data.price_key], active: true, limit: 1 });
       const price = prices.data[0];
       if (!price || price.unit_amount !== pkg.data.amount || price.currency !== pkg.data.currency) throw new Error('Package pricing is being updated. Please try again shortly.');
@@ -53,7 +53,7 @@ async function resolveOrCreateCustomer(
     const existing = await stripe.customers.list({ email: options.email, limit: 1 });
     const customer = existing.data[0];
     if (customer) {
-      if (options.userId && customer.metadata?.userId !== options.userId) await stripe.customers.update(customer.id, { metadata: { ...customer.metadata, userId: options.userId } });
+      if (options.userId && customer.metadata?.['userId'] !== options.userId) await stripe.customers.update(customer.id, { metadata: { ...customer.metadata, userId: options.userId } });
       return customer.id;
     }
   }
