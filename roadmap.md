@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Remove the full-catalog and research-another-market panels from Discover; real results remain visible and both panels are absent.
 - [x] Let page scrolling pass over the evidence map until double-click activates gestures; scroll, pan and Escape verified.
 - [x] Separate related problems from Evidence and restore its source cards; signed-in tab switching verified.
 - [x] Move the comparison tab last and rename it Other opportunities; order verified.

@@ -1,11 +1,10 @@
 import { useMemo, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Compass, LayoutGrid, Sparkles, Telescope } from "lucide-react";
+import { ArrowRight, Compass, Sparkles } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
 import { useAuthUser } from "@/hooks/use-auth";
 import { myProjectsQuery } from "@/lib/queries";
-import { creditCatalogQuery } from "@/lib/credit-queries";
 import { recommendStartups } from "@/lib/project-progress";
 import { FOR_YOU, industryChoices, rankSpotlights } from "@/lib/journey";
 import { industryColor } from "@/lib/taxonomy";
@@ -37,8 +36,6 @@ export function GuidedDiscover({
   const { data: projects } = useQuery({ ...myProjectsQuery, enabled: !!user });
   const picks = useMemo(() => (projects ? recommendStartups(cards, projects, 3) : []), [cards, projects]);
   const choices = useMemo(() => industryChoices(cards), [cards]);
-  const catalog = useQuery(creditCatalogQuery());
-  const researchCost = catalog.data?.settings["discovery"];
 
   // "For you" only exists once a founder has claimed something with related ideas.
   const selected = industry === FOR_YOU && picks.length === 0 ? "all" : industry;
@@ -136,42 +133,6 @@ export function GuidedDiscover({
             )}
           </div>
 
-          <div className="mt-14 grid gap-4 md:grid-cols-2">
-            <div className="flex flex-col items-start gap-4 rounded-[4px] bg-surface-sunken p-6 sm:flex-row sm:p-8">
-              <span className="grid size-12 shrink-0 place-items-center rounded-full border-2 border-primary text-primary" aria-hidden="true">
-                <LayoutGrid className="size-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-xl font-bold text-foreground">
-                  {pool.length > spotlights.length
-                    ? `See all ${pool.length} ${industryLabel ?? ""} startups`.replace(/\s+/g, " ")
-                    : "Browse the full catalog"}
-                </p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
-                  Filter by region, business model and date, and open the problem map, market changes and past research.
-                </p>
-                <Button asChild variant="outline" className="mt-5">
-                  <Link from="/discover" to="/discover" search={(p) => ({ ...p, view: "all", industry: selected === FOR_YOU ? "all" : selected })}>
-                    Open the full catalog <ArrowRight />
-                  </Link>
-                </Button>
-              </div>
-            </div>
-            <div className="flex flex-col items-start gap-4 rounded-[4px] bg-primary p-6 text-primary-foreground sm:flex-row sm:p-8">
-              <span className="grid size-12 shrink-0 place-items-center rounded-full border-2 border-primary-foreground" aria-hidden="true">
-                <Telescope className="size-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="font-display text-xl font-bold">Don’t see what you want?</p>
-                <p className="mt-1 text-sm leading-relaxed text-primary-foreground/85">
-                  Research a new market. We read the live web and draft startups from the problems people keep describing.
-                </p>
-                <Button variant="glass" className="mt-5" onClick={onResearch}>
-                  Research a market{researchCost !== undefined ? ` · ${researchCost} credits` : ""} <ArrowRight />
-                </Button>
-              </div>
-            </div>
-          </div>
         </>
       )}
     </section>
