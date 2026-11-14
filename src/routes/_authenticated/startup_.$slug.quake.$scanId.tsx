@@ -225,7 +225,7 @@ function QuakePage() {
               <p className="text-sm text-muted-foreground">The startup profile, timeline and assessment now reflect this scan. Completed <TimeAgo iso={scan.completed_at} />.</p>
               <Button asChild variant="hero">
                 <Link to="/startup/$slug" params={{ slug }} search={{ tab: "updates" }}>
-                  View updated timeline <ArrowRight />
+                  View updated information <ArrowRight />
                 </Link>
               </Button>
             </div>
