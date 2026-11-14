@@ -130,7 +130,7 @@ function AuthPage() {
           <div>
             <p className="eyebrow text-primary-foreground/80">Free account</p>
             <h2 className="mt-2 font-display text-[1.9rem] font-bold leading-tight">Turn an idea into your startup</h2>
-            <p className="mt-3 text-sm leading-relaxed text-primary-foreground/85">Browsing is open to everyone. An account lets you:</p>
+            <p className="mt-3 text-sm leading-relaxed text-primary-foreground/85">Sign in to explore the shared research catalog. An account lets you:</p>
             <ul className="mt-8 space-y-5">
               {BENEFITS.map((b) => (
                 <li key={b.title} className="flex gap-4">
@@ -241,9 +241,9 @@ function AuthPage() {
           </>
         )}
         <p className="mt-8 border-t border-border pt-5 text-center text-xs text-muted-foreground">
-          Just looking? Browsing is open to everyone.{" "}
+          Want to learn more before signing in?{" "}
           <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
-            Keep exploring
+            Back to the introduction
           </Link>
         </p>
         </div>

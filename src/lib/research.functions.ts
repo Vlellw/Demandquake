@@ -1,4 +1,4 @@
-// Public server functions for discovery, research runs, catalog reads and market scans.
+// Authenticated server functions for the shared research catalog and actions.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
@@ -7,52 +7,52 @@ import { normalizeQueryKey } from './research-utils';
 const uuid = z.string().uuid();
 
 // ---------- Catalog reads ----------
-export const getStartupCards = createServerFn({ method: "GET" }).handler(async () => {
+export const getStartupCards = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { listStartupCards } = await import("./catalog.server");
-  return listStartupCards();
+  return listStartupCards(context.supabase);
 });
 
-export const getRadarNodes = createServerFn({ method: "GET" }).handler(async () => {
+export const getRadarNodes = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { radarNodes } = await import("./catalog.server");
-  return radarNodes();
+  return radarNodes(context.supabase);
 });
 
-export const getClusterSignals = createServerFn({ method: "GET" })
+export const getClusterSignals = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { clusterId: string }) => ({ clusterId: uuid.parse(d.clusterId) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { clusterSignals } = await import("./catalog.server");
-    return clusterSignals(data.clusterId);
+    return clusterSignals(context.supabase, data.clusterId);
   });
 
-export const getDashboardStats = createServerFn({ method: "GET" }).handler(async () => {
+export const getDashboardStats = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { dashboardStats } = await import("./catalog.server");
-  return dashboardStats();
+  return dashboardStats(context.supabase);
 });
 
-export const getRecentRuns = createServerFn({ method: "GET" }).handler(async () => {
+export const getRecentRuns = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { recentRuns } = await import("./catalog.server");
-  return recentRuns(10);
+  return recentRuns(context.supabase, 10);
 });
 
-export const getRunDetail = createServerFn({ method: "GET" })
+export const getRunDetail = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { runId: string }) => ({ runId: uuid.parse(d.runId) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { runDetail } = await import("./catalog.server");
-    return runDetail(data.runId);
+    return runDetail(context.supabase, data.runId);
   });
 
-export const getStartupDetail = createServerFn({ method: "GET" })
+export const getStartupDetail = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { slug: string }) => ({ slug: z.string().min(1).max(80).parse(d.slug) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { startupDetail } = await import("./catalog.server");
-    return startupDetail(data.slug);
+    return startupDetail(context.supabase, data.slug);
   });
 
-export const getScanDetail = createServerFn({ method: "GET" })
+export const getScanDetail = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { scanId: string }) => ({ scanId: uuid.parse(d.scanId) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { scanDetail } = await import("./catalog.server");
-    return scanDetail(data.scanId);
+    return scanDetail(context.supabase, data.scanId);
   });
 
 // ---------- Discovery ----------
@@ -114,9 +114,9 @@ export const retryDiscovery = createServerFn({ method: "POST" })
   });
 
 // ---------- Market scans ----------
-export const startMarketScan = createServerFn({ method: "POST" })
+export const startMarketScan = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { startupId: string }) => ({ startupId: uuid.parse(d.startupId) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { startScan } = await import("./scan.server");
     const { userMessageOf } = await import("./pipeline.server");
     try {
@@ -127,9 +127,9 @@ export const startMarketScan = createServerFn({ method: "POST" })
     }
   });
 
-export const advanceMarketScan = createServerFn({ method: "POST" })
+export const advanceMarketScan = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { scanId: string }) => ({ scanId: uuid.parse(d.scanId) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { advanceScan } = await import("./scan.server");
     const { userMessageOf } = await import("./pipeline.server");
     try {
@@ -143,28 +143,28 @@ export const advanceMarketScan = createServerFn({ method: "POST" })
 // ---------- Competitor brands (Context.dev brand lookups, cached per domain) ----------
 const slugSchema = z.string().min(1).max(80);
 
-export const getCompetitorBrands = createServerFn({ method: "GET" })
+export const getCompetitorBrands = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { startupCompetitorBrands } = await import("./brands.server");
     return startupCompetitorBrands(data.slug);
   });
 
-export const enrichCompetitorBrands = createServerFn({ method: "POST" })
+export const enrichCompetitorBrands = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { enrichStartupCompetitorBrands } = await import("./brands.server");
     return enrichStartupCompetitorBrands(data.slug);
   });
 
-export const getStartupScans = createServerFn({ method: "GET" })
+export const getStartupScans = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth])
   .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
     const { startupScans } = await import("./catalog.server");
-    return startupScans(data.slug);
+    return startupScans(context.supabase, data.slug);
   });
 
-export const getRecentQuakes = createServerFn({ method: "GET" }).handler(async () => {
+export const getRecentQuakes = createServerFn({ method: "GET" }).middleware([requireSupabaseAuth]).handler(async ({ context }) => {
   const { recentQuakes } = await import("./catalog.server");
-  return recentQuakes(12);
+  return recentQuakes(context.supabase, 12);
 });

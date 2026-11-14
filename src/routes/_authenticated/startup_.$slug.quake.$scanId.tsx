@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/startup_/$slug/quake/$scanId")({
+export const Route = createFileRoute("/_authenticated/startup_/$slug/quake/$scanId")({
   loader: async ({ context, params }) => {
     const [startup, scan] = await Promise.all([
       context.queryClient.ensureQueryData(startupDetailQuery(params.slug)),
@@ -53,7 +53,7 @@ export const Route = createFileRoute("/startup_/$slug/quake/$scanId")({
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <p className="font-display text-2xl text-foreground">Scan not found</p>
       <Button asChild variant="outline" className="mt-6">
-        <Link to="/">Back to discovery</Link>
+        <Link to="/discover">Back to discovery</Link>
       </Button>
     </div>
   ),
@@ -108,7 +108,7 @@ function QuakePage() {
       <div style={brandStyle(st.brand)}>
         <Breadcrumbs
           trail={[
-            <Link key="d" to="/" hash="startups">
+            <Link key="d" to="/discover" hash="startups">
               Discover startups
             </Link>,
             <Link key="s" to="/startup/$slug" params={{ slug }} search={{ tab: "updates" }}>

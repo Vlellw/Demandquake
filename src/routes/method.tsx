@@ -91,12 +91,12 @@ function MethodPage() {
             action={
               <>
                 <Button asChild size="lg">
-                  <Link to="/" hash="startups">
+                  <Link to="/discover" hash="startups">
                     Browse startups <ArrowRight />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link to="/" hash="discover">
+                  <Link to="/discover" hash="discover">
                     Research a market
                   </Link>
                 </Button>
@@ -205,7 +205,7 @@ function MethodPage() {
             <p className="mt-2 text-primary-foreground/85">Browsing is free and open to everyone. You only need an account to claim a startup.</p>
           </div>
           <Button asChild variant="glass" size="lg">
-            <Link to="/" hash="startups">
+            <Link to="/discover" hash="startups">
               Browse startups <ArrowRight />
             </Link>
           </Button>

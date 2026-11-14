@@ -25,7 +25,7 @@ import { industryColor } from "@/lib/taxonomy";
 import type { RunDetailDTO } from "@/lib/dto";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/research/$runId")({
+export const Route = createFileRoute("/_authenticated/research/$runId")({
   loader: async ({ context, params }) => {
     const data = await context.queryClient.ensureQueryData(runDetailQuery(params.runId));
     if (!data) throw notFound();
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/research/$runId")({
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <p className="font-display text-2xl text-foreground">Research run not found</p>
       <Button asChild variant="outline" className="mt-6">
-        <Link to="/">Back to discovery</Link>
+        <Link to="/discover">Back to discovery</Link>
       </Button>
     </div>
   ),
@@ -112,10 +112,10 @@ function ResearchPage() {
     <div className="relative">
       <Breadcrumbs
         trail={[
-          <Link key="d" to="/" hash="startups">
+          <Link key="d" to="/discover" hash="startups">
             Discover startups
           </Link>,
-          <Link key="r" to="/" hash="latest-research">
+          <Link key="r" to="/discover" hash="latest-research">
             Latest research
           </Link>,
         ]}

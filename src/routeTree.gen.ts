@@ -15,15 +15,16 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as MethodRouteImport } from './routes/method'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ResearchRunIdRouteImport } from './routes/research.$runId'
-import { Route as StartupSlugRouteImport } from './routes/startup.$slug'
+import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
 import { Route as AuthenticatedCreditsAdminRouteImport } from './routes/_authenticated/credits.admin'
 import { Route as AuthenticatedCreditsHistoryRouteImport } from './routes/_authenticated/credits.history'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
+import { Route as AuthenticatedResearchRunIdRouteImport } from './routes/_authenticated/research.$runId'
+import { Route as AuthenticatedStartupSlugRouteImport } from './routes/_authenticated/startup.$slug'
 import { Route as AuthenticatedWorkspaceIndexRouteImport } from './routes/_authenticated/workspace.index'
 import { Route as AuthenticatedWorkspaceProjectIdRouteImport } from './routes/_authenticated/workspace.$projectId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
-import { Route as StartupSlugQuakeScanIdRouteImport } from './routes/startup_.$slug.quake.$scanId'
+import { Route as AuthenticatedStartupSlugQuakeScanIdRouteImport } from './routes/_authenticated/startup_.$slug.quake.$scanId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -54,15 +55,10 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResearchRunIdRoute = ResearchRunIdRouteImport.update({
-  id: '/research/$runId',
-  path: '/research/$runId',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const StartupSlugRoute = StartupSlugRouteImport.update({
-  id: '/startup/$slug',
-  path: '/startup/$slug',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCreditsAdminRoute =
   AuthenticatedCreditsAdminRouteImport.update({
@@ -80,6 +76,18 @@ const AuthenticatedInviteTokenRoute =
   AuthenticatedInviteTokenRouteImport.update({
     id: '/invite/$token',
     path: '/invite/$token',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedResearchRunIdRoute =
+  AuthenticatedResearchRunIdRouteImport.update({
+    id: '/research/$runId',
+    path: '/research/$runId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedStartupSlugRoute =
+  AuthenticatedStartupSlugRouteImport.update({
+    id: '/startup/$slug',
+    path: '/startup/$slug',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedWorkspaceIndexRoute =
@@ -100,11 +108,12 @@ const ApiPublicPaymentsWebhookRoute =
     path: '/api/public/payments/webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const StartupSlugQuakeScanIdRoute = StartupSlugQuakeScanIdRouteImport.update({
-  id: '/startup_/$slug/quake/$scanId',
-  path: '/startup/$slug/quake/$scanId',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedStartupSlugQuakeScanIdRoute =
+  AuthenticatedStartupSlugQuakeScanIdRouteImport.update({
+    id: '/startup_/$slug/quake/$scanId',
+    path: '/startup/$slug/quake/$scanId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -112,15 +121,16 @@ export interface FileRoutesByFullPath {
   '/credits': typeof CreditsRoute
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/research/$runId': typeof ResearchRunIdRoute
-  '/startup/$slug': typeof StartupSlugRoute
+  '/discover': typeof AuthenticatedDiscoverRoute
   '/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/research/$runId': typeof AuthenticatedResearchRunIdRoute
+  '/startup/$slug': typeof AuthenticatedStartupSlugRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/workspace/': typeof AuthenticatedWorkspaceIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/startup/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
+  '/startup/$slug/quake/$scanId': typeof AuthenticatedStartupSlugQuakeScanIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -128,15 +138,16 @@ export interface FileRoutesByTo {
   '/credits': typeof CreditsRoute
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/research/$runId': typeof ResearchRunIdRoute
-  '/startup/$slug': typeof StartupSlugRoute
+  '/discover': typeof AuthenticatedDiscoverRoute
   '/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/research/$runId': typeof AuthenticatedResearchRunIdRoute
+  '/startup/$slug': typeof AuthenticatedStartupSlugRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/workspace': typeof AuthenticatedWorkspaceIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/startup/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
+  '/startup/$slug/quake/$scanId': typeof AuthenticatedStartupSlugQuakeScanIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -146,15 +157,16 @@ export interface FileRoutesById {
   '/credits': typeof CreditsRoute
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
-  '/research/$runId': typeof ResearchRunIdRoute
-  '/startup/$slug': typeof StartupSlugRoute
+  '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
   '/_authenticated/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/_authenticated/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
+  '/_authenticated/research/$runId': typeof AuthenticatedResearchRunIdRoute
+  '/_authenticated/startup/$slug': typeof AuthenticatedStartupSlugRoute
   '/_authenticated/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/_authenticated/workspace/': typeof AuthenticatedWorkspaceIndexRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
-  '/startup_/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
+  '/_authenticated/startup_/$slug/quake/$scanId': typeof AuthenticatedStartupSlugQuakeScanIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -164,11 +176,12 @@ export interface FileRouteTypes {
     | '/credits'
     | '/method'
     | '/reset-password'
-    | '/research/$runId'
-    | '/startup/$slug'
+    | '/discover'
     | '/credits/admin'
     | '/credits/history'
     | '/invite/$token'
+    | '/research/$runId'
+    | '/startup/$slug'
     | '/workspace/$projectId'
     | '/workspace/'
     | '/api/public/payments/webhook'
@@ -180,11 +193,12 @@ export interface FileRouteTypes {
     | '/credits'
     | '/method'
     | '/reset-password'
-    | '/research/$runId'
-    | '/startup/$slug'
+    | '/discover'
     | '/credits/admin'
     | '/credits/history'
     | '/invite/$token'
+    | '/research/$runId'
+    | '/startup/$slug'
     | '/workspace/$projectId'
     | '/workspace'
     | '/api/public/payments/webhook'
@@ -197,15 +211,16 @@ export interface FileRouteTypes {
     | '/credits'
     | '/method'
     | '/reset-password'
-    | '/research/$runId'
-    | '/startup/$slug'
+    | '/_authenticated/discover'
     | '/_authenticated/credits/admin'
     | '/_authenticated/credits/history'
     | '/_authenticated/invite/$token'
+    | '/_authenticated/research/$runId'
+    | '/_authenticated/startup/$slug'
     | '/_authenticated/workspace/$projectId'
     | '/_authenticated/workspace/'
     | '/api/public/payments/webhook'
-    | '/startup_/$slug/quake/$scanId'
+    | '/_authenticated/startup_/$slug/quake/$scanId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -215,10 +230,7 @@ export interface RootRouteChildren {
   CreditsRoute: typeof CreditsRoute
   MethodRoute: typeof MethodRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
-  ResearchRunIdRoute: typeof ResearchRunIdRoute
-  StartupSlugRoute: typeof StartupSlugRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
-  StartupSlugQuakeScanIdRoute: typeof StartupSlugQuakeScanIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -265,19 +277,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/research/$runId': {
-      id: '/research/$runId'
-      path: '/research/$runId'
-      fullPath: '/research/$runId'
-      preLoaderRoute: typeof ResearchRunIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/startup/$slug': {
-      id: '/startup/$slug'
-      path: '/startup/$slug'
-      fullPath: '/startup/$slug'
-      preLoaderRoute: typeof StartupSlugRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_authenticated/discover': {
+      id: '/_authenticated/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof AuthenticatedDiscoverRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/credits/admin': {
       id: '/_authenticated/credits/admin'
@@ -298,6 +303,20 @@ declare module '@tanstack/react-router' {
       path: '/invite/$token'
       fullPath: '/invite/$token'
       preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/research/$runId': {
+      id: '/_authenticated/research/$runId'
+      path: '/research/$runId'
+      fullPath: '/research/$runId'
+      preLoaderRoute: typeof AuthenticatedResearchRunIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/startup/$slug': {
+      id: '/_authenticated/startup/$slug'
+      path: '/startup/$slug'
+      fullPath: '/startup/$slug'
+      preLoaderRoute: typeof AuthenticatedStartupSlugRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/workspace/': {
@@ -321,30 +340,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicPaymentsWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/startup_/$slug/quake/$scanId': {
-      id: '/startup_/$slug/quake/$scanId'
+    '/_authenticated/startup_/$slug/quake/$scanId': {
+      id: '/_authenticated/startup_/$slug/quake/$scanId'
       path: '/startup/$slug/quake/$scanId'
       fullPath: '/startup/$slug/quake/$scanId'
-      preLoaderRoute: typeof StartupSlugQuakeScanIdRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedStartupSlugQuakeScanIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
   AuthenticatedCreditsAdminRoute: typeof AuthenticatedCreditsAdminRoute
   AuthenticatedCreditsHistoryRoute: typeof AuthenticatedCreditsHistoryRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
+  AuthenticatedResearchRunIdRoute: typeof AuthenticatedResearchRunIdRoute
+  AuthenticatedStartupSlugRoute: typeof AuthenticatedStartupSlugRoute
   AuthenticatedWorkspaceProjectIdRoute: typeof AuthenticatedWorkspaceProjectIdRoute
   AuthenticatedWorkspaceIndexRoute: typeof AuthenticatedWorkspaceIndexRoute
+  AuthenticatedStartupSlugQuakeScanIdRoute: typeof AuthenticatedStartupSlugQuakeScanIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
   AuthenticatedCreditsAdminRoute: AuthenticatedCreditsAdminRoute,
   AuthenticatedCreditsHistoryRoute: AuthenticatedCreditsHistoryRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
+  AuthenticatedResearchRunIdRoute: AuthenticatedResearchRunIdRoute,
+  AuthenticatedStartupSlugRoute: AuthenticatedStartupSlugRoute,
   AuthenticatedWorkspaceProjectIdRoute: AuthenticatedWorkspaceProjectIdRoute,
   AuthenticatedWorkspaceIndexRoute: AuthenticatedWorkspaceIndexRoute,
+  AuthenticatedStartupSlugQuakeScanIdRoute:
+    AuthenticatedStartupSlugQuakeScanIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -357,10 +385,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreditsRoute: CreditsRoute,
   MethodRoute: MethodRoute,
   ResetPasswordRoute: ResetPasswordRoute,
-  ResearchRunIdRoute: ResearchRunIdRoute,
-  StartupSlugRoute: StartupSlugRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
-  StartupSlugQuakeScanIdRoute: StartupSlugQuakeScanIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

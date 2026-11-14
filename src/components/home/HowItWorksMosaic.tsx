@@ -13,7 +13,7 @@ type Tile = {
   body: string;
   cta: string;
   tone: string;
-  link: { to: "/"; hash: string } | { to: "/method" } | { to: "/workspace" };
+  link: { to: "/discover"; hash: string } | { to: "/method" } | { to: "/workspace" };
 };
 
 const TILES = [
@@ -31,7 +31,7 @@ const TILES = [
     body: "Open a startup to read the posts and articles behind it. Anything the AI guessed is labelled as a hypothesis.",
     cta: "Browse startups",
     tone: "bg-tile-purple text-tile-foreground",
-    link: { to: "/", hash: "startups" },
+    link: { to: "/discover", hash: "startups" },
   },
   {
     step: "Step 3",
@@ -47,7 +47,7 @@ const TILES = [
     body: "Market scans check new articles and tell you whether each change strengthens or weakens the idea.",
     cta: "Latest changes",
     tone: "bg-tile-magenta text-tile-foreground",
-    link: { to: "/", hash: "market-changes" },
+    link: { to: "/discover", hash: "market-changes" },
   },
 ] as const satisfies readonly Tile[];
 

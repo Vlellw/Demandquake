@@ -48,7 +48,7 @@ interface StartupSearch {
   claim?: boolean | undefined;
 }
 
-export const Route = createFileRoute("/startup/$slug")({
+export const Route = createFileRoute("/_authenticated/startup/$slug")({
   validateSearch: (s: Record<string, unknown>): StartupSearch => ({
     tab: TABS.includes(s["tab"] as Tab) ? (s["tab"] as Tab) : undefined,
     claim: s["claim"] === true || s["claim"] === "1" || s["claim"] === 1 ? true : undefined,
@@ -81,7 +81,7 @@ export const Route = createFileRoute("/startup/$slug")({
       <h1 className="section-title mt-2 text-3xl">This startup isn’t in the catalog</h1>
       <p className="mt-3 text-sm text-muted-foreground">It may have been removed after a research refresh.</p>
       <Button asChild variant="outline" className="mt-6">
-        <Link to="/" hash="startups">Browse all startups</Link>
+        <Link to="/discover" hash="startups">Browse all startups</Link>
       </Button>
     </div>
   ),
@@ -187,7 +187,7 @@ function StartupPage() {
       <div style={brandStyle(st.brand)}>
         <Breadcrumbs
           trail={[
-            <Link key="d" to="/" hash="startups">
+            <Link key="d" to="/discover" hash="startups">
               Discover startups
             </Link>,
             ...(st.industry ? [st.industry] : []),

@@ -14,4 +14,8 @@ describe("App routing", () => {
 
     expect(matches.at(-1)?.routeId).not.toBe(rootRouteId);
   });
+  it.each(["/discover", "/startup/example", "/research/00000000-0000-4000-8000-000000000001", "/startup/example/quake/00000000-0000-4000-8000-000000000001"])("protects research page %s with the signed-in layout", (path) => {
+    const router = createRouter({ routeTree, context: { queryClient: new QueryClient() } });
+    expect(router.matchRoutes(path).some(match => match.routeId === "/_authenticated")).toBe(true);
+  });
 });

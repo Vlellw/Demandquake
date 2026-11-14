@@ -78,6 +78,13 @@
       "when": 1794667351729,
       "tag": "0010_scope_public_credit_catalog_reads",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794667551966,
+      "tag": "0011_require_auth_for_shared_research_catalog",
+      "breakpoints": true
     }
   ]
 }

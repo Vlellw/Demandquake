@@ -19,7 +19,7 @@ import { CreditBalance } from '@/components/credits/CreditBalance';
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { to: "/", label: "Discover startups", icon: Compass, match: (p: string) => p === "/" || p.startsWith("/startup") || p.startsWith("/research") },
+  { to: "/discover", label: "Discover startups", icon: Compass, match: (p: string) => p === "/discover" || p.startsWith("/startup") || p.startsWith("/research") },
   { to: "/method", label: "How it works", icon: BookOpen, match: (p: string) => p === "/method" },
   { to: "/workspace", label: "My startups", icon: Briefcase, match: (p: string) => p.startsWith("/workspace") || p.startsWith("/invite") },
 ] as const;

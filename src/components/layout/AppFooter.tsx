@@ -4,7 +4,7 @@ import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
 import { useAuthUser } from "@/hooks/use-auth";
 
 const LINKS = [
-  { to: "/", label: "Discover startups" },
+  { to: "/discover", label: "Discover startups" },
   { to: "/method", label: "How it works" },
   { to: "/workspace", label: "My startups" },
 ] as const;
@@ -20,7 +20,7 @@ export function AppFooter() {
         <DemandquakeLogo />
         <p className="mt-4 max-w-xl text-sm leading-relaxed text-foreground">
           Demandquake reads the live web, finds problems businesses keep describing, and turns them into startup ideas
-          anyone can explore and claim. It shows evidence, not guarantees: problems found online do not prove that
+          signed-in founders can explore and claim. It shows evidence, not guarantees: problems found online do not prove that
           customers will pay, so validate before you build.
         </p>
         <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -49,7 +49,7 @@ export function AppFooter() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/" className={circle} aria-label="Discover startups">
+            <Link to="/discover" className={circle} aria-label="Discover startups">
               <Compass className="size-[18px]" />
             </Link>
             <Link to="/method" className={circle} aria-label="How it works">

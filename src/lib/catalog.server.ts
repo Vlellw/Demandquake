@@ -1,5 +1,7 @@
-// Read-model mapping for public research data. Server-only.
-import { publicDb } from "./public-db.server";
+// Authenticated research read-model mapping. Server-only.
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+type ResearchDb = SupabaseClient<Database>;
 import type {
   ClusterDTO,
   QuakeFeedItemDTO,
@@ -137,8 +139,8 @@ function toScanSummary(r: Record<string, unknown>): ScanSummaryDTO {
   };
 }
 
-export async function listStartupCards(limit = 120): Promise<StartupCardDTO[]> {
-  const { data, error } = await publicDb()
+export async function listStartupCards(db: ResearchDb, limit = 120): Promise<StartupCardDTO[]> {
+  const { data, error } = await db
     .from("startups")
     .select(CARD_COLS)
     .order("created_at", { ascending: false })
@@ -147,8 +149,7 @@ export async function listStartupCards(limit = 120): Promise<StartupCardDTO[]> {
   return ((data ?? []) as unknown as CardRow[]).map(toCard);
 }
 
-export async function radarNodes(limit = 160): Promise<RadarNodeDTO[]> {
-  const db = publicDb();
+export async function radarNodes(db: ResearchDb, limit = 160): Promise<RadarNodeDTO[]> {
   const { data, error } = await db
     .from("clusters")
     .select(
@@ -179,8 +180,7 @@ export async function radarNodes(limit = 160): Promise<RadarNodeDTO[]> {
   });
 }
 
-export async function clusterSignals(clusterId: string): Promise<{ cluster: ClusterDTO; sources: SourceRecord[] } | null> {
-  const db = publicDb();
+export async function clusterSignals(db: ResearchDb, clusterId: string): Promise<{ cluster: ClusterDTO; sources: SourceRecord[] } | null> {
   const { data, error } = await db.from("clusters").select("*").eq("id", clusterId).maybeSingle();
   if (error) throw error;
   if (!data) return null;
@@ -189,8 +189,7 @@ export async function clusterSignals(clusterId: string): Promise<{ cluster: Clus
   return { cluster, sources: ((src ?? []) as unknown as Record<string, unknown>[]).map(toSource) };
 }
 
-export async function dashboardStats() {
-  const db = publicDb();
+export async function dashboardStats(db: ResearchDb) {
   const [startups, sources, runs, latest] = await Promise.all([
     db.from("startups").select("id", { count: "exact", head: true }),
     db.from("sources").select("id", { count: "exact", head: true }),
@@ -207,8 +206,8 @@ export async function dashboardStats() {
   };
 }
 
-export async function recentRuns(limit = 8): Promise<RunDTO[]> {
-  const { data, error } = await publicDb()
+export async function recentRuns(db: ResearchDb, limit = 8): Promise<RunDTO[]> {
+  const { data, error } = await db
     .from("discovery_runs")
     .select("*")
     .order("created_at", { ascending: false })
@@ -217,8 +216,7 @@ export async function recentRuns(limit = 8): Promise<RunDTO[]> {
   return ((data ?? []) as unknown as Record<string, unknown>[]).map(toRun);
 }
 
-export async function runDetail(runId: string): Promise<RunDetailDTO | null> {
-  const db = publicDb();
+export async function runDetail(db: ResearchDb, runId: string): Promise<RunDetailDTO | null> {
   const { data: run, error } = await db.from("discovery_runs").select("*").eq("id", runId).maybeSingle();
   if (error) throw error;
   if (!run) return null;
@@ -235,8 +233,7 @@ export async function runDetail(runId: string): Promise<RunDetailDTO | null> {
   };
 }
 
-export async function startupDetail(slug: string): Promise<StartupDetailDTO | null> {
-  const db = publicDb();
+export async function startupDetail(db: ResearchDb, slug: string): Promise<StartupDetailDTO | null> {
   const { data: st, error } = await db.from("startups").select("*").eq("slug", slug).maybeSingle();
   if (error) throw error;
   if (!st) return null;
@@ -303,8 +300,7 @@ export async function startupDetail(slug: string): Promise<StartupDetailDTO | nu
   };
 }
 
-export async function scanDetail(scanId: string): Promise<ScanDetailDTO | null> {
-  const db = publicDb();
+export async function scanDetail(db: ResearchDb, scanId: string): Promise<ScanDetailDTO | null> {
   const { data, error } = await db.from("market_scans").select("*").eq("id", scanId).maybeSingle();
   if (error) throw error;
   if (!data) return null;
@@ -325,8 +321,7 @@ export async function scanDetail(scanId: string): Promise<ScanDetailDTO | null> 
 }
 
 /** Lightweight scan history for a startup (used by the founder workspace's market watch). */
-export async function startupScans(slug: string): Promise<{ startupId: string; slug: string; scans: ScanSummaryDTO[] } | null> {
-  const db = publicDb();
+export async function startupScans(db: ResearchDb, slug: string): Promise<{ startupId: string; slug: string; scans: ScanSummaryDTO[] } | null> {
   const { data: st, error } = await db.from("startups").select("id, slug").eq("slug", slug).maybeSingle();
   if (error) throw error;
   if (!st) return null;
@@ -340,8 +335,7 @@ export async function startupScans(slug: string): Promise<{ startupId: string; s
   return { startupId: st.id, slug: st.slug, scans: ((data ?? []) as unknown as Record<string, unknown>[]).map(toScanSummary) };
 }
 
-export async function recentQuakes(limit = 12): Promise<QuakeFeedItemDTO[]> {
-  const db = publicDb();
+export async function recentQuakes(db: ResearchDb, limit = 12): Promise<QuakeFeedItemDTO[]> {
   const { data, error } = await db
     .from("market_scans")
     .select(

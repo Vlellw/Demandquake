@@ -15,7 +15,7 @@ type Slide = {
   cta: string;
   image: string;
   alt: string;
-  link: { to: "/"; hash: string } | { to: "/workspace" };
+  link: { to: "/discover"; hash: string } | { to: "/workspace" };
 };
 
 const SLIDES: Slide[] = [
@@ -26,7 +26,7 @@ const SLIDES: Slide[] = [
     cta: "Browse startups",
     image: heroFounder,
     alt: "A founder smiling at her laptop in a bright office",
-    link: { to: "/", hash: "startups" },
+    link: { to: "/discover", hash: "startups" },
   },
   {
     eyebrow: "Live research",
@@ -35,7 +35,7 @@ const SLIDES: Slide[] = [
     cta: "Research a market",
     image: heroIndustry,
     alt: "A factory manager checking a tablet on the production floor",
-    link: { to: "/", hash: "discover" },
+    link: { to: "/discover", hash: "discover" },
   },
   {
     eyebrow: "Market watch",
@@ -44,7 +44,7 @@ const SLIDES: Slide[] = [
     cta: "Latest market changes",
     image: heroMarket,
     alt: "Two analysts reviewing printed market reports",
-    link: { to: "/", hash: "market-changes" },
+    link: { to: "/discover", hash: "market-changes" },
   },
   {
     eyebrow: "For founders",
