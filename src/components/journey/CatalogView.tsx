@@ -11,6 +11,7 @@ import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
 import { QuakeFeed } from "@/components/discovery/QuakeFeed";
 import { RecentRuns } from "@/components/discovery/RecentRuns";
 import { SectionHeading } from "@/components/common/SectionHeading";
+import { InfoTip } from "@/components/common/InfoTip";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscoverViewToggle } from "./DiscoverViewToggle";
@@ -47,11 +48,11 @@ export function CatalogView({
           <div className="max-w-3xl">
             <p className="eyebrow">Step 2 of 4 · Full catalog</p>
             <h1 id="catalog-heading" className="section-title mt-2 text-[2rem] leading-tight sm:text-[2.6rem]">
-              All startups waiting for a founder
+              All startups waiting for a founder{" "}
+              <InfoTip align="start">
+                Each one was drafted from a real problem found in live sources. Filter the list, then open a card to inspect its evidence.
+              </InfoTip>
             </h1>
-            <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Each one was drafted from a real problem found in live sources. Filter the list, then open a card to inspect its evidence.
-            </p>
           </div>
           <DiscoverViewToggle view="all" />
         </div>
@@ -153,7 +154,9 @@ function MapPanel({ filters }: { filters: CatalogFilters }) {
   const filtered = useMemo(() => filterNodes(nodes, filters), [nodes, filters]);
   return (
     <>
-      <p className="mb-4 text-center text-sm text-muted-foreground">Bigger dots have more sources behind them. Click one to read the posts behind it.</p>
+      <div className="mb-4 flex justify-center">
+        <InfoTip label="How to read the problem map">Bigger dots have more sources behind them. Click one to read the posts behind it.</InfoTip>
+      </div>
       <OpportunityRadar nodes={filtered} />
     </>
   );
@@ -164,9 +167,11 @@ function ChangesPanel({ filters }: { filters: CatalogFilters }) {
   const filtered = useMemo(() => filterQuakes(quakes, filters), [quakes, filters]);
   return (
     <>
-      <p className="mb-4 text-center text-sm text-muted-foreground">
-        Market scans read newly published articles about a startup’s problem. Each spike is one change that matters.
-      </p>
+      <div className="mb-4 flex justify-center">
+        <InfoTip label="How to read market changes">
+          Market scans read newly published articles about a startup’s problem. Each spike is one change that matters.
+        </InfoTip>
+      </div>
       <QuakeFeed items={filtered} filtered={filtersActive(filters)} embedded />
     </>
   );
@@ -176,9 +181,11 @@ function RunsPanel() {
   const { data: runs } = useSuspenseQuery(recentRunsQuery);
   return (
     <>
-      <p className="mb-6 text-center text-sm text-muted-foreground">
-        Open a research run to replay what was searched, which sources were read and which startups came out of it.
-      </p>
+      <div className="mb-6 flex justify-center">
+        <InfoTip label="About past research">
+          Open a research run to replay what was searched, which sources were read and which startups came out of it.
+        </InfoTip>
+      </div>
       <RecentRuns runs={runs} embedded />
     </>
   );

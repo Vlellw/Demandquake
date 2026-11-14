@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
+import { InfoTip } from "@/components/common/InfoTip";
 import { cn } from "@/lib/utils";
 
 /**
- * Lindström-style section opener: small bold uppercase eyebrow, navy title,
- * optional lead text and a pill action underneath. Centered by default.
+ * Lindström-style section opener: small bold uppercase eyebrow, navy title and a pill
+ * action underneath. Centered by default. The optional explanation lives in a round
+ * info button next to the title, so no subheadline is rendered.
  */
 export function SectionHeading({
   eyebrow,
@@ -39,12 +41,13 @@ export function SectionHeading({
         )}
       >
         {title}
+        {description && (
+          <>
+            {" "}
+            <InfoTip align={align === "center" ? "center" : "start"}>{description}</InfoTip>
+          </>
+        )}
       </Tag>
-      {description && (
-        <p className={cn("mt-3 text-base leading-relaxed", inverse ? "text-primary-foreground/85" : "text-muted-foreground")}>
-          {description}
-        </p>
-      )}
       {action && <div className={cn("mt-6 flex flex-wrap gap-3", align === "center" && "justify-center")}>{action}</div>}
     </div>
   );

@@ -10,6 +10,7 @@ import { recommendStartups } from "@/lib/project-progress";
 import { FOR_YOU, industryChoices, rankSpotlights } from "@/lib/journey";
 import { industryColor } from "@/lib/taxonomy";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { InfoTip } from "@/components/common/InfoTip";
 import { Button } from "@/components/ui/button";
 import { SpotlightCard } from "./SpotlightCard";
 import { DiscoverViewToggle } from "./DiscoverViewToggle";
@@ -53,11 +54,11 @@ export function GuidedDiscover({
         <div className="max-w-3xl">
           <p className="eyebrow">Step 2 of 4 · Choose an idea</p>
           <h1 id="choose-heading" className="section-title mt-2 text-[2rem] leading-tight sm:text-[2.6rem]">
-            Which market interests you?
+            Which market interests you?{" "}
+            <InfoTip align="start">
+              Pick an industry. We show the ideas with the most evidence behind them — open one to check its sources before you decide.
+            </InfoTip>
           </h1>
-          <p className="mt-3 text-base leading-relaxed text-muted-foreground sm:text-lg">
-            Pick an industry. We show the ideas with the most evidence behind them — open one to check its sources before you decide.
-          </p>
         </div>
         <DiscoverViewToggle view="guided" />
       </div>
@@ -102,13 +103,13 @@ export function GuidedDiscover({
                   ? "Close to what you’re building"
                   : industryLabel
                     ? `The best-documented ideas in ${industryLabel}`
-                    : "The best-documented ideas right now"}
+                    : "The best-documented ideas right now"}{" "}
+                <InfoTip align="start">
+                  {selected === FOR_YOU
+                    ? `Matched on industry and region with ${projectNames.join(", ")}.`
+                    : "Ordered by how much independent evidence backs each problem — not by chance of success."}
+                </InfoTip>
               </h2>
-              <p className="max-w-md text-sm text-muted-foreground md:text-right">
-                {selected === FOR_YOU
-                  ? `Matched on industry and region with ${projectNames.join(", ")}.`
-                  : "Ordered by how much independent evidence backs each problem — not by chance of success."}
-              </p>
             </div>
 
             {spotlights.length === 0 ? (

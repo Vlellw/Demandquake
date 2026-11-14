@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { InfoTip } from "@/components/common/InfoTip";
 import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -501,9 +502,11 @@ function StartupPage() {
                   <Radar className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-display text-xl font-bold">Check for market changes</p>
-                  <p className="mt-1 text-sm text-primary-foreground/85">
-                    Searches the live web for news since the last check (about 30 seconds) and shows how each change affects the idea.
+                  <p className="font-display text-xl font-bold">
+                    Check for market changes{" "}
+                    <InfoTip align="start" className="border-primary-foreground/60 text-primary-foreground hover:border-primary-foreground hover:bg-primary-foreground/10">
+                      Searches the live web for news since the last check (about 30 seconds) and shows how each change affects the idea.
+                    </InfoTip>
                   </p>
                 </div>
                 <Button variant="glass" onClick={scan} disabled={scanning}>

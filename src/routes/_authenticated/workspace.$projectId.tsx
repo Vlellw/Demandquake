@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { InfoTip } from "@/components/common/InfoTip";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -174,13 +175,19 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           <div className="mt-5 flex flex-col items-start gap-5 sm:flex-row">
             <StartupMark brand={p.brand} size="xl" />
             <div className="w-full min-w-0 flex-1">
-              <Input
-                aria-label="Startup name"
-                value={p.name}
-                onChange={(e) => update({ name: e.target.value.slice(0, 80) })}
-                onBlur={() => !p.name.trim() && update({ name: initial.name }, { immediate: true })}
-                className="h-auto rounded-[4px] border-transparent bg-transparent px-0 font-display text-4xl font-bold text-primary shadow-none hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2 md:text-[2.6rem]"
-              />
+              <div className="flex items-center gap-2">
+                <Input
+                  aria-label="Startup name"
+                  value={p.name}
+                  onChange={(e) => update({ name: e.target.value.slice(0, 80) })}
+                  onBlur={() => !p.name.trim() && update({ name: initial.name }, { immediate: true })}
+                  className="h-auto flex-1 rounded-[4px] border-transparent bg-transparent px-0 font-display text-4xl font-bold text-primary shadow-none hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2 md:text-[2.6rem]"
+                />
+                <InfoTip align="start" label="How this workspace works">
+                  Click the name or pitch to edit. Work through the checklist, test your assumptions and plan the roadmap below — everything saves
+                  automatically{shared ? " and your co-founders see your changes." : "."}
+                </InfoTip>
+              </div>
               <Textarea
                 aria-label="Tagline"
                 rows={1}
@@ -190,10 +197,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
                 placeholder="One-line pitch"
                 className="mt-1 min-h-0 resize-none rounded-[4px] border-transparent bg-transparent px-0 py-1 text-lg text-foreground shadow-none [field-sizing:content] hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2 md:text-lg"
               />
-              <p className="mt-2 text-sm text-muted-foreground">
-                Click the name or pitch to edit. Work through the checklist, test your assumptions and plan the roadmap below — everything saves automatically
-                {shared ? " and your co-founders see your changes." : "."}
-              </p>
             </div>
           </div>
         </div>

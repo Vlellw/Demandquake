@@ -10,6 +10,7 @@ import { useAuthUser } from "@/hooks/use-auth";
 import { creditAccountQuery, creditCatalogQuery } from "@/lib/credit-queries";
 import { canAfford } from "@/lib/credit-rules";
 import { getStripeEnvironment } from "@/lib/stripe";
+import { InfoTip } from "@/components/common/InfoTip";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -158,13 +159,13 @@ export function ResearchStep({
             <Telescope className="size-3.5" aria-hidden="true" /> Step 1 of 4 · {stage === "form" ? "Search a market" : "Confirm your research"}
           </p>
           <h2 id="search-heading" className="section-title mt-2 text-[1.75rem] leading-tight sm:text-[2.2rem]">
-            {stage === "form" ? "What should Demandquake research?" : "Ready to start?"}
+            {stage === "form" ? "What should Demandquake research?" : "Ready to start?"}{" "}
+            <InfoTip align="start">
+              {stage === "form"
+                ? "Describe a market or a group of customers in your own words. We read the live web and add the startups we find to the catalog."
+                : "Check the details below. The research starts right away and you can follow every step."}
+            </InfoTip>
           </h2>
-          <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
-            {stage === "form"
-              ? "Describe a market or a group of customers in your own words. We read the live web and add the startups we find to the catalog."
-              : "Check the details below. The research starts right away and you can follow every step."}
-          </p>
           </div>
           {stage === "form" && (
             <Button variant="ghost" onClick={onSkip} className="self-start sm:self-auto">
