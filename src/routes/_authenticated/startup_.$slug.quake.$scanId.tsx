@@ -83,7 +83,7 @@ function QuakePage() {
   const st = startupDetail.startup;
   const { driverError, restart } = useScanDriver(scanId, slug, scan.status);
   const done = scan.status === "complete";
-  const failed = scan.status === "failed" || Boolean(driverError);
+  const failed = !done && (scan.status === "failed" || Boolean(driverError));
 
   const allSources = useMemo(() => {
     const m = new Map(startupDetail.sources.map((s) => [s.id, s]));

@@ -165,13 +165,13 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
                   )}
                 />
                 <Button
-                  variant={editing ? "hero" : "outline"}
+                  variant={editing ? "hero" : "secondary"}
                   size="sm"
                   onClick={() => setEditing((v) => !v)}
                   aria-pressed={editing}
                   aria-label={editing ? "Finish editing" : "Edit this workspace"}
                 >
-                  {editing ? <><Check /> Done</> : <><Pencil /> Edit</>}
+                  <Pencil /> Edit
                 </Button>
                 <InfoTip align="start" label="How this workspace works">
                   Press Edit to change the name, pitch, checklist, assumptions and notes — everything saves

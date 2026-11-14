@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Info } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
@@ -21,16 +22,18 @@ export function InfoTip({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label={label}
           className={cn(
-            "inline-grid size-6 shrink-0 translate-y-[-2px] cursor-pointer place-items-center rounded-full border-2 border-primary/50 text-primary transition-colors hover:border-primary hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "size-6 shrink-0 translate-y-[-2px] rounded-full p-0 text-primary/70 hover:bg-accent hover:text-primary [&_svg]:size-6",
             className,
           )}
         >
-          <Info className="size-3.5" strokeWidth={2.5} aria-hidden="true" />
-        </button>
+          <Info strokeWidth={1.8} aria-hidden="true" />
+        </Button>
       </PopoverTrigger>
       <PopoverContent align={align} className="max-w-xs text-sm leading-relaxed text-muted-foreground">
         {children}

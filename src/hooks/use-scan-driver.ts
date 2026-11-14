@@ -10,7 +10,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export function useScanDriver(scanId: string, slug: string, status: string | undefined) {
   const advance = useServerFn(advanceMarketScan);
   const queryClient = useQueryClient();
-  const [driverError, setDriverError] = useState<string | null>(null);
+  const [error, setError] = useState<{ scanId: string; message: string } | null>(null);
   const [generation, setGeneration] = useState(0);
   const running = useRef(false);
 
@@ -18,26 +18,36 @@ export function useScanDriver(scanId: string, slug: string, status: string | und
     if (!status || TERMINAL.has(status) || running.current) return;
     running.current = true;
     let cancelled = false;
-    setDriverError(null);
+    setError(null);
+    const stopped = () => {
+      const detailStatus = queryClient.getQueryData<{ scan: { status: string } }>(["scan", scanId])?.scan.status;
+      const listStatus = queryClient.getQueryData<{ scans: { id: string; status: string }[] }>(["startup-scans", slug])?.scans.find(s => s.id === scanId)?.status;
+      return cancelled || TERMINAL.has(detailStatus ?? "") || TERMINAL.has(listStatus ?? "");
+    };
 
     (async () => {
       let failures = 0;
-      while (!cancelled) {
+      while (!stopped()) {
         try {
           const res = await advance({ data: { scanId } });
-          await queryClient.invalidateQueries({ queryKey: ["scan", scanId] });
+          await Promise.all([
+            queryClient.invalidateQueries({ queryKey: ["scan", scanId] }),
+            queryClient.invalidateQueries({ queryKey: ["startup-scans", slug] }),
+          ]);
+          if (stopped()) break;
           if (!res.ok) {
-            setDriverError(res.error);
+            setError({ scanId, message: res.error });
             break;
           }
           failures = 0;
           if (TERMINAL.has(res.status)) break;
           if (res.busy) await sleep(2500);
         } catch (err) {
+          if (stopped()) break;
           console.error("[scan] advance failed", err);
           failures++;
           if (failures >= 3) {
-            setDriverError("Lost connection to the research engine. Your scan is saved — retry to continue.");
+            setError({ scanId, message: "Lost connection to the research engine. Your scan is saved — retry to continue." });
             break;
           }
           await sleep(3000 * failures);
@@ -58,5 +68,6 @@ export function useScanDriver(scanId: string, slug: string, status: string | und
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanId, generation, status && TERMINAL.has(status)]);
 
+  const driverError = status && status !== "complete" && error?.scanId === scanId ? error.message : null;
   return { driverError, restart: () => setGeneration((g) => g + 1) };
 }
