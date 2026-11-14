@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, useHydrated, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { Briefcase, LogOut, Menu, Radar, Sparkles } from "lucide-react";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
@@ -20,6 +20,9 @@ export function AppHeader() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // A protected page can redirect to sign-in before hydration, so the server-rendered highlight may be
+  // stale; remounting the nav once hydrated redraws it from the real location.
+  const hydrated = useHydrated();
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -40,14 +43,14 @@ export function AppHeader() {
         <Link to="/" className="shrink-0" aria-label="Demandquake home">
           <DemandquakeLogo />
         </Link>
-        <nav className="hidden items-center gap-1 md:flex">
-          <Link to="/" className={navItem(pathname === "/")}>
+        <nav key={hydrated ? "client" : "server"} className="hidden items-center gap-1 md:flex">
+          <Link to="/" className={navItem(pathname === "/")} suppressHydrationWarning>
             <Radar className="size-4" /> Discover
           </Link>
-          <Link to="/method" className={navItem(pathname === "/method")}>
+          <Link to="/method" className={navItem(pathname === "/method")} suppressHydrationWarning>
             <Sparkles className="size-4" /> Method
           </Link>
-          <Link to="/workspace" className={navItem(pathname.startsWith("/workspace"))}>
+          <Link to="/workspace" className={navItem(pathname.startsWith("/workspace"))} suppressHydrationWarning>
             <Briefcase className="size-4" /> My startups
           </Link>
         </nav>
