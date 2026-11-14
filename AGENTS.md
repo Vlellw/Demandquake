@@ -49,11 +49,11 @@ use the editor.
 - Public credit reads allow only active packages and explicitly advertised cost keys; verified admins can read inactive packages and all settings so internal configuration is not public by default.
 - Payment functions use the shared gateway Stripe utility, authenticated user identity and server-snapshotted orders; only signature-verified webhooks allocate or reverse credits, keeping test purchases separate from live balances.
 - Admin bootstrap uses a service-only allowlist matched to a verified auth email; ordinary browser requests can never assign roles or edit balances.
-- Discover state (industry, view, filters, overview tab, jump-to-search request) lives in validated URL search params defined in `src/lib/journey.ts`, so every journey step is linkable and back-button safe; Step 2 check-offs are per-browser localStorage hints, never billing or account data.
+- Discover state (industry, view, filters, overview tab, jump-to-search request) lives in validated URL search params defined in `src/lib/journey.ts`, so every journey step is linkable and back-button safe; inspection tab visits are not counted or stored.
 - The journey has three parts: Discover combines search and gated idea selection; Inspect and Claim remain distinct startup/workspace pages so scrolling cannot cross journey parts. Legacy Choose links normalize to Discover.
 - Workspace assumptions use a dedicated list component with status filters and explicit selectors, connected to the existing project saver; this keeps long hypotheses readable without accidental status changes.
 
-- Startup inspection keeps Overview outside the tab control and defaults to Evidence; Overview counts as viewed on page entry because it remains visible above every panel.
+- Startup inspection keeps Overview outside the tab control and defaults to Evidence; browsing sections is not a completion checklist.
 
 - Corrected existing startup artwork is selected centrally in bannerBackground so cards and profiles share the same replacement without exposing private storage.
 - JourneySteps mounts into the shared header slot after hydration; an inline header fallback shows steps on other pages and hides when page-owned progress mounts, preventing duplicate navigation.

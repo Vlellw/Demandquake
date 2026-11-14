@@ -47,8 +47,6 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/compone
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { QuakeTrace } from "@/components/discovery/QuakeFeed";
 import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
-import { useInspection } from "@/hooks/use-inspection";
-import { INSPECTION_STEPS, nextInspection, type InspectionTab } from "@/lib/journey";
 import { IMPLICATION_META } from "@/lib/taxonomy";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +61,6 @@ const TAB_LABEL: Record<Tab, string> = {
   plan: "Business plan",
 };
 
-const ESSENTIAL = new Set<string>(INSPECTION_STEPS.map((s) => s.tab));
 
 interface StartupSearch {
   tab?: Tab | undefined;
@@ -148,7 +145,6 @@ function StartupPage() {
   const [scanning, setScanning] = useState(false);
   const autoClaimed = useRef(false);
   const tab: Tab = search.tab ?? "evidence";
-  const { visited, progress } = useInspection(slug, tab);
   function goTab(t: Tab) {
     navigate({ search: (p) => ({ ...p, tab: t === "evidence" ? undefined : t }), replace: true, resetScroll: false });
     document.getElementById("inspect")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -326,9 +322,6 @@ function StartupPage() {
                 </TabsList>
               </div>
               <div className="hidden shrink-0 items-center gap-3 lg:flex">
-                <span className="text-xs text-muted-foreground" aria-live="polite">
-                  <span className="font-bold text-foreground">{progress.done}</span> of {progress.total} checked
-                </span>
                 {user && existing ? (
                   <Button asChild size="sm">
                     <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
@@ -517,11 +510,6 @@ function StartupPage() {
                 </li>
               ))}
             </ul>
-            {!progress.complete && (
-              <p className="mt-5 rounded-[4px] bg-accent p-3 text-sm text-foreground">
-                You’ve checked {progress.done} of {progress.total} essentials. You can claim now — the evidence stays available in your workspace.
-              </p>
-            )}
             <dl className="mt-6 grid grid-cols-2 gap-4">
               <div className="stat-rule pt-3">
                 <dt className="text-sm text-primary">Cost</dt>
@@ -643,51 +631,6 @@ function Overview({ detail }: { detail: StartupDetailDTO }) {
   );
 }
 
-
-/** Inspection guidance under every tab: the next essential check, or the way to Claim & build. */
-function NextCheck({
-  tab,
-  visited,
-  done,
-  total,
-  claimed,
-  onGo,
-  onClaim,
-  claimCost,
-  workspaceId,
-}: {
-  tab: Tab;
-  visited: string[];
-  done: number;
-  total: number;
-  claimed: boolean;
-  onGo: (t: Tab) => void;
-  onClaim: () => void;
-  claimCost: number;
-  workspaceId: string | null;
-}) {
-  const next = nextInspection(visited, tab);
-  if (next) {
-    return (
-      <div className="mt-10 flex flex-col gap-4 rounded-[4px] border-l-4 border-primary bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div className="min-w-0">
-          <p className="mt-1 font-display text-lg font-bold text-foreground">{next.label}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {!claimed && (
-            <Button variant="ghost" onClick={onClaim}>
-              Skip to claim
-            </Button>
-          )}
-          <Button onClick={() => onGo(next.tab as Tab)}>
-            Open {TAB_LABEL[next.tab as Tab]} <ArrowRight />
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  return null;
-}
 
 /** Market signals in context: the latest finished scan drawn as a seismograph, one spike per change. */
 function LatestScan({ slug, scans }: { slug: string; scans: StartupDetailDTO["scans"] }) {

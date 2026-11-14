@@ -5,15 +5,11 @@ import {
   JOURNEY_STEPS,
   filterCards,
   industryChoices,
-  inspectionProgress,
   journeyStatuses,
   journeyStepForPath,
-  markVisited,
-  nextInspection,
   normalizeOverview,
   normalizeView,
   parseSearchDone,
-  parseVisited,
   rankSpotlights,
 } from "@/lib/journey";
 
@@ -112,26 +108,6 @@ describe("discover URL state", () => {
     expect(normalizeView("all")).toBe("all");
     expect(normalizeOverview("radar")).toBe("map");
     expect(normalizeOverview("runs")).toBe("runs");
-  });
-});
-
-describe("step 2 inspection", () => {
-  it("has five essential checks and ignores the business plan tab", () => {
-    expect(inspectionProgress(markVisited([], "plan"))).toMatchObject({ done: 0, total: 5, complete: false });
-  });
-  it("is complete after all five essentials", () => {
-    const visited = ["overview", "evidence", "landscape", "assessment", "updates"].reduce<string[]>((v, t) => markVisited(v, t), []);
-    expect(inspectionProgress(visited).complete).toBe(true);
-  });
-  it("suggests the next unchecked essential after the current tab", () => {
-    expect(nextInspection(["overview"], "overview")?.tab).toBe("evidence");
-    expect(nextInspection(["overview", "evidence", "assessment"], "evidence")?.tab).toBe("landscape");
-    expect(nextInspection(["evidence", "landscape", "assessment", "updates"], "updates")?.tab).toBe("overview");
-    expect(nextInspection(["overview", "evidence", "landscape", "assessment"], "updates")).toBeNull();
-  });
-  it("reads stored progress safely", () => {
-    expect(parseVisited("not json")).toEqual([]);
-    expect(parseVisited(JSON.stringify(["evidence", "hacked", 4, "evidence"]))).toEqual(["evidence"]);
   });
 });
 
