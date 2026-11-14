@@ -447,18 +447,6 @@ function StartupPage() {
                     ))}
                   </ul>
                 )}
-                {st.monitor_queries.length > 0 && (
-                  <div className="mt-4 border-t border-border pt-4">
-                    <p className="data-label">What scans watch for</p>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {st.monitor_queries.map((q) => (
-                        <span key={q} className="rounded-full border border-ink/30 px-3 py-1 text-xs text-foreground">
-                          {q}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </section>
             </TabsContent>
 
