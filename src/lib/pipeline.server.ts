@@ -590,7 +590,10 @@ Rules:
       return { c, signals, sourceIds, types, strength };
     })
     .filter((x) => x.sourceIds.length >= 2)
-    .sort((a, b) => b.sourceIds.length - a.sourceIds.length || b.types.length - a.types.length);
+    .sort((a, b) => b.sourceIds.length - a.sourceIds.length || b.types.length - a.types.length)
+    // Competitor research runs one search per cluster in parallel; 5 keeps it within the server's
+    // per-request connection budget.
+    .slice(0, 5);
 
   if (clusters.length === 0) {
     throw new PipelineError("The evidence did not reveal a recurring problem backed by multiple sources. Try a broader topic.");

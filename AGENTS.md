@@ -38,3 +38,5 @@ use the editor.
 - Generated startup names must be unique: generation is told the taken names and `ensureUniqueName` renames the newer duplicate after insert, because clusters generate in parallel.
 - `Badge` renders a `<span>` so it can sit inside paragraphs without invalid nesting.
 - Competitor brand data is fetched lazily per startup (`brands.server.ts`) and cached per domain in `brand_profiles`; name-only competitors resolve through brand search, same-name filtering (`sameNameCandidates`) and an AI check against the source description, cached in `brand_name_lookups`, so each company costs credits once and lookalike brands are never shown.
+- Server stages keep at most 5 outbound requests in flight per invocation (the hosted runtime queues beyond 6, letting per-call timeouts expire).
+- Market re-checks run from the founder's browser (workspace auto-scan when evidence is over a week old), not a scheduled callback, because scheduled callbacks are cancelled after a few seconds while a scan takes ~30s.
