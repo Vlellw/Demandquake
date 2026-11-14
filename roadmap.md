@@ -37,6 +37,8 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Separate related problems from Evidence and restore its source cards; signed-in tab switching verified.
+- [x] Move the comparison tab last and rename it Other opportunities; order verified.
 - [x] Sweep all journey navigation: home/method/auth/reset/credits/history/admin/settings/invites/lists remain neutral; research is Search, startup/scan is Inspect, individual workspace is Claim. Removed misleading header Claim link to My startups; 42 navigation tests and signed-in flow verified. No settled records or permissions changed.
 - [x] Keep My startups neutral; only an individual founder workspace belongs to Claim & build. Browser and rule test verified.
 - [x] Keep How it works and other non-journey pages neutral in the step navigation; browser verified.

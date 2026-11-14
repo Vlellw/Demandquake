@@ -29,6 +29,7 @@ import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/St
 import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { SourceProvider, Cite, type Citation } from "@/components/startup/SourceDrawer";
 import { EvidenceMap } from "@/components/startup/EvidenceMap";
+import { SourceStream } from "@/components/research/SourceStream";
 import { MarketLandscape } from "@/components/startup/MarketLandscape";
 import { AssessmentPanel } from "@/components/startup/AssessmentPanel";
 import { OpportunityTimeline } from "@/components/startup/OpportunityTimeline";
@@ -50,11 +51,12 @@ import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
 import { IMPLICATION_META } from "@/lib/taxonomy";
 import { cn } from "@/lib/utils";
 
-const TABS = ["evidence", "landscape", "assessment", "updates", "plan"] as const;
+const TABS = ["evidence", "landscape", "assessment", "updates", "plan", "compare"] as const;
 type Tab = (typeof TABS)[number];
 
 const TAB_LABEL: Record<Tab, string> = {
   evidence: "Evidence",
+  compare: "Other opportunities",
   landscape: "Competitors",
   assessment: "Assessment",
   updates: "Market changes",
@@ -371,6 +373,12 @@ function StartupPage() {
                   </ul>
                 </section>
               )}
+              <section className="panel p-5">
+                <SourceStream sources={evidence} limit={evidence.length} />
+              </section>
+            </TabsContent>
+
+            <TabsContent value="compare" className="mt-0">
               <RelatedProblems industry={st.industry} clusterId={detail.cluster?.id ?? null} />
             </TabsContent>
 

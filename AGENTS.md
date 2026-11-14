@@ -53,7 +53,7 @@ use the editor.
 - The journey has three parts: Discover combines search and gated idea selection; Inspect and Claim remain distinct startup/workspace pages so scrolling cannot cross journey parts. Legacy Choose links normalize to Discover.
 - Workspace assumptions use a dedicated list component with status filters and explicit selectors, connected to the existing project saver; this keeps long hypotheses readable without accidental status changes.
 
-- Startup inspection keeps Overview outside the tab control and defaults to Evidence; browsing sections is not a completion checklist.
+- Startup inspection keeps Overview outside the tabs and defaults to Evidence; related-problem comparisons live in the last tab so evidence stays focused. Browsing sections is not a completion checklist.
 
 - Corrected existing startup artwork is selected centrally in bannerBackground so cards and profiles share the same replacement without exposing private storage.
 - JourneySteps mounts into the shared header slot after hydration; an inline header fallback shows steps on other pages and hides when page-owned progress mounts, preventing duplicate navigation.
