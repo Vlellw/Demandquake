@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
 import { toast } from "sonner";
@@ -19,7 +19,7 @@ import {
   Users,
   Waves,
 } from "lucide-react";
-import { startupDetailQuery } from "@/lib/queries";
+import { myProjectsQuery, startupDetailQuery } from "@/lib/queries";
 import { claimStartup } from "@/lib/projects.functions";
 import { startMarketScan } from "@/lib/research.functions";
 import type { StartupDetailDTO } from "@/lib/dto";
@@ -111,6 +111,7 @@ function StartupPage() {
   const detail = useSuspenseQuery(startupDetailQuery(slug)).data!;
   const st = detail.startup;
   const { user, ready } = useAuthUser();
+  const { data: myProjects } = useQuery({ ...myProjectsQuery, enabled: !!user });
   const claimFn = useServerFn(claimStartup);
   const scanFn = useServerFn(startMarketScan);
   const queryClient = useQueryClient();
@@ -131,6 +132,11 @@ function StartupPage() {
     return [...evidence, ...detail.sources.filter((s) => !ids.has(s.id))];
   }, [evidence, detail.sources]);
   const latestScan = detail.scans[0];
+  // Prefer a workspace the founder owns; otherwise one a co-founder shared with them.
+  const existing = useMemo(() => {
+    const mine = (myProjects ?? []).filter((p) => p.startup_id === st.id);
+    return mine.find((p) => p.is_owner) ?? mine[0] ?? null;
+  }, [myProjects, st.id]);
 
   async function claim() {
     if (!ready) return;
@@ -226,9 +232,17 @@ function StartupPage() {
               </div>
 
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <Button variant="hero" size="lg" onClick={claim} disabled={claiming || !ready}>
-                  {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup
-                </Button>
+                {user && existing ? (
+                  <Button asChild variant="hero" size="lg">
+                    <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
+                      <Flag /> {existing.is_owner ? "Open your workspace" : "Open shared workspace"}
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button variant="hero" size="lg" onClick={claim} disabled={claiming || !ready}>
+                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup
+                  </Button>
+                )}
                 <Button variant="outline" size="lg" onClick={scan} disabled={scanning}>
                   {scanning ? <Loader2 className="animate-spin" /> : <Radar />} Scan for market changes
                 </Button>
