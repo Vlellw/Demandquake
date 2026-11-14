@@ -40,6 +40,7 @@ import { Button } from "@/components/ui/button";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { StatRule } from "@/components/common/StatRule";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthUser } from "@/hooks/use-auth";
 import { DIMENSION_META } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/format";
@@ -51,15 +52,32 @@ import { JourneySteps } from "@/components/journey/JourneySteps";
 import { QuakeTrace } from "@/components/discovery/QuakeFeed";
 import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
 import { useInspection } from "@/hooks/use-inspection";
+import { INSPECTION_STEPS, nextInspection, type InspectionTab } from "@/lib/journey";
 import { IMPLICATION_META } from "@/lib/taxonomy";
 import { cn } from "@/lib/utils";
 
+const TABS = ["overview", "evidence", "landscape", "assessment", "updates", "plan"] as const;
+type Tab = (typeof TABS)[number];
+
+const TAB_LABEL: Record<Tab, string> = {
+  overview: "Overview",
+  evidence: "Evidence",
+  landscape: "Competitors",
+  assessment: "Assessment",
+  updates: "Market changes",
+  plan: "Business plan",
+};
+
+const ESSENTIAL = new Set<string>(INSPECTION_STEPS.map((s) => s.tab));
+
 interface StartupSearch {
+  tab?: Tab | undefined;
   claim?: boolean | undefined;
 }
 
 export const Route = createFileRoute("/_authenticated/startup/$slug")({
   validateSearch: (s: Record<string, unknown>): StartupSearch => ({
+    tab: TABS.includes(s["tab"] as Tab) ? (s["tab"] as Tab) : undefined,
     claim: s["claim"] === true || s["claim"] === "1" || s["claim"] === 1 ? true : undefined,
   }),
   loader: async ({ context, params }) => {
@@ -133,7 +151,12 @@ function StartupPage() {
   const affordable = wallet ? canAfford(wallet.balance, wallet.reserved, claimCost) : false;
   const [scanning, setScanning] = useState(false);
   const autoClaimed = useRef(false);
-  const { progress } = useInspection(slug);
+  const tab: Tab = search.tab ?? "overview";
+  const { visited, progress } = useInspection(slug, tab);
+  function goTab(t: Tab) {
+    navigate({ search: (p) => ({ ...p, tab: t === "overview" ? undefined : t }), replace: true, resetScroll: false });
+    document.getElementById("inspect")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   const citations = useMemo(() => buildCitations(detail), [detail]);
   const evidence = useMemo(() => {
@@ -146,6 +169,7 @@ function StartupPage() {
     const ids = new Set(evidence.map((s) => s.id));
     return [...evidence, ...detail.sources.filter((s) => !ids.has(s.id))];
   }, [evidence, detail.sources]);
+  const latestScan = detail.scans[0];
   // Prefer a workspace the founder owns; otherwise one a co-founder shared with them.
   const existing = useMemo(() => {
     const mine = (myProjects ?? []).filter((p) => p.startup_id === st.id);
@@ -341,12 +365,55 @@ function StartupPage() {
           </div>
         </section>
 
-        {/* INSPECT THE EVIDENCE: overview first, then the evidence and the rest of the research */}
-        <div id="inspect" className="mx-auto max-w-[1400px] scroll-mt-24 space-y-12 px-4 pb-8 pt-10 sm:px-6">
-          <Overview detail={detail} />
+        {/* TABS */}
+        <Tabs value={tab} onValueChange={(v) => navigate({ search: (prev) => ({ ...prev, tab: v === "overview" ? undefined : (v as Tab) }), replace: true, resetScroll: false })}>
+          <div id="inspect" className="sticky top-16 z-30 scroll-mt-16 border-b border-border bg-background">
+            <div className="mx-auto flex max-w-[1400px] items-center gap-6 px-4 sm:px-6">
+              <div className="min-w-0 flex-1 overflow-x-auto">
+                <TabsList variant="line" className="h-14">
+                  {TABS.map((t) => {
+                    const checked = ESSENTIAL.has(t) && visited.includes(t as InspectionTab);
+                    return (
+                      <TabsTrigger key={t} variant="line" value={t} className="gap-1.5">
+                        {checked && <CheckCircle2 className="size-3.5 text-positive" aria-hidden="true" />}
+                        {TAB_LABEL[t]}
+                        {checked && <span className="sr-only">(checked)</span>}
+                        {t === "evidence" && (
+                          <span className="rounded-[3px] bg-observed px-1.5 text-[10px] font-bold leading-4 text-observed-foreground">{evidence.length}</span>
+                        )}
+                        {t === "updates" && latestScan && <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </div>
+              <div className="hidden shrink-0 items-center gap-3 lg:flex">
+                <span className="text-xs text-muted-foreground" aria-live="polite">
+                  <span className="font-bold text-foreground">{progress.done}</span> of {progress.total} checked
+                </span>
+                {user && existing ? (
+                  <Button asChild size="sm">
+                    <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
+                      <Flag /> Open workspace
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={claim} disabled={claiming || !ready}>
+                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim · {claimCost} credits
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pt-6 sm:px-6">
+          </div>
 
-          <section aria-labelledby="evidence-heading" className="space-y-6">
-            <h2 id="evidence-heading" className="section-title text-2xl">The evidence</h2>
+          <div className="mx-auto max-w-[1400px] px-4 pb-8 pt-4 sm:px-6">
+            <TabsContent value="overview" className="mt-0">
+              <Overview detail={detail} onTab={(t) => navigate({ search: (p) => ({ ...p, tab: t }), resetScroll: false })} />
+            </TabsContent>
+
+            <TabsContent value="evidence" className="mt-0 space-y-6">
               <section className="panel p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -383,10 +450,9 @@ function StartupPage() {
                 </div>
               </section>
               <RelatedProblems industry={st.industry} clusterId={detail.cluster?.id ?? null} />
-          </section>
+            </TabsContent>
 
-          <section aria-labelledby="competitors-heading" className="space-y-6">
-            <h2 id="competitors-heading" className="section-title text-2xl">Competitors</h2>
+            <TabsContent value="landscape" className="mt-0">
               <MarketLandscape
                 slug={st.slug}
                 startup={{ name: st.name, brand: st.brand }}
@@ -395,15 +461,13 @@ function StartupPage() {
                 differentiation={st.differentiation}
                 businessModel={st.business_model}
               />
-          </section>
+            </TabsContent>
 
-          <section aria-labelledby="assessment-heading" className="space-y-6">
-            <h2 id="assessment-heading" className="section-title text-2xl">Assessment</h2>
+            <TabsContent value="assessment" className="mt-0">
               <AssessmentPanel assessment={st.assessment} hypotheses={st.hypotheses} evidence={evidence} />
-          </section>
+            </TabsContent>
 
-          <section aria-labelledby="updates-heading" className="space-y-6">
-            <h2 id="updates-heading" className="section-title text-2xl">Market changes</h2>
+            <TabsContent value="updates" className="mt-0 space-y-6">
               <section className="flex flex-wrap items-center gap-4 rounded-[4px] bg-primary p-6 text-primary-foreground">
                 <div className="grid size-12 place-items-center rounded-full border-2 border-primary-foreground">
                   <Radar className="size-5" />
@@ -465,33 +529,25 @@ function StartupPage() {
                   </div>
                 )}
               </section>
-          </section>
+            </TabsContent>
 
-          <section aria-labelledby="plan-heading" className="space-y-6">
-            <h2 id="plan-heading" className="section-title text-2xl">Business plan</h2>
+            <TabsContent value="plan" className="mt-0">
               <BusinessPlanPanel model={st.business_model} plan={st.business_plan} validation={st.validation_steps} customers={st.customers} />
-          </section>
+            </TabsContent>
 
-          <div className="flex flex-col gap-4 rounded-[4px] border-l-4 border-positive bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            <div className="flex min-w-0 items-start gap-3">
-              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-positive" aria-hidden="true" />
-              <p className="font-display text-lg font-bold text-foreground">
-                {claimed ? "All checks done — keep going in your workspace" : "You’ve seen the essentials — ready for step 4"}
-              </p>
-            </div>
-            {claimed && existing ? (
-              <Button asChild>
-                <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
-                  Open workspace <ArrowRight />
-                </Link>
-              </Button>
-            ) : (
-              <Button onClick={claim}>
-                <Flag /> Claim · {claimCost} credits
-              </Button>
-            )}
+            <NextCheck
+              tab={tab}
+              visited={visited}
+              done={progress.done}
+              total={progress.total}
+              claimed={claimed}
+              onGo={goTab}
+              onClaim={claim}
+              claimCost={claimCost}
+              workspaceId={existing?.id ?? null}
+            />
           </div>
-        </div>
+        </Tabs>
 
         {/* CLAIM CTA: navy band */}
         <section className="mt-12 bg-primary text-primary-foreground">
@@ -587,14 +643,13 @@ function StartupPage() {
   );
 }
 
-function Overview({ detail }: { detail: StartupDetailDTO }) {
+function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab) => void }) {
   const st = detail.startup;
   return (
     <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
       <div className="space-y-6">
-        <section className="panel p-6" aria-labelledby="problem-heading">
+        <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
-            <h2 id="problem-heading" className="section-title text-2xl">The problem</h2>
             <InferredTag label="AI synthesis of sources" />
           </div>
           <p className="mt-3 font-display text-xl leading-snug text-foreground">{st.problem.statement}</p>
@@ -635,9 +690,8 @@ function Overview({ detail }: { detail: StartupDetailDTO }) {
           )}
         </section>
 
-        <section className="panel p-6" aria-labelledby="solution-heading">
+        <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
-            <h2 id="solution-heading" className="section-title text-2xl">The proposed solution</h2>
             <InferredTag />
           </div>
           <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">{st.solution.summary}</p>
@@ -657,9 +711,8 @@ function Overview({ detail }: { detail: StartupDetailDTO }) {
       </div>
 
       <div className="space-y-6">
-        <section className="panel p-6" aria-labelledby="customers-heading">
+        <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
-            <h2 id="customers-heading" className="section-title text-2xl">Target customers</h2>
             <InferredTag />
           </div>
           <ul className="mt-4 space-y-3">
@@ -682,18 +735,127 @@ function Overview({ detail }: { detail: StartupDetailDTO }) {
           </ul>
         </section>
 
-        <section className="panel p-6" aria-labelledby="glance-heading">
-          <h2 id="glance-heading" className="section-title text-2xl">Assessment at a glance</h2>
+        <button onClick={() => onTab("assessment")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Details →</span>
+          </div>
           <div className="mt-4">
             <AssessmentStrip card={{ assessment: st.assessment }} />
           </div>
           <p className="mt-4 line-clamp-4 text-sm text-muted-foreground">{st.assessment.summary}</p>
-        </section>
+        </button>
+
+        <button onClick={() => onTab("landscape")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-muted-foreground">Landscape →</span>
+          </div>
+          {st.competitors.length === 0 ? (
+            <p className="mt-3 text-sm text-muted-foreground">No named competitors surfaced in live sources — validate with buyers.</p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {st.competitors.slice(0, 4).map((c) => (
+                <li key={c.name} className="text-sm">
+                  <span className="font-medium text-foreground">{c.name}</span>
+                  <span className="text-muted-foreground"> — gap: {c.gap}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </button>
+
+        {st.timeline.length > 0 && (
+          <button onClick={() => onTab("updates")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">Timeline →</span>
+            </div>
+            <ul className="mt-3 space-y-2.5">
+              {[...st.timeline]
+                .sort((a, b) => new Date(b.date ?? b.discovered_at).getTime() - new Date(a.date ?? a.discovered_at).getTime())
+                .slice(0, 3)
+                .map((e) => (
+                  <li key={e.id} className="flex gap-3 text-sm">
+                    <span className="w-16 shrink-0 font-mono text-[11px] text-muted-foreground">{e.date ? formatDate(e.date, { month: "short", year: "numeric" }) : "Undated"}</span>
+                    <span className="text-foreground/90">{e.title}</span>
+                  </li>
+                ))}
+            </ul>
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
+
+/** Step 3 guidance under every tab: the next essential check, or the way to step 4 once all are done. */
+function NextCheck({
+  tab,
+  visited,
+  done,
+  total,
+  claimed,
+  onGo,
+  onClaim,
+  claimCost,
+  workspaceId,
+}: {
+  tab: Tab;
+  visited: string[];
+  done: number;
+  total: number;
+  claimed: boolean;
+  onGo: (t: Tab) => void;
+  onClaim: () => void;
+  claimCost: number;
+  workspaceId: string | null;
+}) {
+  const next = nextInspection(visited, tab);
+  if (next) {
+    return (
+      <div className="mt-10 flex flex-col gap-4 rounded-[4px] border-l-4 border-primary bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="min-w-0">
+          <p className="mt-1 font-display text-lg font-bold text-foreground">{next.label}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {!claimed && (
+            <Button variant="ghost" onClick={onClaim}>
+              Skip to claim
+            </Button>
+          )}
+          <Button onClick={() => onGo(next.tab as Tab)}>
+            Open {TAB_LABEL[next.tab as Tab]} <ArrowRight />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-10 flex flex-col gap-4 rounded-[4px] border-l-4 border-positive bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div className="flex min-w-0 items-start gap-3">
+        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-positive" aria-hidden="true" />
+        <div>
+          <p className="font-display text-lg font-bold text-foreground">
+            {claimed ? "All checks done — keep going in your workspace" : `All ${total} checks done — you’re ready for step 4`}
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {claimed ? "Your checklist, assumptions and notes are waiting there." : "Claim the idea to get a private workspace, or keep reading the business plan first."}
+          </p>
+        </div>
+      </div>
+      {claimed && workspaceId ? (
+        <Button asChild>
+          <Link to="/workspace/$projectId" params={{ projectId: workspaceId }}>
+            Open workspace <ArrowRight />
+          </Link>
+        </Button>
+      ) : (
+        <Button onClick={onClaim}>
+          <Flag /> Claim · {claimCost} credits
+        </Button>
+      )}
+    </div>
+  );
+}
 
 /** Market signals in context: the latest finished scan drawn as a seismograph, one spike per change. */
 function LatestScan({ slug, scans }: { slug: string; scans: StartupDetailDTO["scans"] }) {
