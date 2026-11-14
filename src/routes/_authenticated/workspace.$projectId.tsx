@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -26,7 +26,8 @@ import { startMarketScan } from "@/lib/research.functions";
 import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { deleteProject } from "@/lib/projects.functions";
 import { useProjectSaver, type SaveState } from "@/hooks/use-project-saver";
-import { nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
+import { marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
+import { useScanDriver } from "@/hooks/use-scan-driver";
 import type { ProjectAssumption, ProjectDTO } from "@/lib/dto";
 import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { PitchPlayer } from "@/components/startup/PitchPlayer";
@@ -482,19 +483,25 @@ function ResearchSnapshot({ project: p }: { project: ProjectDTO }) {
   );
 }
 
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const SCAN_STAGE_COPY: Record<string, string> = {
+  fetching: "Searching live news published since the research…",
+  analyzing: "Comparing new developments with the evidence…",
+};
+
+const isRunning = (status: string) => status !== "complete" && status !== "failed";
 
 function MarketWatch({ slug, project: p, update }: { slug: string; project: ProjectDTO; update: Update }) {
-  const { data, isLoading, isError, refetch } = useQuery(startupScansQuery(slug));
+  const { data, isLoading, isError, refetch } = useQuery({
+    ...startupScansQuery(slug),
+    refetchInterval: (q) => (q.state.data?.scans.some((s) => isRunning(s.status)) ? 3000 : false),
+  });
   const scanFn = useServerFn(startMarketScan);
-  const navigate = useNavigate();
   const [starting, setStarting] = useState(false);
+  const [autoStarted, setAutoStarted] = useState(false);
   const scans = data?.scans ?? [];
-  const running = scans.find((s) => s.status !== "complete" && s.status !== "failed");
+  const running = scans.find((s) => isRunning(s.status));
   const latestDone = scans.find((s) => s.status === "complete");
-  const [now, setNow] = useState<number | null>(null);
-  useEffect(() => setNow(Date.now()), []);
-  const stale = !!latestDone && now !== null && now - new Date(latestDone.completed_at ?? latestDone.created_at).getTime() > WEEK_MS;
+  const { driverError, restart } = useScanDriver(running?.id ?? "", slug, running?.status);
 
   // Log every completed scan into the activity feed exactly once.
   const pending = useMemo(() => (data ? scanUpdatesToLog(p.updates, data.scans, slug) : []), [data, p.updates, slug]);
@@ -502,46 +509,81 @@ function MarketWatch({ slug, project: p, update }: { slug: string; project: Proj
     if (pending.length) update({ updates: [...p.updates, ...pending] }, { immediate: true });
   }, [pending, p.updates, update]);
 
-  async function run() {
-    if (!data) return;
+  async function run(auto = false) {
+    if (!data || starting) return;
     setStarting(true);
     try {
       const res = await scanFn({ data: { startupId: data.startupId } });
       if (!res.ok) {
-        toast.error(res.error);
-        setStarting(false);
+        if (!auto) toast.error(res.error);
         return;
       }
-      navigate({ to: "/startup/$slug/quake/$scanId", params: { slug, scanId: res.scanId } });
+      if (auto) setAutoStarted(true);
+      await refetch();
     } catch (err) {
       console.error(err);
-      toast.error("Couldn’t start the market scan. Please try again.");
+      if (!auto) toast.error("Couldn’t start the market scan. Please try again.");
+    } finally {
       setStarting(false);
     }
   }
+
+  // Weekly re-check: when the newest evidence is over a week old, scan once on visit.
+  const runRef = useRef(run);
+  useEffect(() => {
+    runRef.current = run;
+  });
+  useEffect(() => {
+    if (!data || running) return;
+    const due = marketCheckDue({
+      lastScanAt: latestDone?.completed_at ?? latestDone?.created_at ?? null,
+      researchAt: p.research.research_at ?? null,
+      now: Date.now(),
+    });
+    if (!due) return;
+    const key = `dq-autoscan-${p.id}-${new Date().toISOString().slice(0, 10)}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    void runRef.current(true);
+  }, [data, running, latestDone, p.id, p.research.research_at]);
 
   return (
     <section className="panel p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="eyebrow">Market watch</p>
-          <p className="mt-1 text-sm text-muted-foreground">Re-search live news for developments that strengthen or weaken this opportunity.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Re-searches live news for developments that strengthen or weaken this opportunity — automatically once a week when you visit.
+          </p>
         </div>
-        <Radar className="size-5 shrink-0 text-observed" />
+        <Radar className={cn("size-5 shrink-0 text-observed", running && "animate-pulse")} />
       </div>
 
       {running ? (
-        <Button asChild variant="outline" className="mt-4 w-full">
-          <Link to="/startup/$slug/quake/$scanId" params={{ slug, scanId: running.id }}>
-            <Loader2 className="animate-spin" /> Scan in progress — watch it
-          </Link>
-        </Button>
+        <div className="mt-4 rounded-lg border border-observed/30 bg-observed/[0.05] p-3" aria-live="polite">
+          <p className="flex items-center gap-2 text-sm text-foreground">
+            <Loader2 className="size-4 animate-spin text-observed" />
+            {SCAN_STAGE_COPY[running.status] ?? "Scanning the market…"}
+          </p>
+          {autoStarted && <p className="mt-1 text-[11px] text-muted-foreground">Started automatically — the last check was over a week ago.</p>}
+          {driverError ? (
+            <p className="mt-2 text-xs text-negative">
+              {driverError}{" "}
+              <button className="underline" onClick={restart}>
+                Retry
+              </button>
+            </p>
+          ) : (
+            <Link to="/startup/$slug/quake/$scanId" params={{ slug, scanId: running.id }} className="mt-2 inline-flex items-center gap-1 text-xs text-observed hover:underline">
+              Watch in detail <ArrowRight className="size-3" />
+            </Link>
+          )}
+        </div>
       ) : (
-        <Button onClick={run} disabled={starting || !data} variant="outline" className="mt-4 w-full">
+        <Button onClick={() => run(false)} disabled={starting || !data} variant="outline" className="mt-4 w-full">
           {starting ? <Loader2 className="animate-spin" /> : <Radar />} {latestDone ? "Scan again for changes" : "Run first market scan"}
         </Button>
       )}
-      {stale && <p className="mt-2 text-[11px] text-uncertain">Last scan was over a week ago — worth re-checking.</p>}
 
       {isLoading && (
         <div className="mt-4 space-y-2" aria-label="Loading scans">
@@ -558,35 +600,38 @@ function MarketWatch({ slug, project: p, update }: { slug: string; project: Proj
           </button>
         </p>
       )}
-      {data && scans.length === 0 && (
+      {data && scans.length === 0 && !running && (
         <p className="mt-4 rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
           No scans yet. A scan compares recent news with this opportunity’s evidence and explains what changed.
         </p>
       )}
-      {scans.length > 0 && (
+      {scans.some((s) => !isRunning(s.status)) && (
         <ul className="mt-4 space-y-2">
-          {scans.slice(0, 5).map((s) => (
-            <li key={s.id}>
-              <Link
-                to="/startup/$slug/quake/$scanId"
-                params={{ slug, scanId: s.id }}
-                className="block rounded-lg border border-border p-3 transition-colors hover:border-observed/40 hover:bg-foreground/[0.03]"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <VerdictBadge verdict={s.verdict} status={s.status} />
-                  <span className="font-mono text-[10px] text-muted-foreground">
-                    <TimeAgo iso={s.completed_at ?? s.created_at} />
-                  </span>
-                </div>
-                {s.headline && <p className="mt-1.5 line-clamp-2 text-sm text-foreground/90">{s.headline}</p>}
-                {s.status === "complete" && (
-                  <p className="mt-1 font-mono text-[10px] text-faint">
-                    {s.changes.length} change{s.changes.length === 1 ? "" : "s"} · {s.candidates_count} new sources checked
-                  </p>
-                )}
-              </Link>
-            </li>
-          ))}
+          {scans
+            .filter((s) => !isRunning(s.status))
+            .slice(0, 5)
+            .map((s) => (
+              <li key={s.id}>
+                <Link
+                  to="/startup/$slug/quake/$scanId"
+                  params={{ slug, scanId: s.id }}
+                  className="block rounded-lg border border-border p-3 transition-colors hover:border-observed/40 hover:bg-foreground/[0.03]"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <VerdictBadge verdict={s.verdict} status={s.status} />
+                    <span className="font-mono text-[10px] text-muted-foreground">
+                      <TimeAgo iso={s.completed_at ?? s.created_at} />
+                    </span>
+                  </div>
+                  {s.headline && <p className="mt-1.5 line-clamp-2 text-sm text-foreground/90">{s.headline}</p>}
+                  {s.status === "complete" && (
+                    <p className="mt-1 font-mono text-[10px] text-faint">
+                      {s.changes.length} change{s.changes.length === 1 ? "" : "s"} · {s.candidates_count} new sources checked
+                    </p>
+                  )}
+                </Link>
+              </li>
+            ))}
         </ul>
       )}
     </section>

@@ -46,3 +46,15 @@ export function scanUpdatesToLog(updates: ProjectUpdate[], scans: ScanSummaryDTO
       };
     });
 }
+
+export const MARKET_CHECK_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * A workspace re-checks the market automatically when its newest evidence (last completed scan,
+ * or the original research when never scanned) is more than a week old.
+ */
+export function marketCheckDue(opts: { lastScanAt: string | null; researchAt: string | null; now: number }): boolean {
+  const times = [opts.lastScanAt, opts.researchAt].filter((t): t is string => !!t).map((t) => new Date(t).getTime());
+  if (!times.length) return false;
+  return opts.now - Math.max(...times) > MARKET_CHECK_INTERVAL_MS;
+}

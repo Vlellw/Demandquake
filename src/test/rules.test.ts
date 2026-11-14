@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeRedirect } from "@/lib/safe-redirect";
-import { nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
+import { marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
 import { computeEvidenceStrength, freshnessOf, matchesFreshness, normalizeUrl, stripRefLabels, cleanRefLabels, replaceBrandName, brandMatchesCompetitor, sameNameCandidates } from "@/lib/research-utils";
 import { buildProjectFromStartup, type StartupForClaim } from "@/lib/claim";
 
@@ -163,5 +163,19 @@ describe("market scans are logged into the founder activity once", () => {
   it("skips scans already logged and scans still running", () => {
     const existing = [{ id: "scan-a1", at: "x", kind: "scan" as const, title: "t", text: "t" }];
     expect(scanUpdatesToLog(existing, [scan("a1", "complete", "weakened"), scan("b2", "scanning", null)], "s")).toEqual([]);
+  });
+});
+
+describe("workspaces re-check the market weekly", () => {
+  const now = new Date("2026-11-14T12:00:00Z").getTime();
+  it("is due when the last scan is more than 7 days old", () => {
+    expect(marketCheckDue({ lastScanAt: "2026-11-06T11:00:00Z", researchAt: "2026-11-01T00:00:00Z", now })).toBe(true);
+  });
+  it("is not due within 7 days of the last scan", () => {
+    expect(marketCheckDue({ lastScanAt: "2026-11-08T12:00:00Z", researchAt: "2026-10-01T00:00:00Z", now })).toBe(false);
+  });
+  it("uses the research date when the startup was never scanned", () => {
+    expect(marketCheckDue({ lastScanAt: null, researchAt: "2026-11-10T00:00:00Z", now })).toBe(false);
+    expect(marketCheckDue({ lastScanAt: null, researchAt: "2026-11-01T00:00:00Z", now })).toBe(true);
   });
 });
