@@ -4,7 +4,6 @@ import { z } from "zod";
 import { fallback } from "@tanstack/zod-adapter";
 import { INDUSTRIES } from "./taxonomy";
 import { matchesFreshness } from "./research-utils";
-import { INITIAL_CREDIT_RULES } from "./credit-rules";
 
 export const JOURNEY_STEPS = [
   { n: 1, key: "search", label: "Search a market", short: "Search" },
