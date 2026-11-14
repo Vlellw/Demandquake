@@ -107,7 +107,7 @@ function ResearchPage() {
   }
 
   const isDone = run.status === "complete";
-  const isFailed = run.status === "failed" || Boolean(driverError);
+  const isFailed = !isDone && (run.status === "failed" || Boolean(driverError));
 
   // A finished search reveals ideas within Search & Discover.
   useEffect(() => {

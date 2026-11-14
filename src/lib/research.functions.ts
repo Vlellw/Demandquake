@@ -90,8 +90,23 @@ export const advanceDiscovery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { runId: string }) => ({ runId: uuid.parse(d.runId) }))
   .handler(async ({ data, context }) => {
+    // Terminal runs are read-only: their reservation has already been settled.
+    // Read through the caller's client so catalog access still obeys RLS.
+    const terminalResult = async () => {
+      const { data: run } = await context.supabase.from('discovery_runs').select('status').eq('id', data.runId).maybeSingle();
+      return run && (run.status === 'complete' || run.status === 'failed')
+        ? { ok: true as const, status: run.status, progressed: false, busy: false }
+        : null;
+    };
+    const terminal = await terminalResult();
+    if (terminal) return terminal;
     const { data: reservations, error } = await context.supabase.from('credit_reservations').select('id').eq('run_id', data.runId).eq('user_id', context.userId).eq('status','reserved').limit(1);
-    if (error || !reservations?.length) return { ok: false as const, error: 'Only a researcher with reserved credits can advance this run.' };
+    if (error || !reservations?.length) {
+      // Another worker can finish between the status read and reservation read.
+      const settled = await terminalResult();
+      if (settled) return settled;
+      return { ok: false as const, error: 'Only a researcher with reserved credits can advance this run.' };
+    }
     const { advanceRun, userMessageOf } = await import("./pipeline.server");
     try {
       return { ok: true as const, ...(await advanceRun(data.runId)) };

@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Fix completed discovery showing late-worker credit errors; signed-in completed-run request returns success without advancement, no error/retry banner, and 19 completion/concurrency/credit tests pass.
 - [x] Add Privacy Policy and Terms of Use pages linked from the footer; pages, titles and footer links verified.
 - [x] Remove the Continue with Lovable sign-in button (email code and Google remain); sign-in page verified.
 - [x] Remove the full-catalog and research-another-market panels from Discover; real results remain visible and both panels are absent.
