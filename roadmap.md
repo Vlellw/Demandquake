@@ -37,6 +37,8 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Replace the centered navigation menu with a right-side slide-out panel.
+- [x] Show numbered journey steps on every page, including the public home.
 - [x] Move journey steps into the header, keeping page links in the three-line menu.
 - [x] Remove Market changes and Latest research tabs from Discover.
 - [x] Remove workspace roadmap checklist cards.

@@ -1,20 +1,22 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Command as CommandPrimitive } from "cmdk";
 import { BookOpen, Briefcase, Compass, Telescope } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 
 export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const navigate = useNavigate();
   function go(fn: () => void) { onOpenChange(false); fn(); }
-  const itemClass = "flex cursor-pointer items-center gap-3 rounded-[3px] px-3 py-3 text-sm text-foreground aria-selected:bg-accent";
-  return <Dialog open={open} onOpenChange={onOpenChange}>
-    <DialogContent className="max-w-md gap-0 p-4">
-      <DialogTitle className="sr-only">Menu</DialogTitle>
-      <DialogDescription className="sr-only">Go to a page.</DialogDescription>
+  const itemClass = "flex cursor-pointer items-center gap-3 rounded-md px-3 py-4 text-sm font-medium text-foreground aria-selected:bg-accent hover:bg-accent";
+  return <Sheet open={open} onOpenChange={onOpenChange}>
+    <SheetContent side="right" className="w-[88vw] max-w-sm p-0 motion-reduce:animate-none motion-reduce:transition-none">
+      <div className="flex h-16 items-center border-b border-border px-6">
+        <SheetTitle>Go to</SheetTitle>
+        <SheetDescription className="sr-only">Go to a page.</SheetDescription>
+      </div>
+      <nav aria-label="Site navigation" className="p-4">
       <CommandPrimitive><CommandPrimitive.List>
             <CommandPrimitive.Group
-              heading="Go to"
-              className="[&_[cmdk-group-heading]]:text-[0.6875rem] [&_[cmdk-group-heading]]:font-bold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.06em] [&_[cmdk-group-heading]]:text-foreground mt-1 border-t border-border pt-1 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-2"
+              className="space-y-1"
             >
               <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => navigate({ to: "/discover", search: { view: "all" } }))} className={itemClass}>
                 <Compass className="size-4 text-primary" /> Browse all startups
@@ -30,6 +32,7 @@ export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange
               </CommandPrimitive.Item>
             </CommandPrimitive.Group>
       </CommandPrimitive.List></CommandPrimitive>
-    </DialogContent>
-  </Dialog>;
+      </nav>
+    </SheetContent>
+  </Sheet>;
 }

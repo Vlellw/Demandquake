@@ -55,5 +55,5 @@ use the editor.
 - Startup inspection keeps Overview outside the tab control and defaults to Evidence; Overview counts as viewed on page entry because it remains visible above every panel.
 
 - Corrected existing startup artwork is selected centrally in bannerBackground so cards and profiles share the same replacement without exposing private storage.
-- JourneySteps mounts into the shared header slot after hydration so page-owned navigation actions and progress remain intact without duplicate navigation rows.
+- JourneySteps mounts into the shared header slot after hydration; an inline header fallback shows steps on other pages and hides when page-owned progress mounts, preventing duplicate navigation.
 - Missing banner requests share their promise across mounted cards and profiles so every subscriber receives the generated image.

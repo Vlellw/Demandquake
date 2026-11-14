@@ -12,15 +12,19 @@ export function JourneySteps({
   complete = false,
   renderStep,
   className,
+  inline = false,
 }: {
   current: JourneyStepNumber;
   complete?: boolean;
   renderStep?: (n: JourneyStepNumber, content: ReactNode, className: string) => ReactNode | undefined;
   className?: string;
+  inline?: boolean;
 }) {
   const statuses = journeyStatuses(current, complete);
   const [target, setTarget] = useState<HTMLElement | null>(null);
-  useEffect(() => setTarget(document.getElementById("header-journey")), []);
+  useEffect(() => {
+    if (!inline) setTarget(document.getElementById("header-journey"));
+  }, [inline]);
   const tracker = (
     <nav aria-label="Your progress" className={cn("min-w-0 bg-background py-1", className)}>
       <ol className="mx-auto grid max-w-[1400px] grid-cols-4 gap-1 rounded-full bg-muted p-1 sm:gap-1.5">
