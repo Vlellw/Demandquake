@@ -6,8 +6,21 @@ import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-quer
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import { CalendarClock, Flag, Loader2, Radar, Rocket, Users } from "lucide-react";
-import { myProjectsQuery, startupDetailQuery } from "@/lib/queries";
+import {
+  ArrowRight,
+  CalendarClock,
+  CheckCircle2,
+  FlaskConical,
+  Flag,
+  ListChecks,
+  Loader2,
+  NotebookPen,
+  Radar,
+  Rocket,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { myProjectsQuery, radarQuery, startupDetailQuery } from "@/lib/queries";
 import { claimStartup } from "@/lib/projects.functions";
 import { startMarketScan } from "@/lib/research.functions";
 import type { StartupDetailDTO } from "@/lib/dto";
@@ -34,9 +47,27 @@ import { creditAccountQuery } from "@/lib/credit-queries";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { INITIAL_CREDIT_RULES, canAfford } from "@/lib/credit-rules";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { JourneySteps, StepKicker } from "@/components/journey/JourneySteps";
+import { QuakeTrace } from "@/components/discovery/QuakeFeed";
+import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
+import { useInspection } from "@/hooks/use-inspection";
+import { INSPECTION_STEPS, nextInspection, type InspectionTab } from "@/lib/journey";
+import { IMPLICATION_META } from "@/lib/taxonomy";
+import { cn } from "@/lib/utils";
 
 const TABS = ["overview", "evidence", "landscape", "assessment", "updates", "plan"] as const;
 type Tab = (typeof TABS)[number];
+
+const TAB_LABEL: Record<Tab, string> = {
+  overview: "Overview",
+  evidence: "Evidence",
+  landscape: "Competitors",
+  assessment: "Assessment",
+  updates: "Market changes",
+  plan: "Business plan",
+};
+
+const ESSENTIAL = new Set<string>(INSPECTION_STEPS.map((s) => s.tab));
 
 const TAB_HINT: Record<Tab, string> = {
   overview: "The problem, the proposed solution and who would buy it, in short.",
@@ -85,7 +116,7 @@ export const Route = createFileRoute("/_authenticated/startup/$slug")({
       <h1 className="section-title mt-2 text-3xl">This startup isn’t in the catalog</h1>
       <p className="mt-3 text-sm text-muted-foreground">It may have been removed after a research refresh.</p>
       <Button asChild variant="outline" className="mt-6">
-        <Link to="/discover" hash="startups">Browse all startups</Link>
+        <Link to="/discover">Browse all startups</Link>
       </Button>
     </div>
   ),
@@ -130,6 +161,11 @@ function StartupPage() {
   const [scanning, setScanning] = useState(false);
   const autoClaimed = useRef(false);
   const tab: Tab = search.tab ?? "overview";
+  const { visited, progress } = useInspection(slug, tab);
+  function goTab(t: Tab) {
+    navigate({ search: (p) => ({ ...p, tab: t === "overview" ? undefined : t }), replace: true, resetScroll: false });
+    document.getElementById("inspect")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   const citations = useMemo(() => buildCitations(detail), [detail]);
   const evidence = useMemo(() => {
@@ -148,6 +184,7 @@ function StartupPage() {
     const mine = (myProjects ?? []).filter((p) => p.startup_id === st.id);
     return mine.find((p) => p.is_owner) ?? mine[0] ?? null;
   }, [myProjects, st.id]);
+  const claimed = Boolean(user && existing);
 
   async function claim() {
     if (!ready) return;
@@ -168,7 +205,7 @@ function StartupPage() {
       await queryClient.invalidateQueries({ queryKey: ["credit-account"] });
       await queryClient.invalidateQueries({ queryKey: ["projects"] });
       toast.success(res.created ? `${st.name} is now in your workspace` : "Opening your workspace");
-      navigate({ to: "/workspace/$projectId", params: { projectId: res.projectId } });
+      navigate({ to: "/workspace/$projectId", params: { projectId: res.projectId }, search: res.created ? { welcome: true } : {} });
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Couldn’t claim this startup. No credits were charged.");
@@ -208,12 +245,52 @@ function StartupPage() {
       <div style={brandStyle(st.brand)}>
         <Breadcrumbs
           trail={[
-            <Link key="d" to="/discover" hash="startups">
+            <Link key="d" to="/discover">
               Discover startups
             </Link>,
-            ...(st.industry ? [st.industry] : []),
+            ...(st.industry
+              ? [
+                  <Link key="i" to="/discover" search={{ industry: st.industry }}>
+                    {st.industry}
+                  </Link>,
+                ]
+              : []),
           ]}
           current={st.name}
+        />
+        <JourneySteps
+          current={claimed ? 3 : 2}
+          complete={claimed}
+          hints={{
+            1: st.industry ? `Back to ${st.industry} ideas` : "Back to all ideas",
+            2: `${progress.done} of ${progress.total} checks done`,
+            3: claimed ? "It’s in your workspace" : undefined,
+          }}
+          renderStep={(n, content, cls) => {
+            if (n === 1)
+              return (
+                <Link to="/discover" search={{ industry: st.industry ?? "all" }} className={cn(cls, "hover:opacity-80")}>
+                  {content}
+                </Link>
+              );
+            if (n === 2)
+              return (
+                <a href="#inspect" className={cn(cls, "hover:opacity-80")}>
+                  {content}
+                </a>
+              );
+            if (claimed && existing)
+              return (
+                <Link to="/workspace/$projectId" params={{ projectId: existing.id }} className={cn(cls, "hover:opacity-80")}>
+                  {content}
+                </Link>
+              );
+            return (
+              <button type="button" onClick={claim} disabled={!ready} className={cn(cls, "cursor-pointer hover:opacity-80")}>
+                {content}
+              </button>
+            );
+          }}
         />
 
         {/* HERO: brand-colored block with the pitch on the right */}
@@ -251,7 +328,7 @@ function StartupPage() {
                   </Button>
                 ) : (
                   <Button size="lg" onClick={claim} disabled={claiming || !ready} className="bg-background font-bold text-foreground hover:bg-accent">
-                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup · 5 credits
+                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup · {claimCost} credits
                   </Button>
                 )}
                 <Button variant="glass" size="lg" onClick={scan} disabled={scanning}>
@@ -306,23 +383,48 @@ function StartupPage() {
 
         {/* TABS */}
         <Tabs value={tab} onValueChange={(v) => navigate({ search: (prev) => ({ ...prev, tab: v === "overview" ? undefined : (v as Tab) }), replace: true, resetScroll: false })}>
-          <div className="sticky top-16 z-30 border-b border-border bg-background">
-            <div className="mx-auto max-w-[1400px] overflow-x-auto px-4 sm:px-6">
-              <TabsList variant="line" className="h-14">
-                <TabsTrigger variant="line" value="overview">Overview</TabsTrigger>
-                <TabsTrigger variant="line" value="evidence">
-                  Evidence <span className="ml-1.5 rounded-[3px] bg-observed px-1.5 text-[10px] font-bold leading-4 text-observed-foreground">{evidence.length}</span>
-                </TabsTrigger>
-                <TabsTrigger variant="line" value="landscape">Competitors</TabsTrigger>
-                <TabsTrigger variant="line" value="assessment">Assessment</TabsTrigger>
-                <TabsTrigger variant="line" value="updates">
-                  Market changes {latestScan && <span className="ml-1.5 size-1.5 rounded-full bg-primary" aria-hidden="true" />}
-                </TabsTrigger>
-                <TabsTrigger variant="line" value="plan">Business plan</TabsTrigger>
-              </TabsList>
+          <div id="inspect" className="sticky top-16 z-30 scroll-mt-16 border-b border-border bg-background">
+            <div className="mx-auto flex max-w-[1400px] items-center gap-6 px-4 sm:px-6">
+              <div className="min-w-0 flex-1 overflow-x-auto">
+                <TabsList variant="line" className="h-14">
+                  {TABS.map((t) => {
+                    const checked = ESSENTIAL.has(t) && visited.includes(t as InspectionTab);
+                    return (
+                      <TabsTrigger key={t} variant="line" value={t} className="gap-1.5">
+                        {checked && <CheckCircle2 className="size-3.5 text-positive" aria-hidden="true" />}
+                        {TAB_LABEL[t]}
+                        {checked && <span className="sr-only">(checked)</span>}
+                        {t === "evidence" && (
+                          <span className="rounded-[3px] bg-observed px-1.5 text-[10px] font-bold leading-4 text-observed-foreground">{evidence.length}</span>
+                        )}
+                        {t === "updates" && latestScan && <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />}
+                      </TabsTrigger>
+                    );
+                  })}
+                </TabsList>
+              </div>
+              <div className="hidden shrink-0 items-center gap-3 lg:flex">
+                <span className="text-xs text-muted-foreground" aria-live="polite">
+                  <span className="font-bold text-foreground">{progress.done}</span> of {progress.total} checked
+                </span>
+                {user && existing ? (
+                  <Button asChild size="sm">
+                    <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
+                      <Flag /> Open workspace
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={claim} disabled={claiming || !ready}>
+                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim · {claimCost} credits
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-          <p className="mx-auto max-w-[1400px] px-4 pt-6 text-sm text-muted-foreground sm:px-6">{TAB_HINT[tab]}</p>
+          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pt-6 sm:px-6">
+            <StepKicker n={2}>{ESSENTIAL.has(tab) ? INSPECTION_STEPS.find((s) => s.tab === tab)?.label : "Optional extra"}</StepKicker>
+            <p className="text-sm text-muted-foreground">{TAB_HINT[tab]}</p>
+          </div>
 
           <div className="mx-auto max-w-[1400px] px-4 pb-8 pt-4 sm:px-6">
             <TabsContent value="overview" className="mt-0">
@@ -368,6 +470,7 @@ function StartupPage() {
                   <SourceStream sources={evidence} limit={40} />
                 </div>
               </section>
+              <RelatedProblems industry={st.industry} clusterId={detail.cluster?.id ?? null} />
             </TabsContent>
 
             <TabsContent value="landscape" className="mt-0">
@@ -400,6 +503,7 @@ function StartupPage() {
                   {scanning ? <Loader2 className="animate-spin" /> : <Radar />} Run a market scan
                 </Button>
               </section>
+              <LatestScan slug={slug} scans={detail.scans} />
               <section className="panel p-5">
                 <div className="flex items-center justify-between">
                   <p className="eyebrow">Market timeline</p>
@@ -420,6 +524,11 @@ function StartupPage() {
                         <Link to="/startup/$slug/quake/$scanId" params={{ slug, scanId: s.id }} className="flex flex-wrap items-center gap-3 py-3 hover:text-foreground">
                           <VerdictBadge verdict={s.verdict} status={s.status} />
                           <span className="min-w-0 flex-1 truncate text-sm text-foreground/90">{s.headline ?? (s.status === "failed" ? "Scan failed" : "Scan in progress")}</span>
+                          {s.status === "complete" && (
+                            <span className="hidden w-32 shrink-0 sm:block" aria-hidden="true">
+                              <QuakeTrace item={s} className="h-7" />
+                            </span>
+                          )}
                           <span className="font-mono text-[11px] text-muted-foreground">
                             {s.changes.length} change{s.changes.length === 1 ? "" : "s"} · <TimeAgo iso={s.created_at} />
                           </span>
@@ -446,6 +555,18 @@ function StartupPage() {
             <TabsContent value="plan" className="mt-0">
               <BusinessPlanPanel model={st.business_model} plan={st.business_plan} validation={st.validation_steps} customers={st.customers} />
             </TabsContent>
+
+            <NextCheck
+              tab={tab}
+              visited={visited}
+              done={progress.done}
+              total={progress.total}
+              claimed={claimed}
+              onGo={goTab}
+              onClaim={claim}
+              claimCost={claimCost}
+              workspaceId={existing?.id ?? null}
+            />
           </div>
         </Tabs>
 
@@ -454,7 +575,7 @@ function StartupPage() {
           <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center">
             <StartupMark brand={st.brand} size="lg" className="border-transparent" />
             <div className="min-w-0 flex-1">
-              <p className="eyebrow text-primary-foreground">Ready to build?</p>
+              <p className="eyebrow text-primary-foreground">Step 3 of 3 · Claim & build</p>
               <p className="mt-2 font-display text-3xl font-bold">Build {st.name}</p>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-primary-foreground/85">
                 Claiming copies the idea, its sources, the open assumptions and a validation checklist into your private
@@ -469,21 +590,75 @@ function StartupPage() {
               </Button>
             ) : (
               <Button variant="glass" size="lg" onClick={claim} disabled={claiming || !ready}>
-                {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building · 5 credits
+                {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building · {claimCost} credits
               </Button>
             )}
           </div>
         </section>
       </div>
-      <Dialog open={claimConfirm} onOpenChange={open => { if (!claiming) setClaimConfirm(open); }}>
-        <DialogContent>
-          <DialogTitle>Claim {st.name}</DialogTitle>
-          <DialogDescription>A successful claim costs 5 credits and creates your private workspace. Failed claims cost nothing.</DialogDescription>
-          <p className="text-sm">Available: {wallet ? (wallet.balance - wallet.reserved).toLocaleString('en-US') : '…'} credits</p>
-          {wallet && !affordable && <p role="alert" className="text-negative">You need 5 available credits to claim this startup.</p>}
-          <div className="flex flex-wrap justify-end gap-3">
-            <Button variant="outline" disabled={claiming} onClick={() => setClaimConfirm(false)}>Cancel</Button>
-            {wallet && !affordable ? <Button asChild><Link to="/credits">Buy credits</Link></Button> : <Button disabled={claiming || !affordable} onClick={confirmClaim}>{claiming && <Loader2 className="animate-spin" />}Confirm · 5 credits</Button>}
+      <Dialog open={claimConfirm} onOpenChange={(open) => { if (!claiming) setClaimConfirm(open); }}>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl gap-0 overflow-y-auto rounded-[4px] p-0 sm:rounded-[4px]">
+          <div className="border-b border-border bg-surface-sunken px-6 pb-5 pt-6 sm:px-8">
+            <StepKicker n={3}>Claim & build</StepKicker>
+            <DialogTitle className="section-title mt-2 text-2xl">Claim {st.name}</DialogTitle>
+            <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              You get a private workspace for this idea. The idea stays public, so other founders can claim it too.
+            </DialogDescription>
+          </div>
+          <div className="px-6 py-6 sm:px-8">
+            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">What you get</p>
+            <ul className="mt-3 space-y-3">
+              {[
+                { icon: ListChecks, text: "A validation checklist to test the idea with real customers" },
+                { icon: FlaskConical, text: "The AI’s open assumptions, ready to mark as validated or not" },
+                { icon: UserPlus, text: "Invite links for co-founders, with shared editing" },
+                { icon: NotebookPen, text: "Notes, sources and market scans in one place" },
+              ].map(({ icon: Icon, text }) => (
+                <li key={text} className="flex items-center gap-3 text-sm text-foreground">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-full border border-ink/25 text-primary" aria-hidden="true">
+                    <Icon className="size-4" />
+                  </span>
+                  {text}
+                </li>
+              ))}
+            </ul>
+            {!progress.complete && (
+              <p className="mt-5 rounded-[4px] bg-accent p-3 text-sm text-foreground">
+                You’ve checked {progress.done} of {progress.total} essentials. You can claim now — the evidence stays available in your workspace.
+              </p>
+            )}
+            <dl className="mt-6 grid grid-cols-2 gap-4">
+              <div className="stat-rule pt-3">
+                <dt className="text-sm text-primary">Cost</dt>
+                <dd className="font-display text-2xl font-bold text-primary">{claimCost} credits</dd>
+              </div>
+              <div className="stat-rule pt-3">
+                <dt className="text-sm text-primary">You have</dt>
+                <dd className="font-display text-2xl font-bold text-primary">
+                  {wallet ? `${(wallet.balance - wallet.reserved).toLocaleString("en-US")} credits` : "…"}
+                </dd>
+              </div>
+            </dl>
+            <p className="mt-3 text-sm text-muted-foreground">Charged only when your workspace is created. A failed claim costs nothing.</p>
+            {wallet && !affordable && (
+              <p role="alert" className="mt-4 rounded-[4px] border border-negative/40 p-3 text-sm text-negative">
+                You need {claimCost} available credits to claim this startup.
+              </p>
+            )}
+            <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
+              <Button variant="outline" disabled={claiming} onClick={() => setClaimConfirm(false)}>
+                Not yet
+              </Button>
+              {wallet && !affordable ? (
+                <Button asChild>
+                  <Link to="/credits">Buy credits</Link>
+                </Button>
+              ) : (
+                <Button disabled={claiming || !affordable} onClick={confirmClaim}>
+                  {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim · {claimCost} credits
+                </Button>
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -637,5 +812,151 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
         )}
       </div>
     </div>
+  );
+}
+
+
+/** Step 2 guidance under every tab: the next essential check, or the way to step 3 once all are done. */
+function NextCheck({
+  tab,
+  visited,
+  done,
+  total,
+  claimed,
+  onGo,
+  onClaim,
+  claimCost,
+  workspaceId,
+}: {
+  tab: Tab;
+  visited: string[];
+  done: number;
+  total: number;
+  claimed: boolean;
+  onGo: (t: Tab) => void;
+  onClaim: () => void;
+  claimCost: number;
+  workspaceId: string | null;
+}) {
+  const next = nextInspection(visited, tab);
+  if (next) {
+    return (
+      <div className="mt-10 flex flex-col gap-4 rounded-[4px] border-l-4 border-primary bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="min-w-0">
+          <p className="eyebrow">Next check · {done} of {total} done</p>
+          <p className="mt-1 font-display text-lg font-bold text-foreground">{next.label}</p>
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          {!claimed && (
+            <Button variant="ghost" onClick={onClaim}>
+              Skip to claim
+            </Button>
+          )}
+          <Button onClick={() => onGo(next.tab as Tab)}>
+            Open {TAB_LABEL[next.tab as Tab]} <ArrowRight />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="mt-10 flex flex-col gap-4 rounded-[4px] border-l-4 border-positive bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+      <div className="flex min-w-0 items-start gap-3">
+        <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-positive" aria-hidden="true" />
+        <div>
+          <p className="font-display text-lg font-bold text-foreground">
+            {claimed ? "All checks done — keep going in your workspace" : `All ${total} checks done — you’re ready for step 3`}
+          </p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
+            {claimed ? "Your checklist, assumptions and notes are waiting there." : "Claim the idea to get a private workspace, or keep reading the business plan first."}
+          </p>
+        </div>
+      </div>
+      {claimed && workspaceId ? (
+        <Button asChild>
+          <Link to="/workspace/$projectId" params={{ projectId: workspaceId }}>
+            Open workspace <ArrowRight />
+          </Link>
+        </Button>
+      ) : (
+        <Button onClick={onClaim}>
+          <Flag /> Claim · {claimCost} credits
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** Market signals in context: the latest finished scan drawn as a seismograph, one spike per change. */
+function LatestScan({ slug, scans }: { slug: string; scans: StartupDetailDTO["scans"] }) {
+  const latest = scans.find((s) => s.status === "complete");
+  if (!latest) return null;
+  return (
+    <section className="panel p-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="eyebrow">Latest market scan</p>
+          <p className="mt-1 font-display text-lg font-bold leading-snug text-foreground">{latest.headline ?? "Market scan completed"}</p>
+        </div>
+        <VerdictBadge verdict={latest.verdict} status={latest.status} />
+      </div>
+      <div className="mt-4 border-y border-border py-3">
+        <QuakeTrace item={latest} className="h-20" />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+        <ul className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
+          {(["positive", "negative", "uncertain"] as const).map((k) => (
+            <li key={k} className="flex items-center gap-1.5">
+              <span className="h-[3px] w-4 rounded-full" style={{ background: IMPLICATION_META[k].color }} aria-hidden="true" />
+              {IMPLICATION_META[k].label}
+            </li>
+          ))}
+          <li>
+            {latest.changes.length} change{latest.changes.length === 1 ? "" : "s"} from {latest.candidates_count} new sources ·{" "}
+            <TimeAgo iso={latest.completed_at ?? latest.created_at} />
+          </li>
+        </ul>
+        <Link
+          to="/startup/$slug/quake/$scanId"
+          params={{ slug, scanId: latest.id }}
+          className="inline-flex items-center gap-1 text-sm font-bold text-primary underline-offset-4 hover:underline"
+        >
+          See what changed <ArrowRight className="size-4" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/** Market signals in context: other problems found in the same industry, with this idea's problem ringed. */
+function RelatedProblems({ industry, clusterId }: { industry: string | null; clusterId: string | null }) {
+  const { data, isLoading, isError, refetch } = useQuery(radarQuery);
+  const nodes = useMemo(() => (data ?? []).filter((n) => !industry || n.industry === industry), [data, industry]);
+  return (
+    <section aria-labelledby="related-heading" className="space-y-3">
+      <div>
+        <p className="eyebrow">Where this problem sits</p>
+        <h2 id="related-heading" className="mt-1 font-display text-xl font-semibold text-foreground">
+          Other problems we found{industry ? ` in ${industry}` : ""}
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">Compare how much evidence each problem has. Click a dot to read the posts behind it.</p>
+      </div>
+      {isLoading ? (
+        <div className="panel grid h-[380px] place-items-center text-sm text-muted-foreground">
+          <span className="inline-flex items-center gap-2">
+            <Loader2 className="size-4 animate-spin" aria-hidden="true" /> Loading the problem map…
+          </span>
+        </div>
+      ) : isError ? (
+        <div className="panel flex flex-wrap items-center justify-between gap-3 p-5 text-sm text-muted-foreground">
+          The problem map couldn’t load.
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Try again
+          </Button>
+        </div>
+      ) : (
+        <OpportunityRadar nodes={nodes} highlightId={clusterId} compact />
+      )}
+    </section>
   );
 }

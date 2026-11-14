@@ -43,7 +43,7 @@ function WorkspaceList() {
             description="Startups you claimed or were invited to. Only you and your co-founders can see them."
           />
           <Button asChild variant="outline">
-            <Link to="/discover" hash="startups">
+            <Link to="/discover">
               <Radar /> Find more startups
             </Link>
           </Button>
@@ -67,7 +67,7 @@ function WorkspaceList() {
               ))}
             </ol>
             <Button asChild variant="hero" size="lg" className="mt-10">
-              <Link to="/discover" hash="startups">
+              <Link to="/discover">
                 Browse startups <ArrowRight />
               </Link>
             </Button>

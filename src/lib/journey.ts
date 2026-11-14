@@ -4,11 +4,12 @@ import { z } from "zod";
 import { fallback } from "@tanstack/zod-adapter";
 import { INDUSTRIES } from "./taxonomy";
 import { matchesFreshness } from "./research-utils";
+import { INITIAL_CREDIT_RULES } from "./credit-rules";
 
 export const JOURNEY_STEPS = [
   { n: 1, key: "choose", label: "Choose an idea", short: "Choose", hint: "Pick an industry and open an idea" },
   { n: 2, key: "inspect", label: "Inspect the evidence", short: "Inspect", hint: "Read the sources, competitors and market" },
-  { n: 3, key: "claim", label: "Claim & build", short: "Claim", hint: "Get a private workspace for 5 credits" },
+  { n: 3, key: "claim", label: "Claim & build", short: "Claim", hint: `Get a private workspace for ${INITIAL_CREDIT_RULES.claim} credits` },
 ] as const;
 export type JourneyStepNumber = (typeof JOURNEY_STEPS)[number]["n"];
 export type JourneyStatus = "done" | "current" | "upcoming";
@@ -31,6 +32,9 @@ export const discoverSearchSchema = z.object({
   fresh: fallback(z.string(), "all").default("all"),
   overview: fallback(z.string(), "map").default("map"),
   research: fallback(z.boolean(), false).default(false),
+  /** Prefilled research question (e.g. "Run fresh" after reused results). */
+  q: fallback(z.string(), "").default(""),
+  rerun: fallback(z.boolean(), false).default(false),
 });
 export type DiscoverSearch = z.infer<typeof discoverSearchSchema>;
 export const DISCOVER_DEFAULTS: DiscoverSearch = discoverSearchSchema.parse({});

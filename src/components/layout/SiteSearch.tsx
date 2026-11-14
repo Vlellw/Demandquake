@@ -77,10 +77,10 @@ export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange
               heading="Go to"
               className="[&_[cmdk-group-heading]]:text-[0.6875rem] [&_[cmdk-group-heading]]:font-bold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-[0.06em] [&_[cmdk-group-heading]]:text-foreground mt-1 border-t border-border pt-1 [&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:pt-2"
             >
-              <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => navigate({ to: "/discover", hash: "startups" }))} className={itemClass}>
+              <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => navigate({ to: "/discover", search: { view: "all" } }))} className={itemClass}>
                 <Compass className="size-4 text-primary" /> Browse all startups
               </CommandPrimitive.Item>
-              <CommandPrimitive.Item value="research new market discovery start" onSelect={() => go(() => navigate({ to: "/discover", hash: "discover" }))} className={itemClass}>
+              <CommandPrimitive.Item value="research new market discovery start" onSelect={() => go(() => navigate({ to: "/discover", search: { research: true } }))} className={itemClass}>
                 <Telescope className="size-4 text-primary" /> Research a new market
               </CommandPrimitive.Item>
               <CommandPrimitive.Item value="how it works method sources" onSelect={() => go(() => navigate({ to: "/method" }))} className={itemClass}>

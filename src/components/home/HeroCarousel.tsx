@@ -15,7 +15,7 @@ type Slide = {
   cta: string;
   image: string;
   alt: string;
-  link: { to: "/discover"; hash: string } | { to: "/workspace" };
+  link: { to: "/discover"; search: { research?: boolean; view?: string; overview?: string } } | { to: "/workspace" };
 };
 
 const SLIDES: Slide[] = [
@@ -26,7 +26,7 @@ const SLIDES: Slide[] = [
     cta: "Browse startups",
     image: heroFounder,
     alt: "A founder smiling at her laptop in a bright office",
-    link: { to: "/discover", hash: "startups" },
+    link: { to: "/discover", search: {} },
   },
   {
     eyebrow: "Live research",
@@ -35,7 +35,7 @@ const SLIDES: Slide[] = [
     cta: "Research a market",
     image: heroIndustry,
     alt: "A factory manager checking a tablet on the production floor",
-    link: { to: "/discover", hash: "discover" },
+    link: { to: "/discover", search: { research: true } },
   },
   {
     eyebrow: "Market watch",
@@ -44,7 +44,7 @@ const SLIDES: Slide[] = [
     cta: "Latest market changes",
     image: heroMarket,
     alt: "Two analysts reviewing printed market reports",
-    link: { to: "/discover", hash: "market-changes" },
+    link: { to: "/discover", search: { view: "all", overview: "changes" } },
   },
   {
     eyebrow: "For founders",
@@ -125,8 +125,8 @@ export function HeroCarousel() {
               <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-foreground/90 sm:text-lg">{s.body}</p>
               <div className="mt-8">
                 <Button asChild variant="glass" size="lg">
-                  {"hash" in s.link ? (
-                    <Link to={s.link.to} hash={s.link.hash}>
+                  {"search" in s.link ? (
+                    <Link to={s.link.to} search={s.link.search} hash={s.link.search.overview ? "market-overview" : undefined}>
                       {s.cta} <ArrowRight />
                     </Link>
                   ) : (

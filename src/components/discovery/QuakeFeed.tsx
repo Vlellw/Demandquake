@@ -85,29 +85,18 @@ function pad(n: number) {
  * Navy band in the place of Lindström's testimonials: one market scan at a time, its headline as the
  * quote, and its seismograph in a white card. Follows the discover filters.
  */
-export function QuakeFeed({ items, filtered }: { items: QuakeFeedItemDTO[]; filtered: boolean }) {
+export function QuakeFeed({ items, filtered, embedded = false }: { items: QuakeFeedItemDTO[]; filtered: boolean; embedded?: boolean }) {
   const [index, setIndex] = useState(0);
   const count = items.length;
   const i = count ? Math.min(index, count - 1) : 0;
   const q = items[i];
 
-  return (
-    <section id="market-changes" aria-labelledby="market-heading" className="bg-primary text-primary-foreground">
-      <div className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 sm:py-20">
-        <SectionHeading
-          id="market-heading"
-          tone="inverse"
-          eyebrow="Market watch"
-          title="What changed in the market"
-          description="Market scans read newly published articles about a startup’s problem. Each spike below is one change that matters."
-        />
-
-        {!q ? (
-          <p className="mx-auto mt-10 max-w-md text-center text-sm text-primary-foreground/85">
+  const body = !q ? (
+          <p className={`mx-auto max-w-md text-center text-sm text-primary-foreground/85 ${embedded ? "" : "mt-10"}`}>
             {filtered ? "No market scans match your filters yet." : "No market scans have finished yet."}
           </p>
         ) : (
-          <div className="mt-12 grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14">
+          <div className={`grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14 ${embedded ? "" : "mt-12"}`}>
             <div className="min-w-0" aria-live="polite">
               <p className="eyebrow text-primary-foreground">
                 {q.startup.name}
@@ -207,7 +196,22 @@ export function QuakeFeed({ items, filtered }: { items: QuakeFeedItemDTO[]; filt
               </p>
             </Link>
           </div>
-        )}
+        );
+
+  if (embedded) {
+    return <div className="rounded-[4px] bg-primary px-5 py-10 text-primary-foreground sm:px-10 sm:py-12">{body}</div>;
+  }
+  return (
+    <section id="market-changes" aria-labelledby="market-heading" className="bg-primary text-primary-foreground">
+      <div className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 sm:py-20">
+        <SectionHeading
+          id="market-heading"
+          tone="inverse"
+          eyebrow="Market watch"
+          title="What changed in the market"
+          description="Market scans read newly published articles about a startup’s problem. Each spike below is one change that matters."
+        />
+        {body}
       </div>
     </section>
   );

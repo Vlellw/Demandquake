@@ -112,10 +112,10 @@ function ResearchPage() {
     <div className="relative">
       <Breadcrumbs
         trail={[
-          <Link key="d" to="/discover" hash="startups">
+          <Link key="d" to="/discover">
             Discover startups
           </Link>,
-          <Link key="r" to="/discover" hash="latest-research">
+          <Link key="r" to="/discover" search={{ view: "all", overview: "runs" }} hash="market-overview">
             Latest research
           </Link>,
         ]}

@@ -2,15 +2,11 @@ import { SlidersHorizontal, X } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BUSINESS_MODELS, FRESHNESS_FILTERS, GEOGRAPHIES, INDUSTRIES } from "@/lib/taxonomy";
 import { Button } from "@/components/ui/button";
+import type { CatalogFilters } from "@/lib/journey";
 
-export interface FilterState {
-  industry: string;
-  geography: string;
-  model: string;
-  freshness: string;
-}
+export type FilterState = CatalogFilters;
 
-export const EMPTY_FILTERS: FilterState = { industry: "all", geography: "all", model: "all", freshness: "all" };
+export const EMPTY_FILTERS: FilterState = { industry: "all", region: "all", model: "all", fresh: "all" };
 
 function FilterSelect({
   label,
@@ -57,8 +53,8 @@ export function DiscoveryFilters({ value, onChange, count, total }: { value: Fil
       />
       <FilterSelect
         label="Region"
-        value={value.geography}
-        onChange={(geography) => onChange({ ...value, geography })}
+        value={value.region}
+        onChange={(region) => onChange({ ...value, region })}
         options={[{ value: "all", label: "All regions" }, ...GEOGRAPHIES.map((g) => ({ value: g, label: g }))]}
       />
       <FilterSelect
@@ -69,8 +65,8 @@ export function DiscoveryFilters({ value, onChange, count, total }: { value: Fil
       />
       <FilterSelect
         label="How recent"
-        value={value.freshness}
-        onChange={(freshness) => onChange({ ...value, freshness })}
+        value={value.fresh}
+        onChange={(fresh) => onChange({ ...value, fresh })}
         options={FRESHNESS_FILTERS.map((f) => ({ value: f.value, label: f.value === "all" ? "Any date" : f.label }))}
       />
       {active && (

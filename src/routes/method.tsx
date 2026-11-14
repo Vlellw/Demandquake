@@ -91,12 +91,12 @@ function MethodPage() {
             action={
               <>
                 <Button asChild size="lg">
-                  <Link to="/discover" hash="startups">
+                  <Link to="/discover">
                     Browse startups <ArrowRight />
                   </Link>
                 </Button>
                 <Button asChild variant="outline" size="lg">
-                  <Link to="/discover" hash="discover">
+                  <Link to="/discover" search={{ research: true }}>
                     Research a market
                   </Link>
                 </Button>
@@ -202,10 +202,10 @@ function MethodPage() {
         <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="font-display text-2xl font-bold sm:text-3xl">Ready to look around?</h2>
-            <p className="mt-2 text-primary-foreground/85">Browsing is free and open to everyone. You only need an account to claim a startup.</p>
+            <p className="mt-2 text-primary-foreground/85">Create a free account to browse every startup and its sources. Claiming one costs credits, and new accounts get welcome credits.</p>
           </div>
           <Button asChild variant="glass" size="lg">
-            <Link to="/discover" hash="startups">
+            <Link to="/discover">
               Browse startups <ArrowRight />
             </Link>
           </Button>

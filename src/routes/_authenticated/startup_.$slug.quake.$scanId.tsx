@@ -108,7 +108,7 @@ function QuakePage() {
       <div style={brandStyle(st.brand)}>
         <Breadcrumbs
           trail={[
-            <Link key="d" to="/discover" hash="startups">
+            <Link key="d" to="/discover">
               Discover startups
             </Link>,
             <Link key="s" to="/startup/$slug" params={{ slug }} search={{ tab: "updates" }}>

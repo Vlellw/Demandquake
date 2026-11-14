@@ -13,7 +13,7 @@ type Tile = {
   body: string;
   cta: string;
   tone: string;
-  link: { to: "/discover"; hash: string } | { to: "/method" } | { to: "/workspace" };
+  link: { to: "/discover"; search: { view?: string; overview?: string } } | { to: "/method" } | { to: "/workspace" };
 };
 
 const TILES = [
@@ -31,7 +31,7 @@ const TILES = [
     body: "Open a startup to read the posts and articles behind it. Anything the AI guessed is labelled as a hypothesis.",
     cta: "Browse startups",
     tone: "bg-tile-purple text-tile-foreground",
-    link: { to: "/discover", hash: "startups" },
+    link: { to: "/discover", search: {} },
   },
   {
     step: "Step 3",
@@ -47,7 +47,7 @@ const TILES = [
     body: "Market scans check new articles and tell you whether each change strengthens or weakens the idea.",
     cta: "Latest changes",
     tone: "bg-tile-magenta text-tile-foreground",
-    link: { to: "/discover", hash: "market-changes" },
+    link: { to: "/discover", search: { view: "all", overview: "changes" } },
   },
 ] as const satisfies readonly Tile[];
 
@@ -59,8 +59,8 @@ function TileBlock({ tile }: { tile: Tile }) {
       <p className="mt-2 text-sm leading-relaxed opacity-90">{tile.body}</p>
       <div className="mt-5">
         <Button asChild variant="glass" size="sm" className="h-9 px-4">
-          {"hash" in tile.link ? (
-            <Link to={tile.link.to} hash={tile.link.hash}>
+          {"search" in tile.link ? (
+            <Link to={tile.link.to} search={tile.link.search} hash={tile.link.search.overview ? "market-overview" : undefined}>
               {tile.cta} <ArrowRight />
             </Link>
           ) : (

@@ -37,7 +37,18 @@ function useSize<T extends HTMLElement>() {
   return { ref, ...size };
 }
 
-export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
+export function OpportunityRadar({
+  nodes,
+  highlightId,
+  highlightLabel = "This idea",
+  compact = false,
+}: {
+  nodes: RadarNodeDTO[];
+  /** Ring one problem (e.g. the one the current startup was built from). */
+  highlightId?: string | null;
+  highlightLabel?: string;
+  compact?: boolean;
+}) {
   const { ref, w, h } = useSize<HTMLDivElement>();
   const [hovered, setHovered] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -102,7 +113,7 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
       </div>
 
       <div className="relative grid lg:grid-cols-[1fr_360px]">
-        <div ref={ref} className="relative h-[460px] overflow-hidden sm:h-[520px]">
+        <div ref={ref} className={cn("relative overflow-hidden", compact ? "h-[380px] sm:h-[420px]" : "h-[460px] sm:h-[520px]")}>
           {/* radar rings + sweep */}
           <div className="pointer-events-none absolute inset-0 grid place-items-center">
             {[0.18, 0.36, 0.56, 0.78].map((f) => (
@@ -182,6 +193,19 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
                     className="transition-all duration-200"
                   />
                   {n.d.startup && <circle cx={n.x} cy={n.y} r={2.6} fill={color} />}
+                  {highlightId === n.d.id && (
+                    <>
+                      <circle cx={n.x} cy={n.y} r={n.r + 6} fill="none" stroke="var(--primary)" strokeWidth={2} strokeDasharray="4 3" />
+                      <text
+                        x={n.x}
+                        y={(n.y ?? 0) - n.r - 12 < 12 ? (n.y ?? 0) + n.r + 22 : (n.y ?? 0) - n.r - 12}
+                        textAnchor="middle"
+                        className="fill-primary text-[11px] font-bold"
+                      >
+                        {highlightLabel}
+                      </text>
+                    </>
+                  )}
                 </motion.g>
               );
             })}
@@ -240,6 +264,9 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
                 <div className="mt-6 rounded-[4px] bg-surface-sunken p-4 text-sm text-foreground">
                   Each dot is a problem that came up again and again in live sources. Click one to read the posts behind it
                   and open the startup made from it.
+                  {highlightId && nodes.some((n) => n.id === highlightId) && (
+                    <span className="mt-2 block font-semibold text-primary">The dashed ring marks the problem this idea was built from.</span>
+                  )}
                 </div>
               </motion.div>
             )}

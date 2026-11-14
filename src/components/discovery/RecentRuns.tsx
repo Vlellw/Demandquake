@@ -32,17 +32,14 @@ function StatusLine({ status }: { status: string }) {
 }
 
 /** "Latest research" as Lindström news cards: status kicker, the question as title, outlined tags. */
-export function RecentRuns({ runs }: { runs: RunDTO[] }) {
-  if (runs.length === 0) return null;
-  return (
-    <section id="latest-research" aria-labelledby="runs-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
-      <SectionHeading
-        id="runs-heading"
-        eyebrow="Stay up to date"
-        title="The latest research"
-        description="Every research run is public. Open one to replay what was searched, which sources were read and which startups came out of it."
-      />
-      <ul className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+export function RecentRuns({ runs, embedded = false }: { runs: RunDTO[]; embedded?: boolean }) {
+  if (runs.length === 0) {
+    return embedded ? (
+      <p className="rounded-[4px] bg-surface-sunken px-6 py-12 text-center text-sm text-muted-foreground">No research has run yet.</p>
+    ) : null;
+  }
+  const list = (
+      <ul className={`grid gap-5 sm:grid-cols-2 lg:grid-cols-3 ${embedded ? "" : "mt-12"}`}>
         {runs.slice(0, 6).map((r) => (
           <li key={r.id}>
             <Link
@@ -72,6 +69,17 @@ export function RecentRuns({ runs }: { runs: RunDTO[] }) {
           </li>
         ))}
       </ul>
+  );
+  if (embedded) return list;
+  return (
+    <section id="latest-research" aria-labelledby="runs-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
+      <SectionHeading
+        id="runs-heading"
+        eyebrow="Stay up to date"
+        title="The latest research"
+        description="Every research run is shared with signed-in founders. Open one to replay what was searched, which sources were read and which startups came out of it."
+      />
+      {list}
     </section>
   );
 }
