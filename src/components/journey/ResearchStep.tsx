@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Coins, Factory, Loader2, MapPin, Search } from "lucide-react";
+import { ArrowLeft, ArrowRight, Coins, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { startDiscovery } from "@/lib/research.functions";
 import { EXAMPLE_QUERIES, INDUSTRIES } from "@/lib/taxonomy";
@@ -12,7 +12,6 @@ import { canAfford } from "@/lib/credit-rules";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { InfoTip } from "@/components/common/InfoTip";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 const NEXT_STEPS = [
   { n: "1", title: "We read the live web" },
@@ -221,15 +220,6 @@ export function ResearchStep({
             <div className="rounded-[4px] border-l-4 border-primary bg-surface-sunken p-4">
               <p className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-muted-foreground">You’re researching</p>
               <p className="mt-1 font-display text-lg font-bold leading-snug text-foreground">“{query.trim()}”</p>
-              <div className="mt-3 flex flex-wrap gap-1.5">
-                <Badge variant="outline">
-                  <Factory /> {industry === "any" ? "Any industry" : industry}
-                </Badge>
-                <Badge variant="outline">
-                  <MapPin /> {geography === "any" ? "Any region" : geography}
-                </Badge>
-                {force && <Badge variant="default">Fresh research, not reused</Badge>}
-              </div>
             </div>
 
             <dl className="mt-5 grid grid-cols-2 gap-4">
