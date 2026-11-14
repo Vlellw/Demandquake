@@ -1,6 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { Check } from "lucide-react";
 import { JOURNEY_STEPS, journeyStatuses, type JourneyStepNumber } from "@/lib/journey";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +37,7 @@ export function JourneySteps({
                 )}
                 aria-hidden="true"
               >
-                {status === "done" ? <Check className="size-3 sm:size-3.5" strokeWidth={2.5} /> : s.n}
+                {s.n}
               </span>
               <span className="min-w-0 text-center sm:text-left">
                 <span
