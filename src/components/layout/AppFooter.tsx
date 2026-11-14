@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUp, BookOpen, Compass } from "lucide-react";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
 import { InfoTip } from "@/components/common/InfoTip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuthUser } from "@/hooks/use-auth";
 
 const LINKS = [{ to: "/workspace", label: "My startups" }] as const;
@@ -60,20 +61,37 @@ export function AppFooter() {
             </ul>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/discover" className={circle} aria-label="Discover startups">
-              <Compass className="size-[18px]" />
-            </Link>
-            <Link to="/method" className={circle} aria-label="How it works">
-              <BookOpen className="size-[18px]" />
-            </Link>
-            <button
-              type="button"
-              className={`${circle} cursor-pointer`}
-              aria-label="Back to top"
-              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            >
-              <ArrowUp className="size-[18px]" />
-            </button>
+            <TooltipProvider delayDuration={150}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to="/discover" className={circle} aria-label="Discover startups">
+                    <Compass className="size-[18px]" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>Browse startup ideas found from live market research</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link to="/method" className={circle} aria-label="How it works">
+                    <BookOpen className="size-[18px]" />
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent>See how Demandquake turns web signals into startup ideas</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    type="button"
+                    className={`${circle} cursor-pointer`}
+                    aria-label="Back to top"
+                    onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                  >
+                    <ArrowUp className="size-[18px]" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>Back to the top of the page</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </div>
