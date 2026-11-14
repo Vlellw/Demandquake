@@ -58,3 +58,42 @@ export function marketCheckDue(opts: { lastScanAt: string | null; researchAt: st
   if (!times.length) return false;
   return opts.now - Math.max(...times) > MARKET_CHECK_INTERVAL_MS;
 }
+
+export interface Recommendation<C> {
+  card: C;
+  reason: string;
+}
+
+/**
+ * Personalised picks for a signed-in founder: unclaimed-by-them startups sharing an industry
+ * (strongest signal) or a concrete region with startups they already claimed. No match → no pick.
+ */
+export function recommendStartups<
+  C extends { id: string; slug: string; industry: string | null; geography: string | null; research_at: string },
+>(
+  cards: C[],
+  projects: { name: string; startup_id: string | null; research: { startup_slug?: string; industry?: string | null; geography?: string | null } }[],
+  limit = 3,
+): Recommendation<C>[] {
+  if (!projects.length) return [];
+  const ownedIds = new Set(projects.map((p) => p.startup_id).filter(Boolean));
+  const ownedSlugs = new Set(projects.map((p) => p.research.startup_slug).filter(Boolean));
+  const scored = cards
+    .filter((c) => !ownedIds.has(c.id) && !ownedSlugs.has(c.slug))
+    .map((c) => {
+      const byIndustry = c.industry ? projects.find((p) => p.research.industry === c.industry) : undefined;
+      // "Global" says nothing about fit, so only a concrete shared region counts.
+      const byGeo =
+        c.geography && c.geography !== "Global" ? projects.find((p) => p.research.geography === c.geography) : undefined;
+      const score = (byIndustry ? 3 : 0) + (byGeo ? 1 : 0);
+      const reason = byIndustry
+        ? `Same industry as ${byIndustry.name}`
+        : byGeo
+          ? `Same region as ${byGeo.name}`
+          : "";
+      return { card: c, reason, score };
+    })
+    .filter((r) => r.score > 0)
+    .sort((a, b) => b.score - a.score || new Date(b.card.research_at).getTime() - new Date(a.card.research_at).getTime());
+  return scored.slice(0, limit).map(({ card, reason }) => ({ card, reason }));
+}

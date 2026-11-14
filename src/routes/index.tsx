@@ -8,6 +8,7 @@ import { StartupCard } from "@/components/discovery/StartupCard";
 import { DiscoveryFilters, EMPTY_FILTERS, type FilterState } from "@/components/discovery/DiscoveryFilters";
 import { RecentRuns } from "@/components/discovery/RecentRuns";
 import { QuakeFeed } from "@/components/discovery/QuakeFeed";
+import { PickedForYou } from "@/components/discovery/PickedForYou";
 import { radarQuery, recentQuakesQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
 import { matchesFreshness } from "@/lib/research-utils";
 
@@ -81,6 +82,8 @@ function DiscoverPage() {
         </div>
 
         <OpportunityRadar nodes={filteredNodes} />
+
+        <PickedForYou cards={cards} />
 
         <QuakeFeed items={quakes} />
 

@@ -16,6 +16,7 @@
 - [x] Brand data pre-loaded for all 15 startups
 - [x] Workspace market watch: scans run in place, re-check automatically once a week on visit, and auto-log into founder activity
 - [x] Discovery page "Opportunity quakes" feed: recent market scans drawn as seismograph traces (one spike per change, colored by implication)
+- [x] "Picked for you" on discover for signed-in founders (same industry or concrete region as their claimed startups)
 
 ## In progress
 

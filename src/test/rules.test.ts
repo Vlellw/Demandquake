@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeRedirect } from "@/lib/safe-redirect";
-import { marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
+import { recommendStartups, marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
 import { pickQuakeFeed, computeEvidenceStrength, freshnessOf, matchesFreshness, normalizeUrl, stripRefLabels, cleanRefLabels, replaceBrandName, brandMatchesCompetitor, sameNameCandidates } from "@/lib/research-utils";
 import { buildProjectFromStartup, type StartupForClaim } from "@/lib/claim";
 
@@ -198,5 +198,37 @@ describe("home market-shift feed", () => {
   it("respects the limit", () => {
     const feed = pickQuakeFeed([scan("a", "mixed", 1, "2026-11-14T10:00:00Z"), scan("b", "weakened", 2, "2026-11-13T10:00:00Z")], 1);
     expect(feed.map((s) => s.id)).toEqual(["a"]);
+  });
+});
+
+describe("personalised recommendations", () => {
+  const card = (id: string, industry: string | null, geography: string | null, at = "2026-11-10T00:00:00Z") => ({
+    id,
+    slug: id,
+    industry,
+    geography,
+    research_at: at,
+  });
+  const project = { name: "Chartweft", startup_id: "own", research: { startup_slug: "own", industry: "Healthcare", geography: "North America" } };
+
+  it("never recommends a startup the founder already claimed", () => {
+    const recs = recommendStartups([card("own", "Healthcare", "North America")], [project]);
+    expect(recs).toEqual([]);
+  });
+  it("ranks same-industry picks above same-market picks and explains why", () => {
+    const recs = recommendStartups([card("geo", "Education", "North America"), card("ind", "Healthcare", "Europe")], [project]);
+    expect(recs.map((r) => r.card.id)).toEqual(["ind", "geo"]);
+    expect(recs[0]?.reason).toBe("Same industry as Chartweft");
+    expect(recs[1]?.reason).toBe("Same region as Chartweft");
+  });
+  it("does not treat a shared \"Global\" market as a match", () => {
+    const globalProject = { ...project, research: { ...project.research, geography: "Global" } };
+    expect(recommendStartups([card("g", "Education", "Global")], [globalProject])).toEqual([]);
+  });
+  it("skips startups with no shared industry or market", () => {
+    expect(recommendStartups([card("x", "Logistics", "Europe")], [project])).toEqual([]);
+  });
+  it("returns nothing for founders without projects", () => {
+    expect(recommendStartups([card("ind", "Healthcare", "Europe")], [])).toEqual([]);
   });
 });
