@@ -37,6 +37,10 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Add account Settings in the menu with email/password changes and email-verified self-deletion; navigation, validation and confirmation verified, three deletion safety tests passed.
+- [ ] End-to-end account mutation checks require a disposable account; no real email, password or account was changed. Deletion also requires the sign-in email to include its OTP code; template delivery is unverified.
+- [x] Remove menu research shortcut, rename browse to Search startups, and remove two highlighted sign-in descriptions.
+- [x] Reduce search example buttons again.
 - [x] Remove optional search-focus controls; center and enlarge the query and example choices; example selection and phone width verified.
 - [x] Compact evidence map with scroll pan and zoom controls; real startup and phone verified.
 - [x] Fix workspace pitch content overlapping its controls and add Recommended actions headline.

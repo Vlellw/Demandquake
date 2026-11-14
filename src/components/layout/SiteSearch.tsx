@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Command as CommandPrimitive } from "cmdk";
-import { BookOpen, Briefcase, CircleUserRound, Compass, LogOut, Telescope } from "lucide-react";
+import { BookOpen, Briefcase, CircleUserRound, Compass, LogOut, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { CreditBalance } from "@/components/credits/CreditBalance";
@@ -23,10 +23,7 @@ export function SiteSearch({ open, onOpenChange, onSignOut }: { open: boolean; o
               className="space-y-1"
             >
               <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => navigate({ to: "/discover", search: { view: "all" } }))} className={itemClass}>
-                <Compass className="size-4 text-primary" /> Browse all startups
-              </CommandPrimitive.Item>
-              <CommandPrimitive.Item value="research new market discovery start" onSelect={() => go(() => navigate({ to: "/discover", search: { research: true } }))} className={itemClass}>
-                <Telescope className="size-4 text-primary" /> Research a new market
+                <Compass className="size-4 text-primary" /> Search startups
               </CommandPrimitive.Item>
               <CommandPrimitive.Item value="how it works method sources" onSelect={() => go(() => navigate({ to: "/method" }))} className={itemClass}>
                 <BookOpen className="size-4 text-primary" /> How it works
@@ -45,6 +42,7 @@ export function SiteSearch({ open, onOpenChange, onSignOut }: { open: boolean; o
           </div>
           <CreditBalance userId={user.id} onNavigate={() => onOpenChange(false)} />
           <div className="mt-6 border-t border-border pt-3">
+            <Button asChild variant="ghost" className="-ml-3"><Link to="/settings" onClick={() => onOpenChange(false)}><Settings />Settings</Link></Button>
             <Button variant="ghost" className="-ml-3" onClick={() => { onOpenChange(false); void onSignOut(); }}><LogOut />Sign out</Button>
           </div>
         </>}

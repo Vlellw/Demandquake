@@ -199,7 +199,7 @@ export function ResearchStep({
                       inputRef.current?.focus();
                     }}
                     aria-pressed={query === q}
-                    className="h-auto min-h-10 max-w-full whitespace-normal rounded-full border-ink/40 px-4 py-2 text-center text-sm leading-snug aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-primary sm:text-base"
+                    className="h-auto min-h-9 max-w-full whitespace-normal rounded-full border-ink/40 px-3 py-1.5 text-center text-xs leading-snug aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-primary sm:text-sm"
                   >
                     {q}
                   </Button>

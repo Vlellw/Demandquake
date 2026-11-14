@@ -16,6 +16,7 @@ import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as MethodRouteImport } from './routes/method'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedCreditsAdminRouteImport } from './routes/_authenticated/credits.admin'
 import { Route as AuthenticatedCreditsHistoryRouteImport } from './routes/_authenticated/credits.history'
 import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
@@ -59,6 +60,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
   id: '/discover',
   path: '/discover',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCreditsAdminRoute =
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
   '/discover': typeof AuthenticatedDiscoverRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -147,6 +154,7 @@ export interface FileRoutesByTo {
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
   '/discover': typeof AuthenticatedDiscoverRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -167,6 +175,7 @@ export interface FileRoutesById {
   '/method': typeof MethodRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/credits/admin': typeof AuthenticatedCreditsAdminRoute
   '/_authenticated/credits/history': typeof AuthenticatedCreditsHistoryRoute
   '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
@@ -187,6 +196,7 @@ export interface FileRouteTypes {
     | '/method'
     | '/reset-password'
     | '/discover'
+    | '/settings'
     | '/credits/admin'
     | '/credits/history'
     | '/invite/$token'
@@ -205,6 +215,7 @@ export interface FileRouteTypes {
     | '/method'
     | '/reset-password'
     | '/discover'
+    | '/settings'
     | '/credits/admin'
     | '/credits/history'
     | '/invite/$token'
@@ -224,6 +235,7 @@ export interface FileRouteTypes {
     | '/method'
     | '/reset-password'
     | '/_authenticated/discover'
+    | '/_authenticated/settings'
     | '/_authenticated/credits/admin'
     | '/_authenticated/credits/history'
     | '/_authenticated/invite/$token'
@@ -296,6 +308,13 @@ declare module '@tanstack/react-router' {
       path: '/discover'
       fullPath: '/discover'
       preLoaderRoute: typeof AuthenticatedDiscoverRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/credits/admin': {
@@ -373,6 +392,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedCreditsAdminRoute: typeof AuthenticatedCreditsAdminRoute
   AuthenticatedCreditsHistoryRoute: typeof AuthenticatedCreditsHistoryRoute
   AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
@@ -385,6 +405,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedCreditsAdminRoute: AuthenticatedCreditsAdminRoute,
   AuthenticatedCreditsHistoryRoute: AuthenticatedCreditsHistoryRoute,
   AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
