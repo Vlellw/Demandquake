@@ -159,7 +159,7 @@ function ResearchPage() {
               {(run.plan.geography || run.geography) && <Badge variant="outline">{run.plan.geography ?? run.geography}</Badge>}
             </div>
           </div>
-          <dl className="grid w-full grid-cols-3 gap-6 sm:w-auto sm:min-w-[22rem]">
+          <dl className="grid w-full grid-cols-3 gap-4 sm:w-auto sm:min-w-[18rem] [&>div]:border-t [&>div]:border-border [&>div]:pt-2 [&_dd]:text-xl [&_dd]:font-semibold [&_dd]:text-muted-foreground [&_dt]:text-xs [&_dt]:text-muted-foreground">
             <StatRule label="Sources read" value={evidence.length} />
             <StatRule label="Problems found" value={detail.clusters.length} />
             <StatRule label="Startups" value={detail.startups.length} />
