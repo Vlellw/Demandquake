@@ -16,7 +16,6 @@ import { ResearchConstellation } from "@/components/research/ResearchConstellati
 import { StartupCard } from "@/components/discovery/StartupCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { StatRule } from "@/components/common/StatRule";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
@@ -117,17 +116,15 @@ function ResearchPage() {
 
   return (
     <div className="relative">
-      <JourneySteps current={isDone ? 2 : 1} />
-      <Breadcrumbs
-        trail={[
-          <Link key="d" to="/discover">
-            Discover startups
-          </Link>,
-          <Link key="r" to="/discover" search={{ view: "all", overview: "runs" }} hash="market-overview">
-            Latest research
-          </Link>,
-        ]}
-        current={run.query}
+      <JourneySteps
+        current={isDone ? 2 : 1}
+        renderStep={(n, content, cls) =>
+          n === 1 || (n === 2 && isDone) ? (
+            <Link to="/discover" className={cls + " hover:opacity-80"}>
+              {content}
+            </Link>
+          ) : undefined
+        }
       />
       <div className="relative mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
         <header className="flex flex-wrap items-start justify-between gap-8">
