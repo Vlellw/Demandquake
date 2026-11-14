@@ -64,6 +64,13 @@
       "when": 1794665285064,
       "tag": "0008_atomic_paid_discovery_and_verified_admin_bootstrap",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794667266238,
+      "tag": "0009_restrict_competitor_caches_to_service",
+      "breakpoints": true
     }
   ]
 }
