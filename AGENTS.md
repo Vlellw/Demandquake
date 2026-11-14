@@ -50,6 +50,7 @@ use the editor.
 - Payment functions use the shared gateway Stripe utility, authenticated user identity and server-snapshotted orders; only signature-verified webhooks allocate or reverse credits, keeping test purchases separate from live balances.
 - Admin bootstrap uses a service-only allowlist matched to a verified auth email; ordinary browser requests can never assign roles or edit balances.
 - Discover state (industry, view, filters, overview tab, jump-to-search request) lives in validated URL search params defined in `src/lib/journey.ts`, so every journey step is linkable and back-button safe; Step 2 check-offs are per-browser localStorage hints, never billing or account data.
+- Discover's validated step parameter renders Search or Choose exclusively; Inspect and Claim remain distinct startup/workspace pages so scrolling cannot cross journey parts.
 - Workspace assumptions use a dedicated list component with status filters and explicit selectors, connected to the existing project saver; this keeps long hypotheses readable without accidental status changes.
 
 - Startup inspection keeps Overview outside the tab control and defaults to Evidence; Overview counts as viewed on page entry because it remains visible above every panel.
@@ -59,3 +60,4 @@ use the editor.
 - AppHeader uses one shared SiteSearch drawer for navigation, identity and credit controls on all screen sizes so account actions have one consistent home.
 - Missing banner requests share their promise across mounted cards and profiles so every subscriber receives the generated image.
 - Banner artwork uses a shared version in storage paths and URLs; stale versions regenerate lazily so prompt changes replace cached images without breaking old URLs.
+- Pitch PDFs render static copies of the shared player in the browser, one complete slide per page; prepare the Blob before the save click to preserve mobile download activation and private workspace access.

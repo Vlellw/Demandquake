@@ -356,6 +356,24 @@
       oklch(0.97 0.012 var(--brand-h, 250));
   }
 
+  .pitch-export-stage {
+    position: fixed;
+    left: -10000px;
+    top: 0;
+    width: 800px;
+    pointer-events: none;
+  }
+
+  .pitch-export-slide {
+    width: 800px;
+    height: 600px;
+    min-height: 600px;
+    aspect-ratio: 4 / 3;
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
   /* Full-bleed brand block used where Lindström shows a photo */
   .brand-banner {
     background:

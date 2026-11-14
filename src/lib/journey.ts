@@ -26,6 +26,7 @@ export function journeyStatuses(current: JourneyStepNumber | null, complete = fa
 export const FOR_YOU = "for-you";
 
 export const discoverSearchSchema = z.object({
+  step: fallback(z.coerce.number().int().min(1).max(2), 1).default(1),
   view: fallback(z.string(), "guided").default("guided"),
   industry: fallback(z.string(), "all").default("all"),
   region: fallback(z.string(), "all").default("all"),
@@ -39,6 +40,11 @@ export const discoverSearchSchema = z.object({
 });
 export type DiscoverSearch = z.infer<typeof discoverSearchSchema>;
 export const DISCOVER_DEFAULTS: DiscoverSearch = discoverSearchSchema.parse({});
+
+/** Discover renders exactly one journey part; later parts have their own routes. */
+export function discoverStep(step: number, searchCompleted: boolean): 1 | 2 {
+  return searchCompleted && step === 2 ? 2 : 1;
+}
 
 export type DiscoverView = "guided" | "all";
 export type OverviewPanel = "map" | "changes" | "runs";

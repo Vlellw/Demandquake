@@ -145,6 +145,11 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
 
   return (
     <div style={brandStyle(p.brand)}>
+      <JourneySteps current={4} renderStep={(n, content, cls) => n === 1 || n === 2 ? (
+        <Link to="/discover" search={{ step: n }} className={cls}>{content}</Link>
+      ) : n === 3 && r.startup_slug ? (
+        <Link to="/startup/$slug" params={{ slug: r.startup_slug }} className={cls}>{content}</Link>
+      ) : undefined} />
       <WelcomePanel project={p} />
       <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-[1300px] px-4 pb-8 pt-8 sm:px-6">
@@ -224,6 +229,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
                 brand: p.brand,
                 evidenceCount: r.sources?.length ?? 0,
                 domains: [...new Set((r.sources ?? []).map((s) => s.domain))],
+                sources: r.sources ?? [],
                 features: [],
                 customers: (r.customers ?? []).map((c) => c.segment),
                 businessModel: r.business_model?.type ?? null,
@@ -306,7 +312,6 @@ function WelcomePanel({ project: p }: { project: ProjectDTO }) {
   ];
   return (
     <section aria-labelledby="welcome-heading" className="border-b border-border bg-surface-sunken">
-      <JourneySteps current={4} complete className="bg-transparent" />
       <div className="mx-auto max-w-[1300px] px-4 py-8 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div>

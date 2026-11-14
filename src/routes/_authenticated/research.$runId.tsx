@@ -120,7 +120,7 @@ function ResearchPage() {
         current={isDone ? 2 : 1}
         renderStep={(n, content, cls) =>
           n === 1 || (n === 2 && isDone) ? (
-            <Link to="/discover" className={cls + " hover:opacity-80"}>
+            <Link to="/discover" search={{ step: n === 2 ? 2 : 1 }} className={cls + " hover:opacity-80"}>
               {content}
             </Link>
           ) : undefined

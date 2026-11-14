@@ -232,18 +232,17 @@ function StartupPage() {
     <SourceProvider sources={orderedSources} citations={citations}>
       <div style={brandStyle(st.brand)}>
         <JourneySteps
-          current={claimed ? 4 : 3}
-          complete={claimed}
+          current={3}
           renderStep={(n, content, cls) => {
             if (n === 1)
               return (
-                <Link to="/discover" hash="search-step" className={cn(cls, "hover:opacity-80")}>
+                <Link to="/discover" search={{ step: 1 }} className={cn(cls, "hover:opacity-80")}>
                   {content}
                 </Link>
               );
             if (n === 2)
               return (
-                <Link to="/discover" search={{ industry: st.industry ?? "all" }} className={cn(cls, "hover:opacity-80")}>
+                <Link to="/discover" search={{ step: 2, industry: st.industry ?? "all" }} className={cn(cls, "hover:opacity-80")}>
                   {content}
                 </Link>
               );

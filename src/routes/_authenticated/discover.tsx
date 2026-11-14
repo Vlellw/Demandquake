@@ -2,12 +2,13 @@ import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { radarQuery, recentQuakesQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
-import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, isSearchDone, normalizeOverview, normalizeView } from "@/lib/journey";
+import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, discoverStep, isSearchDone, normalizeOverview, normalizeView } from "@/lib/journey";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { GuidedDiscover } from "@/components/journey/GuidedDiscover";
 import { CatalogView } from "@/components/journey/CatalogView";
 import { ResearchStep } from "@/components/journey/ResearchStep";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_authenticated/discover")({
   validateSearch: zodValidator(discoverSearchSchema),
@@ -60,41 +61,43 @@ function DiscoverPage() {
 
   // "Research a market" buttons jump back up to Step 1 instead of opening a pop-up.
   const [focusKey, setFocusKey] = useState(0);
-  const goToSearch = () => setFocusKey((k) => k + 1);
+  const goToSearch = () => {
+    setFocusKey((k) => k + 1);
+    navigate({ search: (p) => ({ ...p, step: 1 }), resetScroll: true });
+  };
   useEffect(() => {
     if (!search.research) return;
     setFocusKey((k) => k + 1);
-    navigate({ search: (p) => ({ ...p, research: false }), replace: true, resetScroll: false });
+    navigate({ search: (p) => ({ ...p, step: 1, research: false }), replace: true, resetScroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.research]);
-  const skipToIdeas = () => document.getElementById("startups")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const choosing = marketOpen && (search.industry !== "all" || view === "all");
+  const skipToIdeas = () => navigate({ search: (p) => ({ ...p, step: 2 }), resetScroll: true });
+  const step = discoverStep(search.step, marketOpen);
 
   return (
     <div>
       <JourneySteps
-        current={choosing ? 2 : 1}
+        current={step}
         renderStep={(n, content, cls) =>
           n === 1 ? (
-            <button type="button" onClick={goToSearch} className={`${cls} cursor-pointer hover:opacity-80`}>
+            <Button variant="ghost" type="button" onClick={goToSearch} className={`${cls} cursor-pointer hover:opacity-80`}>
               {content}
-            </button>
+            </Button>
           ) : n === 2 && marketOpen ? (
-            <button type="button" onClick={skipToIdeas} className={`${cls} cursor-pointer hover:opacity-80`}>
+            <Button variant="ghost" type="button" onClick={skipToIdeas} className={`${cls} cursor-pointer hover:opacity-80`}>
               {content}
-            </button>
+            </Button>
           ) : undefined
         }
       />
-      <ResearchStep
+      {step === 1 ? <ResearchStep
         initialQuery={search.q}
         initialIndustry={search.industry}
         rerun={search.rerun}
         focusKey={focusKey}
         locked={!marketOpen}
         onSkip={skipToIdeas}
-      />
-      {effectiveView === "guided" ? (
+      /> : effectiveView === "guided" ? (
         // The market section appears only after the first search completes.
         marketOpen ? (
           <GuidedDiscover cards={cards} stats={stats} industry={search.industry} onResearch={goToSearch} />

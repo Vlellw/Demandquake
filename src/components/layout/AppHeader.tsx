@@ -48,6 +48,10 @@ export function AppHeader() {
               <JourneySteps inline current={pathname === "/" ? null : pathname.startsWith("/workspace") ? 4 : 1}
                 renderStep={(n, content, cls) => n === 1 ? (
                   <Link to="/discover" search={{ research: true }} className={cls}>{content}</Link>
+                ) : n === 2 ? (
+                  <Link to="/discover" search={{ step: 2 }} className={cls}>{content}</Link>
+                ) : n === 4 ? (
+                  <Link to="/workspace" className={cls}>{content}</Link>
                 ) : undefined}
               />
             </div>

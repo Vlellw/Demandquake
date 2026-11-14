@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DISCOVER_DEFAULTS,
   discoverSearchSchema,
+  discoverStep,
   filterCards,
   industryChoices,
   inspectionProgress,
@@ -116,6 +117,14 @@ describe("step 2 inspection", () => {
 });
 
 describe("search gate", () => {
+  it("shows only the selected Search or Choose part", () => {
+    expect(discoverStep(1, true)).toBe(1);
+    expect(discoverStep(2, true)).toBe(2);
+    expect(discoverSearchSchema.parse({ step: "2" }).step).toBe(2);
+  });
+  it("keeps Choose inaccessible until search completion", () => {
+    expect(discoverStep(2, false)).toBe(1);
+  });
   it("opens the market only when the stored flag is exactly set", () => {
     expect(parseSearchDone("1")).toBe(true);
     expect(parseSearchDone(null)).toBe(false);

@@ -6,6 +6,7 @@ import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
 import { SeismicField } from "@/components/common/SeismicField";
 import { cn } from "@/lib/utils";
+import { PitchDownload } from "@/components/startup/PitchDownload";
 
 const SLIDE_MS = 8000;
 const KIND_LABEL: Record<string, string> = {
@@ -23,14 +24,16 @@ export interface PitchContext {
   brand: Brand;
   evidenceCount: number;
   domains: string[];
+  sources?: { domain: string; url: string }[];
   features: string[];
   customers: string[];
   businessModel: string | null;
 }
 
-export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; ctx: PitchContext; className?: string }) {
-  const [index, setIndex] = useState(0);
-  const [playing, setPlaying] = useState(true);
+export function PitchPlayer({ slides, ctx, className, exportIndex }: { slides: PitchSlide[]; ctx: PitchContext; className?: string; exportIndex?: number }) {
+  const exporting = exportIndex !== undefined;
+  const [index, setIndex] = useState(exportIndex ?? 0);
+  const [playing, setPlaying] = useState(!exporting);
   const [hovering, setHovering] = useState(false);
   const [progress, setProgress] = useState(0);
   const started = useRef<number>(Date.now());
@@ -80,7 +83,7 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
       style={brandStyle(ctx.brand)}
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
-      tabIndex={0}
+      tabIndex={exporting ? -1 : 0}
       role="region"
       aria-roledescription="carousel"
       aria-label={`${ctx.name} pitch`}
@@ -120,7 +123,7 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
         <AnimatePresence mode="wait">
           <motion.div
             key={index}
-            initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
+            initial={exporting ? false : { opacity: 0, y: 18, filter: "blur(6px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             exit={{ opacity: 0, y: -14, filter: "blur(4px)" }}
             transition={{ duration: 0.55, ease: [0.2, 0.8, 0.2, 1] }}
@@ -128,21 +131,21 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
             <p className="brand-text font-mono text-[11px] uppercase tracking-[0.2em]">{KIND_LABEL[slide.kind]}</p>
             <h3 className="mt-3 max-w-xl font-display text-2xl font-semibold leading-[1.08] text-foreground sm:text-[2.1rem]">{slide.headline}</h3>
             <motion.p
-              initial={{ opacity: 0 }}
+              initial={exporting ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.35 }}
               className="mt-3 max-w-lg text-sm leading-relaxed text-foreground/75 sm:text-base"
             >
               {slide.body}
             </motion.p>
-            <SlideVisual kind={slide.kind} ctx={ctx} />
+            <SlideVisual kind={slide.kind} ctx={ctx} exporting={exporting} />
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* controls */}
       <div className="absolute inset-x-0 bottom-0 z-10 flex items-center gap-1 px-4 pb-3">
-        <button onClick={() => go(index - 1)} className="rounded-md p-1.5 text-foreground/70 hover:bg-foreground/10 hover:text-foreground" aria-label="Previous slide">
+        {!exporting && <><button onClick={() => go(index - 1)} className="rounded-md p-1.5 text-foreground/70 hover:bg-foreground/10 hover:text-foreground" aria-label="Previous slide">
           <ChevronLeft className="size-4" />
         </button>
         <button
@@ -159,29 +162,33 @@ export function PitchPlayer({ slides, ctx, className }: { slides: PitchSlide[]; 
         </button>
         <button onClick={() => go(index + 1)} className="rounded-md p-1.5 text-foreground/70 hover:bg-foreground/10 hover:text-foreground" aria-label="Next slide">
           <ChevronRight className="size-4" />
-        </button>
-        <span className="ml-auto truncate font-mono text-[10px] text-foreground/50">AI-generated pitch · ~{Math.round((total * SLIDE_MS) / 1000)}s</span>
+        </button></>}
+        <span className="ml-auto truncate font-mono text-[10px] text-foreground/50">AI-generated pitch{!exporting && ` · ~${Math.round((total * SLIDE_MS) / 1000)}s`}</span>
+        {!exporting && <PitchDownload name={ctx.name} total={total}>
+          {slides.map((_, i) => <PitchPlayer key={i} slides={slides} ctx={ctx} exportIndex={i} className="pitch-export-slide" />)}
+        </PitchDownload>}
       </div>
     </div>
   );
 }
 
-function SlideVisual({ kind, ctx }: { kind: PitchSlide["kind"]; ctx: PitchContext }) {
+function SlideVisual({ kind, ctx, exporting }: { kind: PitchSlide["kind"]; ctx: PitchContext; exporting: boolean }) {
   if (kind === "evidence") {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-5 flex flex-wrap items-center gap-2">
+      <motion.div initial={exporting ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-5 flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-observed/40 bg-observed/15 px-3 py-1 font-mono text-xs text-observed">
           {ctx.evidenceCount} live sources
         </span>
         {ctx.domains.slice(0, 5).map((d, i) => (
           <motion.span
             key={d}
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={exporting ? false : { opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.6 + i * 0.12 }}
             className="inline-flex items-center gap-1.5 rounded-full border border-foreground/15 bg-background/40 px-2.5 py-1 text-xs text-foreground/80 backdrop-blur"
           >
-            <SourceFavicon domain={d} className="size-3.5" /> {d}
+            {!exporting && <SourceFavicon domain={d} className="size-3.5" />}
+            {ctx.sources?.find((s) => s.domain === d)?.url ? <a href={ctx.sources.find((s) => s.domain === d)?.url} target="_blank" rel="noreferrer">{d}</a> : d}
           </motion.span>
         ))}
       </motion.div>
@@ -193,7 +200,7 @@ function SlideVisual({ kind, ctx }: { kind: PitchSlide["kind"]; ctx: PitchContex
         {ctx.features.slice(0, 4).map((f, i) => (
           <motion.div
             key={f}
-            initial={{ opacity: 0, x: -10 }}
+            initial={exporting ? false : { opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 + i * 0.15 }}
             className="brand-border flex items-center gap-2 rounded-lg border bg-background/30 px-3 py-2 text-xs text-foreground/85 backdrop-blur"
@@ -210,7 +217,7 @@ function SlideVisual({ kind, ctx }: { kind: PitchSlide["kind"]; ctx: PitchContex
         {ctx.customers.slice(0, 3).map((c, i) => (
           <motion.span
             key={c}
-            initial={{ opacity: 0, y: 8 }}
+            initial={exporting ? false : { opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 + i * 0.15 }}
             className="brand-soft brand-text rounded-full px-3 py-1 text-xs font-medium"
@@ -223,7 +230,7 @@ function SlideVisual({ kind, ctx }: { kind: PitchSlide["kind"]; ctx: PitchContex
   }
   if (kind === "opportunity") {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-5 flex flex-wrap items-center gap-2">
+      <motion.div initial={exporting ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-5 flex flex-wrap items-center gap-2">
         {ctx.businessModel && <span className="brand-soft brand-text rounded-full px-3 py-1 text-xs font-medium">{ctx.businessModel}</span>}
         {!ctx.claimed && <span className="rounded-full border border-dashed border-foreground/30 px-3 py-1 text-xs text-foreground/70">Unclaimed — founder wanted</span>}
       </motion.div>
