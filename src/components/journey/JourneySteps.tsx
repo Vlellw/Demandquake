@@ -11,13 +11,11 @@ import { cn } from "@/lib/utils";
 export function JourneySteps({
   current,
   complete = false,
-  hints,
   renderStep,
   className,
 }: {
   current: JourneyStepNumber;
   complete?: boolean;
-  hints?: Partial<Record<JourneyStepNumber, ReactNode>>;
   renderStep?: (n: JourneyStepNumber, content: ReactNode, className: string) => ReactNode | undefined;
   className?: string;
 }) {
@@ -50,7 +48,6 @@ export function JourneySteps({
                   <span className="sm:hidden">{s.short}</span>
                   <span className="hidden sm:inline">{s.label}</span>
                 </span>
-                <span className="hidden truncate text-xs text-muted-foreground lg:block">{hints?.[s.n] ?? s.hint}</span>
               </span>
               <span className="sr-only">{status === "done" ? "(done)" : status === "current" ? "(you are here)" : "(next)"}</span>
             </>

@@ -319,7 +319,7 @@ function WelcomePanel({ project: p }: { project: ProjectDTO }) {
   ];
   return (
     <section aria-labelledby="welcome-heading" className="border-b border-border bg-surface-sunken">
-      <JourneySteps current={4} complete hints={{ 4: "Done — your workspace is ready" }} className="bg-transparent" />
+      <JourneySteps current={4} complete className="bg-transparent" />
       <div className="mx-auto max-w-[1300px] px-4 py-8 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div>

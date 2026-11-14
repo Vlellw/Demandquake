@@ -7,10 +7,10 @@ import { matchesFreshness } from "./research-utils";
 import { INITIAL_CREDIT_RULES } from "./credit-rules";
 
 export const JOURNEY_STEPS = [
-  { n: 1, key: "search", label: "Search a market", short: "Search", hint: "Describe a market — this opens the ideas" },
-  { n: 2, key: "choose", label: "Choose an idea", short: "Choose", hint: "Pick an industry and open an idea" },
-  { n: 3, key: "inspect", label: "Inspect the evidence", short: "Inspect", hint: "Read the sources, competitors and market" },
-  { n: 4, key: "claim", label: "Claim & build", short: "Claim", hint: `Get a private workspace for ${INITIAL_CREDIT_RULES.claim} credits` },
+  { n: 1, key: "search", label: "Search a market", short: "Search" },
+  { n: 2, key: "choose", label: "Choose an idea", short: "Choose" },
+  { n: 3, key: "inspect", label: "Inspect the evidence", short: "Inspect" },
+  { n: 4, key: "claim", label: "Claim & build", short: "Claim" },
 ] as const;
 export type JourneyStepNumber = (typeof JOURNEY_STEPS)[number]["n"];
 export type JourneyStatus = "done" | "current" | "upcoming";

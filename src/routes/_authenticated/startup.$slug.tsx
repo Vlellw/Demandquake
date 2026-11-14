@@ -261,12 +261,6 @@ function StartupPage() {
         <JourneySteps
           current={claimed ? 4 : 3}
           complete={claimed}
-          hints={{
-            1: "Research a new market",
-            2: st.industry ? `Back to ${st.industry} ideas` : "Back to all ideas",
-            3: `${progress.done} of ${progress.total} checks done`,
-            4: claimed ? "It’s in your workspace" : undefined,
-          }}
           renderStep={(n, content, cls) => {
             if (n === 1)
               return (
