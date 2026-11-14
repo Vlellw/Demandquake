@@ -95,7 +95,10 @@ function DiscoverPage() {
         onSkip={skipToIdeas}
       />
       {effectiveView === "guided" ? (
-        <GuidedDiscover cards={cards} stats={stats} industry={search.industry} locked={!marketOpen} onResearch={goToSearch} />
+        // The market section appears only after the first search completes.
+        marketOpen ? (
+          <GuidedDiscover cards={cards} stats={stats} industry={search.industry} onResearch={goToSearch} />
+        ) : null
       ) : (
         <CatalogView
           cards={cards}
