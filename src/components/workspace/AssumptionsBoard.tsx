@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, CircleDashed, Plus, XCircle } from "lucide-react";
+import { CheckCircle2, CircleDashed, Plus, Trash2, XCircle } from "lucide-react";
 import type { ProjectAssumption } from "@/lib/dto";
 import { InfoTip } from "@/components/common/InfoTip";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +58,7 @@ export function AssumptionsBoard({ assumptions, onChange }: {
                 <li key={a.id} className="min-w-0 rounded-md border border-border bg-surface p-4 sm:p-5">
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <Badge variant="inferred">Assumption</Badge>
+                    <div className="flex items-center gap-2">
                     <Select value={a.status} onValueChange={(value) => {
                       const status = statuses.find((s) => s.value === value)?.value;
                       if (status) onChange(assumptions.map((item) => item.id === a.id ? { ...item, status } : item));
@@ -73,6 +74,10 @@ export function AssumptionsBoard({ assumptions, onChange }: {
                         ))}
                       </SelectContent>
                     </Select>
+                    <Button variant="ghost" size="icon" title="Delete assumption" aria-label={`Delete assumption: ${a.text}`} onClick={() => {
+                      if (window.confirm("Delete this assumption?")) onChange(assumptions.filter((item) => item.id !== a.id));
+                    }}><Trash2 className="size-4 text-negative" /></Button>
+                    </div>
                   </div>
                   <p className="break-words text-base leading-relaxed text-foreground">{a.text}</p>
                   {a.how_to_test && (

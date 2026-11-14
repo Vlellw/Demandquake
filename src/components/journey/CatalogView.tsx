@@ -113,36 +113,9 @@ function MarketOverview({ filters, panel }: { filters: CatalogFilters; panel: Ov
       <SectionHeading
         id="overview-heading"
         title="Look at the whole market"
-        description="For a wider view: every problem on one map, the latest market changes and past research. The map and market changes follow your filters."
+        description="Every problem on one map. The map follows your filters."
       />
-      <Tabs
-        value={panel}
-        onValueChange={(v) => navigate({ search: (p) => ({ ...p, overview: v }), replace: true, resetScroll: false })}
-        className="mt-8"
-      >
-        <div className="flex justify-center overflow-x-auto border-b border-border">
-          <TabsList variant="line" className="gap-8">
-            <TabsTrigger variant="line" value="map" className="gap-2">
-              <MapIcon className="size-4" aria-hidden="true" /> Problem map
-            </TabsTrigger>
-            <TabsTrigger variant="line" value="changes" className="gap-2">
-              <Waves className="size-4" aria-hidden="true" /> Market changes
-            </TabsTrigger>
-            <TabsTrigger variant="line" value="runs" className="gap-2">
-              <History className="size-4" aria-hidden="true" /> Latest research
-            </TabsTrigger>
-          </TabsList>
-        </div>
-        <TabsContent value="map" className="mt-8">
-          <MapPanel filters={filters} />
-        </TabsContent>
-        <TabsContent value="changes" className="mt-8">
-          <ChangesPanel filters={filters} />
-        </TabsContent>
-        <TabsContent value="runs" className="mt-8">
-          <RunsPanel />
-        </TabsContent>
-      </Tabs>
+      <div className="mt-8"><MapPanel filters={filters} /></div>
     </section>
   );
 }

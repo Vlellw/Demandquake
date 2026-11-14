@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ensureStartupBanner } from "@/lib/banner.functions";
 
 /** Startup ids already asked for a banner in this browser session (generation is cached server-side). */
-const requested = new Set<string>();
+const requested = new Map<string, Promise<{ url: string | null }>>();
 
 /**
  * The startup's banner image URL. When the startup has none yet, asks the server to generate
@@ -12,15 +12,20 @@ const requested = new Set<string>();
  */
 export function useStartupBanner(startup: { id: string; banner_image_url: string | null }) {
   const ensureFn = useServerFn(ensureStartupBanner);
-  const [url, setUrl] = useState<string | null>(startup.banner_image_url);
+  const [result, setResult] = useState<{ id: string; url: string | null }>({ id: startup.id, url: startup.banner_image_url });
+  const url = startup.banner_image_url ?? (result.id === startup.id ? result.url : null);
 
   useEffect(() => {
-    if (url || requested.has(startup.id)) return;
-    requested.add(startup.id);
+    if (url) return;
+    let request = requested.get(startup.id);
+    if (!request) {
+      request = ensureFn({ data: { startupId: startup.id } });
+      requested.set(startup.id, request);
+    }
     let alive = true;
-    ensureFn({ data: { startupId: startup.id } })
+    request
       .then((r) => {
-        if (alive && r.url) setUrl(r.url);
+        if (alive && r.url) setResult({ id: startup.id, url: r.url });
       })
       .catch(() => {
         requested.delete(startup.id);

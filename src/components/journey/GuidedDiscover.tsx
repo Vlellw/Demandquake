@@ -49,15 +49,15 @@ export function GuidedDiscover({
   const projectNames = (projects ?? []).slice(0, 3).map((p) => p.name);
 
   return (
-    <section id="startups" aria-labelledby="choose-heading" className="mx-auto max-w-[1400px] scroll-mt-24 px-4 pb-20 pt-10 sm:px-6 sm:pt-14">
+    <section id="startups" aria-labelledby="choose-heading" className="mx-auto max-w-[1400px] scroll-mt-24 px-4 pb-20 pt-6 sm:px-6 sm:pt-6">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <h1 id="choose-heading" className="section-title mt-2 text-[2rem] leading-tight sm:text-[2.6rem]">
+          <h2 id="choose-heading" className="section-title mt-2 text-xl leading-tight sm:text-2xl">
             Which market interests you?{" "}
             <InfoTip align="start">
               Pick an industry. We show the ideas with the most evidence behind them — open one to check its sources before you decide.
             </InfoTip>
-          </h1>
+          </h2>
         </div>
         <DiscoverViewToggle view="guided" />
       </div>

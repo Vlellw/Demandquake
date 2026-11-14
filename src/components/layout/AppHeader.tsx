@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useHydrated, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { BookOpen, Briefcase, ChevronDown, ChevronRight, CircleUserRound, Compass, LogOut, Menu, Search } from "lucide-react";
+import { BookOpen, Briefcase, ChevronDown, ChevronRight, CircleUserRound, Compass, LogOut, Menu } from "lucide-react";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
 import { SiteSearch } from "@/components/layout/SiteSearch";
 import {
@@ -105,35 +105,15 @@ export function AppHeader() {
             <DemandquakeLogo />
           </Link>
 
-          <nav key={hydrated ? "client" : "server"} aria-label="Main" className="ml-auto hidden h-full items-stretch gap-7 md:flex">
-            {NAV.map((item) => {
-              const active = item.match(pathname);
-              return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  aria-current={active ? "page" : undefined}
-                  suppressHydrationWarning
-                  className={cn(
-                    "relative inline-flex items-center text-sm font-bold text-foreground transition-colors hover:text-primary",
-                    "after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-primary after:transition-transform after:duration-200",
-                    active ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              );
-            })}
-          </nav>
-
+          <div id="header-journey" className="ml-auto min-w-0 flex-1" />
           <div className="ml-auto flex items-center gap-1 md:ml-4">
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
               className="grid size-10 cursor-pointer place-items-center rounded-full text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              aria-label="Search startups"
+              aria-label="Open navigation menu" title="Menu"
             >
-              <Search className="size-5" />
+              <Menu className="size-5" />
             </button>
 
             <Sheet>

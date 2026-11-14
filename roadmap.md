@@ -37,8 +37,15 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
-- [ ] Generate missing startup backgrounds and verify every profile; use varied abstract moods without text or a focal object.
-- [ ] Remove highlighted method-page item (image-31).
+- [x] Move journey steps into the header, keeping page links in the three-line menu.
+- [x] Remove Market changes and Latest research tabs from Discover.
+- [x] Remove workspace roadmap checklist cards.
+- [x] Replace header search with a menu showing only Go to links.
+- [x] Make market choices look subordinate to the search above.
+- [x] Remove Unclaimed from claimed workspace pitch.
+- [x] Add persistent assumption deletion; temporary assumption deleted and reload verified.
+- [x] Generate missing startup backgrounds; all 26 images served successfully; varied abstract moods without text or a focal object requested.
+- [x] Remove highlighted method-page item (image-31).
 - [x] Strengthen text-free background prompts and correct Trellivo artwork.
 - [x] Remove highlighted AI summary heading on Discover; retain inline AI idea label.
 - [x] Remove the completed-inspection claim banner.

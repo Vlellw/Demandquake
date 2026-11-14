@@ -211,7 +211,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
 
           <ChecklistSection project={p} update={update} />
           <AssumptionsBoard assumptions={p.assumptions} onChange={(assumptions) => update({ assumptions }, { immediate: true })} />
-          <RoadmapSection project={p} update={update} />
         </div>
 
         <aside className="min-w-0 space-y-6">
@@ -219,6 +218,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
             <PitchPlayer
               slides={p.pitch.slides}
               ctx={{
+                claimed: true,
                 name: p.name,
                 tagline: p.tagline ?? "",
                 brand: p.brand,

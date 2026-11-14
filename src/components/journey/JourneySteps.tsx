@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Check } from "lucide-react";
 import { JOURNEY_STEPS, journeyStatuses, type JourneyStepNumber } from "@/lib/journey";
 import { cn } from "@/lib/utils";
@@ -20,11 +21,13 @@ export function JourneySteps({
   className?: string;
 }) {
   const statuses = journeyStatuses(current, complete);
-  return (
+  const [target, setTarget] = useState<HTMLElement | null>(null);
+  useEffect(() => setTarget(document.getElementById("header-journey")), []);
+  const tracker = (
     <nav aria-label="Your progress" className={cn("border-b border-border bg-background", className)}>
-      <ol className="mx-auto grid max-w-[1400px] grid-cols-4 gap-2 px-4 sm:gap-6 sm:px-6">
+      <ol className="mx-auto grid max-w-[1400px] grid-cols-4 gap-1 px-0 sm:gap-3">
         {JOURNEY_STEPS.map((s, i) => {
-          const status = statuses[i]!;
+          const status = statuses[i] ?? "upcoming";
           const content = (
             <>
               <span
@@ -45,14 +48,14 @@ export function JourneySteps({
                     status === "upcoming" ? "text-muted-foreground" : status === "current" ? "text-primary" : "text-foreground",
                   )}
                 >
-                  <span className="sm:hidden">{s.short}</span>
-                  <span className="hidden sm:inline">{s.label}</span>
+                  <span className="xl:hidden">{s.short}</span>
+                  <span className="hidden xl:inline">{s.label}</span>
                 </span>
               </span>
               <span className="sr-only">{status === "done" ? "(done)" : status === "current" ? "(you are here)" : "(next)"}</span>
             </>
           );
-          const cls = "group flex w-full min-w-0 items-center gap-2.5 py-3.5 sm:gap-3 sm:py-4";
+          const cls = "group flex w-full min-w-0 items-center gap-1 py-3.5 sm:gap-2 sm:py-4";
           return (
             <li
               key={s.key}
@@ -69,5 +72,6 @@ export function JourneySteps({
       </ol>
     </nav>
   );
+  return target ? createPortal(tracker, target) : tracker;
 }
 

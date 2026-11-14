@@ -17,6 +17,7 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 export interface PitchContext {
+  claimed?: boolean;
   name: string;
   tagline: string;
   brand: Brand;
@@ -224,7 +225,7 @@ function SlideVisual({ kind, ctx }: { kind: PitchSlide["kind"]; ctx: PitchContex
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-5 flex flex-wrap items-center gap-2">
         {ctx.businessModel && <span className="brand-soft brand-text rounded-full px-3 py-1 text-xs font-medium">{ctx.businessModel}</span>}
-        <span className="rounded-full border border-dashed border-foreground/30 px-3 py-1 text-xs text-foreground/70">Unclaimed — founder wanted</span>
+        {!ctx.claimed && <span className="rounded-full border border-dashed border-foreground/30 px-3 py-1 text-xs text-foreground/70">Unclaimed — founder wanted</span>}
       </motion.div>
     );
   }
