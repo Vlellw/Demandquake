@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import trellivoArtwork from "@/assets/trellivo-text-free.png";
+import { isCurrentBanner } from "@/lib/banner-version";
 import type { Brand, Glyph } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -104,7 +105,7 @@ export function brandStyle(brand: Brand | null | undefined): CSSProperties {
  */
 export function bannerBackground(brand: Brand | null | undefined, imageUrl: string | null | undefined): CSSProperties {
   if (!imageUrl) return {};
-  const artwork = imageUrl.split("?")[0] === "/api/public/banner/aacad4d4-eec3-43a2-a2ad-088818262211" ? trellivoArtwork : imageUrl;
+  const artwork = !isCurrentBanner(imageUrl) && imageUrl.split("?")[0] === "/api/public/banner/aacad4d4-eec3-43a2-a2ad-088818262211" ? trellivoArtwork : imageUrl;
   const hue = brand?.hue ?? 40;
   return {
     backgroundImage: `linear-gradient(hsla(${hue}, 45%, 22%, 0.42), hsla(${hue}, 50%, 30%, 0.3)), url(${artwork})`,

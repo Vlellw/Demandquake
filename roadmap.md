@@ -37,6 +37,12 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Keep all journey steps neutral on the public home.
+- [x] Make the highlighted home-page invitation more noticeable.
+- [x] Replace mosaic startup artwork with topic-related, text-free backgrounds.
+- [x] Use distinctive topic-specific objects instead of people, with varied compositions; all 26 backgrounds regenerated.
+- [x] Apply Sources/footer and competitor-tag cleanup to full catalog cards.
+- [x] Remove the highlighted map evidence explanation and strength badge; consolidate the map info buttons.
 - [x] Replace the centered navigation menu with a right-side slide-out panel.
 - [x] Show numbered journey steps on every page, including the public home.
 - [x] Move journey steps into the header, keeping page links in the three-line menu.

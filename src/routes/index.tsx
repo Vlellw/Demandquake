@@ -22,12 +22,12 @@ function HomePage() {
   const { user } = useAuthUser();
   return <div>
     <HeroCarousel />
-    <section className="bg-surface-sunken px-4 py-16 sm:px-6 sm:py-20">
+    <section className="border-y-4 border-primary bg-primary/10 px-4 py-16 sm:px-6 sm:py-20">
       <SectionHeading title="Real problems. Ideas you can investigate."
         description="Each idea starts from real web sources. Facts link to their evidence, and anything the AI suggests is clearly labelled as a hypothesis." />
       <div className="mx-auto mt-8 max-w-2xl text-center">
         <p className="text-muted-foreground">Sign in to browse startups, read the research and follow market changes. Your founder workspace stays private to you and invited co-founders.</p>
-        <Button asChild variant="hero" className="mt-6">
+        <Button asChild variant="hero" size="xl" className="mt-8">
           {user ? <Link to="/discover">Explore startups <ArrowRight /></Link> : <Link to="/auth" search={{ redirect: "/discover" }}>Sign in to discover <ArrowRight /></Link>}
         </Button>
       </div>

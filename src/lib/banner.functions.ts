@@ -2,6 +2,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { isCurrentBanner } from "./banner-version";
 
 const uuid = z.string().uuid();
 
@@ -20,7 +21,7 @@ export const ensureStartupBanner = createServerFn({ method: "POST" })
       .eq("id", data.startupId)
       .single();
     if (error || !st) throw new Error("Startup not found");
-    if (st.banner_image_url) return { url: st.banner_image_url };
+    if (isCurrentBanner(st.banner_image_url)) return { url: st.banner_image_url };
     const { generateStartupBanner } = await import("./banner.server");
     const url = await generateStartupBanner({ ...st, brand: st.brand as { hue?: number } | null });
     return { url };

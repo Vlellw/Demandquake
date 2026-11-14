@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { motion } from "motion/react";
-import { ArrowRight, FileSearch, Swords } from "lucide-react";
+import { ArrowRight, FileSearch } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
 import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
 import { useStartupBanner } from "@/hooks/use-startup-banner";
@@ -103,12 +103,6 @@ export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?:
             </p>
           )}
           <div className="mt-4 flex flex-wrap gap-1.5">
-            <Badge variant="observed">
-              <FileSearch /> {card.evidence_count} sources
-            </Badge>
-            <Badge variant="outline">
-              <Swords /> {card.competitor_count} competitors
-            </Badge>
             {card.business_model_type && (
               <Badge variant="default" className="max-w-full truncate">
                 {card.business_model_type}
@@ -116,7 +110,7 @@ export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?:
             )}
           </div>
           <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-            <FreshnessBadge iso={card.last_scanned_at ?? card.research_at} prefix={card.last_scanned_at ? "Scanned" : "Researched"} />
+            <Badge variant="observed"><FileSearch /> {card.evidence_count} sources</Badge>
             <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
               View <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
             </span>

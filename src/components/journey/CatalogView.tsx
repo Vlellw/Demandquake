@@ -113,7 +113,7 @@ function MarketOverview({ filters, panel }: { filters: CatalogFilters; panel: Ov
       <SectionHeading
         id="overview-heading"
         title="Look at the whole market"
-        description="Every problem on one map. The map follows your filters."
+        description="The map follows your filters. Bigger dots have more sources behind them. Click one to read the posts behind it."
       />
       <div className="mt-8"><MapPanel filters={filters} /></div>
     </section>
@@ -125,9 +125,6 @@ function MapPanel({ filters }: { filters: CatalogFilters }) {
   const filtered = useMemo(() => filterNodes(nodes, filters), [nodes, filters]);
   return (
     <>
-      <div className="mb-4 flex justify-center">
-        <InfoTip label="How to read the problem map">Bigger dots have more sources behind them. Click one to read the posts behind it.</InfoTip>
-      </div>
       <OpportunityRadar nodes={filtered} />
     </>
   );

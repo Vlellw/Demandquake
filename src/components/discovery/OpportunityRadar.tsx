@@ -313,12 +313,10 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
         <p className="text-sm text-muted-foreground">{node.summary}</p>
         <div className="flex flex-wrap gap-1.5">
           <ObservedTag label="Sources" count={node.signal_count} />
-          <Badge variant="outline" className="capitalize">{node.evidence_strength} evidence</Badge>
           {node.signal_types.map((t) => (
             <Badge key={t} variant="secondary">{signalLabel(t)}</Badge>
           ))}
         </div>
-        {node.strength_reason && <p className="data-label">{node.strength_reason}</p>}
 
         {node.startup ? (
           <Link

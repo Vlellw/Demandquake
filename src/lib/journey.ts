@@ -15,7 +15,8 @@ export type JourneyStepNumber = (typeof JOURNEY_STEPS)[number]["n"];
 export type JourneyStatus = "done" | "current" | "upcoming";
 
 /** Step states for the tracker: steps before `current` are done; `complete` marks every step done. */
-export function journeyStatuses(current: JourneyStepNumber, complete = false): JourneyStatus[] {
+export function journeyStatuses(current: JourneyStepNumber | null, complete = false): JourneyStatus[] {
+  if (current === null) return JOURNEY_STEPS.map(() => "upcoming");
   return JOURNEY_STEPS.map((s) => (complete || s.n < current ? "done" : s.n === current ? "current" : "upcoming"));
 }
 

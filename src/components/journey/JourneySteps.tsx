@@ -14,7 +14,7 @@ export function JourneySteps({
   className,
   inline = false,
 }: {
-  current: JourneyStepNumber;
+  current: JourneyStepNumber | null;
   complete?: boolean;
   renderStep?: (n: JourneyStepNumber, content: ReactNode, className: string) => ReactNode | undefined;
   className?: string;

@@ -45,7 +45,7 @@ export function AppHeader() {
 
           <div id="header-journey" className="order-last w-full min-w-0 [&:has(>nav)>div]:hidden md:order-none md:ml-auto md:w-auto md:flex-1">
             <div>
-              <JourneySteps inline current={pathname.startsWith("/workspace") ? 4 : 1}
+              <JourneySteps inline current={pathname === "/" ? null : pathname.startsWith("/workspace") ? 4 : 1}
                 renderStep={(n, content, cls) => n === 1 ? (
                   <Link to="/discover" search={{ research: true }} className={cls}>{content}</Link>
                 ) : undefined}

@@ -29,6 +29,9 @@ const card = (over: Partial<{ id: string; industry: string | null; geography: st
 });
 
 describe("journey steps", () => {
+  it("does not mark any of the four steps current on the initial home page", () => {
+    expect(journeyStatuses(null)).toEqual(["upcoming", "upcoming", "upcoming", "upcoming"]);
+  });
   it("marks earlier steps done, the current one current and later ones upcoming", () => {
     expect(journeyStatuses(2)).toEqual(["done", "current", "upcoming", "upcoming"]);
   });

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { ensureStartupBanner } from "@/lib/banner.functions";
+import { isCurrentBanner } from "@/lib/banner-version";
 
 /** Startup ids already asked for a banner in this browser session (generation is cached server-side). */
 const requested = new Map<string, Promise<{ url: string | null }>>();
@@ -12,8 +13,9 @@ const requested = new Map<string, Promise<{ url: string | null }>>();
  */
 export function useStartupBanner(startup: { id: string; banner_image_url: string | null }) {
   const ensureFn = useServerFn(ensureStartupBanner);
-  const [result, setResult] = useState<{ id: string; url: string | null }>({ id: startup.id, url: startup.banner_image_url });
-  const url = startup.banner_image_url ?? (result.id === startup.id ? result.url : null);
+  const currentImage = isCurrentBanner(startup.banner_image_url) ? startup.banner_image_url : null;
+  const [result, setResult] = useState<{ id: string; url: string | null }>({ id: startup.id, url: currentImage });
+  const url = currentImage ?? (result.id === startup.id ? result.url : null);
 
   useEffect(() => {
     if (url) return;
