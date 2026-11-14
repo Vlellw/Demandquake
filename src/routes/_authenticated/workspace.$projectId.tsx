@@ -330,10 +330,11 @@ function WelcomePanel({ project: p }: { project: ProjectDTO }) {
                   <Icon className="size-4" />
                 </span>
                 <p className="font-display text-base font-bold text-foreground">
-                  <span className="text-primary">{i + 1}.</span> {title}
+                  <span className="text-primary">{i + 1}.</span> {title}{" "}
+                  <InfoTip align="start" label={`About ${title.toLowerCase()}`}>{body}</InfoTip>
                 </p>
               </div>
-              <p className="mt-3 flex-1 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              <div className="flex-1" />
               <Button variant="outline" size="sm" className="mt-4 self-start" onClick={go}>
                 {cta} <ArrowRight />
               </Button>
