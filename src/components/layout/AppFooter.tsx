@@ -47,18 +47,6 @@ export function AppFooter() {
             <p className="mt-5 text-xs text-muted-foreground">
               © {new Date().getUTCFullYear()} Demandquake · Research powered by Context.dev
             </p>
-            <ul className="mt-3 flex flex-wrap gap-x-5 gap-y-1.5">
-              <li>
-                <Link to="/privacy" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link to="/terms" className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-                  Terms of Use
-                </Link>
-              </li>
-            </ul>
           </div>
           <div className="flex items-center gap-2">
             <TooltipProvider delayDuration={150}>
