@@ -4,6 +4,7 @@ import { Flag, ListChecks, Loader2, MailCheck, Radar, Users } from "lucide-react
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ProviderButtons } from "@/components/auth/ProviderButtons";
+import { InfoTip } from "@/components/common/InfoTip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -135,9 +136,15 @@ function AuthPage() {
                   <span className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-primary-foreground/80">
                     <b.icon className="size-[18px]" aria-hidden="true" />
                   </span>
-                  <span>
-                    <span className="block font-bold">{b.title}</span>
-                    <span className="mt-0.5 block text-sm text-primary-foreground/80">{b.body}</span>
+                  <span className="flex items-center gap-2 font-bold">
+                    {b.title}
+                    <InfoTip
+                      label={`More about: ${b.title}`}
+                      align="start"
+                      className="border-primary-foreground/60 text-primary-foreground hover:border-primary-foreground hover:bg-primary-foreground/10"
+                    >
+                      {b.body}
+                    </InfoTip>
                   </span>
                 </li>
               ))}
