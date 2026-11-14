@@ -17,25 +17,25 @@ export function PickedForYou({ cards }: { cards: StartupCardDTO[] }) {
   const names = projects.slice(0, 3).map((p) => p.name);
 
   return (
-    <section aria-labelledby="picked-heading">
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+    <section aria-labelledby="picked-heading" className="mb-16">
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow flex items-center gap-1.5">
             <Sparkles className="size-3.5" /> Picked for you
           </p>
-          <h2 id="picked-heading" className="mt-1 font-display text-2xl font-semibold text-foreground">
+          <h3 id="picked-heading" className="section-title mt-2 text-2xl">
             Close to what you’re building
-          </h2>
+          </h3>
         </div>
         <p className="max-w-md text-sm text-muted-foreground">
           Matched on industry and region with {names.join(", ")}
           {projects.length > names.length ? ` and ${projects.length - names.length} more` : ""}.
         </p>
       </div>
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {picks.map(({ card, reason }, i) => (
           <div key={card.id} className="flex min-w-0 flex-col gap-2">
-            <p className="flex items-center gap-1.5 font-mono text-[11px] text-primary">
+            <p className="flex items-center gap-1.5 text-xs font-bold text-primary">
               <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" /> {reason}
             </p>
             <StartupCard card={card} index={i} />

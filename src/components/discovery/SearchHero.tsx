@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { TimeAgo } from "@/components/common/TimeAgo";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, Loader2, MapPin, Factory } from "lucide-react";
+import { ArrowRight, Factory, Loader2, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 import { startDiscovery } from "@/lib/research.functions";
 import { EXAMPLE_QUERIES, GEOGRAPHIES, INDUSTRIES } from "@/lib/taxonomy";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SeismicField } from "@/components/common/SeismicField";
+import { SectionHeading } from "@/components/common/SectionHeading";
 
 
-export function SearchHero({ stats }: { stats: { startups: number; sources: number; domains: number; lastResearchAt: string | null } }) {
+/** "Research a new market" section: one plain search box, optional focus, examples and what happens next. */
+export function SearchHero() {
   const [query, setQuery] = useState("");
   const [industry, setIndustry] = useState<string>("any");
   const [geography, setGeography] = useState<string>("any");
@@ -54,112 +54,120 @@ export function SearchHero({ stats }: { stats: { startups: number; sources: numb
     }
   }
 
+  const selectClass =
+    "h-10 w-auto gap-2 rounded-full border-ink/40 bg-background px-4 text-sm font-semibold text-foreground";
+
   return (
-    <section className="relative overflow-hidden border-b border-border">
-      <div className="bg-hero absolute inset-0" />
-      <div className="bg-grid absolute inset-0 opacity-60" />
-      <SeismicField className="absolute inset-x-0 bottom-0 h-40 w-full opacity-80" />
-      <div className="relative mx-auto max-w-[1400px] px-4 pb-16 pt-14 sm:px-6 sm:pt-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="eyebrow animate-float-up">The next unicorn hasn't been founded yet</p>
-          <h1 className="mt-4 animate-float-up font-display text-4xl font-semibold leading-[1.02] text-foreground sm:text-6xl [animation-delay:80ms]">
-            What problems should we turn into <span className="text-magma">startups</span> today?
-          </h1>
-          <p className="mx-auto mt-5 max-w-2xl animate-float-up text-base text-muted-foreground sm:text-lg [animation-delay:160ms]">
-            Demandquake researches the live web, finds recurring business problems, and turns them into unclaimed,
-            evidence-backed startups — every claim linked to its source.
-          </p>
-        </div>
+    <section id="discover" aria-labelledby="discover-heading" className="bg-surface-sunken">
+      <div className="mx-auto max-w-[1400px] px-4 py-16 sm:px-6 sm:py-20">
+        <SectionHeading
+          id="discover-heading"
+          eyebrow="Research a new market"
+          title="What should Demandquake research next?"
+          description="Describe a market or a group of customers in your own words. We read the live web and publish the startups we find here."
+        />
 
         <form
-          className="mx-auto mt-10 max-w-3xl animate-float-up [animation-delay:240ms]"
+          className="mx-auto mt-10 max-w-3xl"
           onSubmit={(e) => {
             e.preventDefault();
             submit(query);
           }}
         >
-          <div className="panel-raised p-2 transition-shadow focus-within:shadow-glow">
+          <div className="rounded-[4px] border border-border bg-background p-2 shadow-panel transition-shadow focus-within:shadow-glow">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <label htmlFor="discover-query" className="sr-only">
-                Research topic
+                What to research
               </label>
-              <input
-                id="discover-query"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="e.g. Find startup opportunities in European manufacturing"
-                className="h-12 min-w-0 flex-1 bg-transparent px-4 text-base text-foreground placeholder:text-faint focus:outline-none"
-                maxLength={300}
-                disabled={pending}
-              />
+              <div className="flex min-w-0 flex-1 items-center gap-3 px-3">
+                <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+                <input
+                  id="discover-query"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="e.g. Problems small clinics have with booking"
+                  className="h-12 min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-faint focus:outline-none"
+                  maxLength={300}
+                  disabled={pending}
+                />
+              </div>
               <Button type="submit" variant="hero" size="lg" disabled={pending} className="sm:w-auto">
                 {pending ? <Loader2 className="animate-spin" /> : <ArrowRight />}
-                {pending ? "Starting research" : "Discover"}
+                {pending ? "Starting research" : "Start research"}
               </Button>
             </div>
-            <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border px-2 pt-2">
-              <Select value={industry} onValueChange={setIndustry} disabled={pending}>
-                <SelectTrigger className="h-8 w-auto gap-2 border-border bg-transparent text-xs text-muted-foreground" aria-label="Industry focus">
-                  <Factory className="size-3.5" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any industry</SelectItem>
-                  {INDUSTRIES.map((i) => (
-                    <SelectItem key={i} value={i}>
-                      {i}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={geography} onValueChange={setGeography} disabled={pending}>
-                <SelectTrigger className="h-8 w-auto gap-2 border-border bg-transparent text-xs text-muted-foreground" aria-label="Geography focus">
-                  <MapPin className="size-3.5" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any geography</SelectItem>
-                  {GEOGRAPHIES.map((g) => (
-                    <SelectItem key={g} value={g}>
-                      {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <span className="ml-auto hidden font-mono text-[11px] text-faint sm:inline">≈ 2–3 min of live research</span>
-            </div>
           </div>
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            {EXAMPLE_QUERIES.map((q) => (
-              <button
-                key={q}
-                type="button"
-                disabled={pending}
-                onClick={() => {
-                  setQuery(q);
-                  submit(q);
-                }}
-                className="rounded-full border border-border bg-surface/60 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-50"
-              >
-                {q}
-              </button>
-            ))}
+
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            <span className="text-sm text-muted-foreground">Optional focus:</span>
+            <Select value={industry} onValueChange={setIndustry} disabled={pending}>
+              <SelectTrigger className={selectClass} aria-label="Industry focus">
+                <Factory className="size-4" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any industry</SelectItem>
+                {INDUSTRIES.map((i) => (
+                  <SelectItem key={i} value={i}>
+                    {i}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={geography} onValueChange={setGeography} disabled={pending}>
+              <SelectTrigger className={selectClass} aria-label="Region focus">
+                <MapPin className="size-4" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="any">Any region</SelectItem>
+                {GEOGRAPHIES.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="mt-8 text-center sm:-mx-24 lg:-mx-40">
+            <p className="eyebrow">Or try an example</p>
+            <div className="mt-3 flex flex-wrap justify-center gap-2">
+              {EXAMPLE_QUERIES.map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  disabled={pending}
+                  onClick={() => {
+                    setQuery(q);
+                    submit(q);
+                  }}
+                  className="cursor-pointer rounded-full border border-ink/40 bg-background px-4 py-2 text-sm text-foreground transition-colors hover:border-ink hover:bg-ink hover:text-ink-foreground disabled:opacity-50"
+                >
+                  {q}
+                </button>
+              ))}
+            </div>
           </div>
         </form>
 
-        <dl className="mx-auto mt-12 grid max-w-3xl grid-cols-2 gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-4">
+        <ol className="mx-auto mt-12 grid max-w-4xl gap-4 sm:grid-cols-3">
           {[
-            { label: "Unclaimed startups", value: stats.startups.toLocaleString() },
-            { label: "Sources analyzed", value: stats.sources.toLocaleString() },
-            { label: "Distinct domains", value: stats.domains.toLocaleString() },
-            { label: "Last live research", value: stats.lastResearchAt ? <TimeAgo iso={stats.lastResearchAt} /> : "—" },
-          ].map((s) => (
-            <div key={s.label} className="bg-surface/80 px-4 py-3 text-center backdrop-blur">
-              <dt className="eyebrow">{s.label}</dt>
-              <dd className="mt-1 font-display text-xl font-semibold text-foreground">{s.value}</dd>
-            </div>
+            { n: "1", title: "Describe a market", body: "A sentence is enough, for example an industry, a region or a type of customer." },
+            { n: "2", title: "We read the live web", body: "About 2–3 minutes. You can watch each step and every source as it comes in." },
+            { n: "3", title: "New startups appear", body: "Each one is linked to its sources and added to the list above for anyone to explore." },
+          ].map((step) => (
+            <li key={step.n} className="flex gap-4 rounded-[4px] bg-background p-5 shadow-panel">
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+                {step.n}
+              </span>
+              <span>
+                <span className="block font-bold text-foreground">{step.title}</span>
+                <span className="mt-1 block text-sm leading-relaxed text-muted-foreground">{step.body}</span>
+              </span>
+            </li>
           ))}
-        </dl>
+        </ol>
       </div>
     </section>
   );

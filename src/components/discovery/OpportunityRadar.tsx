@@ -82,11 +82,8 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
 
   return (
     <div className="panel relative overflow-hidden">
-      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-5 py-4">
-        <div>
-          <p className="eyebrow">Opportunity radar</p>
-          <h2 className="mt-1 font-display text-xl font-semibold text-foreground">A living map of problems found on the web</h2>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
+        <p className="eyebrow">How to read the map</p>
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="size-2.5 rounded-full border-2 border-foreground/80" /> Strong evidence
@@ -116,16 +113,16 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
               />
             ))}
             <div
-              className="absolute aspect-square w-[140%] animate-radar-sweep rounded-full opacity-60"
-              style={{ background: "conic-gradient(from 0deg, transparent 0deg, color-mix(in oklab, var(--primary) 18%, transparent) 30deg, transparent 60deg)" }}
+              className="absolute aspect-square w-[140%] animate-radar-sweep rounded-full opacity-50"
+              style={{ background: "conic-gradient(from 0deg, transparent 0deg, color-mix(in oklab, var(--primary) 9%, transparent) 30deg, transparent 60deg)" }}
             />
           </div>
 
           {nodes.length === 0 && (
             <div className="absolute inset-0 grid place-items-center text-center">
               <div className="max-w-xs">
-                <p className="font-display text-lg text-foreground">No problems mapped yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">Run a discovery above and the problems it uncovers will appear here.</p>
+                <p className="font-display text-lg font-bold text-foreground">No problems on the map yet</p>
+                <p className="mt-1 text-sm text-muted-foreground">Start a research run and the problems it finds will appear here.</p>
               </div>
             </div>
           )}
@@ -138,8 +135,8 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
                   x={a.x}
                   y={Math.max(14, a.y - Math.min(maxR, 120) * 0.62)}
                   textAnchor="middle"
-                  className="fill-muted-foreground font-mono text-[10px] uppercase tracking-[0.14em]"
-                  opacity={0.55}
+                  className="fill-foreground text-[10px] font-bold uppercase tracking-[0.08em]"
+                  opacity={0.7}
                 >
                   {a.name}
                 </text>
@@ -197,26 +194,26 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="pointer-events-none absolute z-10 w-64 rounded-lg border border-border-strong bg-popover/95 p-3 text-left shadow-lift backdrop-blur"
+                className="pointer-events-none absolute z-10 w-64 rounded-[4px] border border-border bg-popover p-3 text-left shadow-lift"
                 style={{
                   left: Math.min(Math.max(8, (hoverNode.x ?? 0) - 128), w - 264),
                   top: (hoverNode.y ?? 0) > h / 2 ? (hoverNode.y ?? 0) - hoverNode.r - 120 : (hoverNode.y ?? 0) + hoverNode.r + 10,
                 }}
               >
-                <p className="text-[10px] font-mono uppercase tracking-wider" style={{ color: industryColor(hoverNode.d.industry) }}>
+                <p className="text-[10px] font-bold uppercase tracking-[0.06em]" style={{ color: industryColor(hoverNode.d.industry) }}>
                   {hoverNode.d.industry} · {hoverNode.d.geography}
                 </p>
-                <p className="mt-1 text-sm font-medium leading-snug text-foreground">{hoverNode.d.title}</p>
+                <p className="mt-1 text-sm font-semibold leading-snug text-foreground">{hoverNode.d.title}</p>
                 <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{hoverNode.d.summary}</p>
-                <p className="mt-2 font-mono text-[10px] text-faint">
-                  {hoverNode.d.signal_count} sources · {hoverNode.d.evidence_strength} evidence · click to inspect
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  {hoverNode.d.signal_count} sources · {hoverNode.d.evidence_strength} evidence · click to open
                 </p>
               </motion.div>
             )}
           </AnimatePresence>
 
           <p className="absolute bottom-3 left-4 flex items-center gap-1.5 text-[11px] text-faint">
-            <Info className="size-3" /> Position groups problems by industry only — distances are not measurements.
+            <Info className="size-3" /> Dots are grouped by industry only. Distances are not measurements.
           </p>
         </div>
 
@@ -239,9 +236,9 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
                     );
                   })}
                 </ul>
-                <div className="mt-6 rounded-lg border border-dashed border-border-strong p-4 text-sm text-muted-foreground">
-                  Each bubble is a recurring problem Demandquake identified from live sources. Click one to see the supporting
-                  signals and the startup generated from it.
+                <div className="mt-6 rounded-[4px] bg-surface-sunken p-4 text-sm text-foreground">
+                  Each dot is a problem that came up again and again in live sources. Click one to read the posts behind it
+                  and open the startup made from it.
                 </div>
               </motion.div>
             )}
@@ -264,10 +261,10 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
     >
       <div className="flex items-start gap-3 border-b border-border p-5">
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[10px] uppercase tracking-wider" style={{ color: industryColor(node.industry) }}>
+          <p className="text-[10px] font-bold uppercase tracking-[0.06em]" style={{ color: industryColor(node.industry) }}>
             {node.industry} · {node.category}
           </p>
-          <h3 className="mt-1 font-display text-lg font-semibold leading-snug text-foreground">{node.title}</h3>
+          <h3 className="mt-1 font-display text-lg font-bold leading-snug text-foreground">{node.title}</h3>
         </div>
         <button onClick={onClose} className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-foreground" aria-label="Close details">
           <X className="size-4" />
@@ -288,7 +285,7 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
           <Link
             to="/startup/$slug"
             params={{ slug: node.startup.slug }}
-            className="group flex items-center gap-3 rounded-xl border border-border-strong bg-surface-raised p-3 transition-colors hover:border-primary/40"
+            className="group flex items-center gap-3 rounded-[4px] border border-border bg-surface p-3 shadow-panel transition-shadow hover:shadow-lift"
           >
             <StartupMark brand={node.startup.brand} size="sm" />
             <div className="min-w-0 flex-1">
@@ -298,24 +295,24 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
             <ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
           </Link>
         ) : (
-          <p className="rounded-lg border border-dashed border-border-strong p-3 text-xs text-muted-foreground">
-            Identified problem without a generated startup yet — only the strongest clusters of each discovery become startups.
+          <p className="rounded-[4px] bg-surface-sunken p-3 text-xs text-muted-foreground">
+            No startup was made from this problem. Only the strongest problems of each research run become startups.
           </p>
         )}
 
         <div>
-          <p className="eyebrow">Supporting signals</p>
+          <p className="eyebrow">What the sources say</p>
           {isLoading && (
             <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-              <Loader2 className="size-3 animate-spin" /> Loading evidence…
+              <Loader2 className="size-3 animate-spin" /> Loading sources…
             </p>
           )}
-          {isError && <p className="mt-3 text-xs text-destructive">Couldn't load the evidence for this problem.</p>}
+          {isError && <p className="mt-3 text-xs text-destructive">Couldn't load the sources for this problem. Try again in a moment.</p>}
           <ul className="mt-3 space-y-2.5">
             {(data?.cluster.signals ?? []).map((sig, i) => {
               const src = sourceById.get(sig.source_id);
               return (
-                <li key={i} className="prov-observed rounded-lg p-3">
+                <li key={i} className="prov-observed rounded-[4px] p-3">
                   <p className="text-[13px] leading-snug text-foreground/90">{sig.claim}</p>
                   {src && (
                     <a

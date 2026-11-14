@@ -1,8 +1,13 @@
 import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Radar } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, Compass } from "lucide-react";
 import { SearchHero } from "@/components/discovery/SearchHero";
+import { HeroCarousel } from "@/components/home/HeroCarousel";
+import { IntroBand } from "@/components/home/IntroBand";
+import { HowItWorksMosaic } from "@/components/home/HowItWorksMosaic";
+import { SectionHeading } from "@/components/common/SectionHeading";
+import { Button } from "@/components/ui/button";
 import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
 import { StartupCard } from "@/components/discovery/StartupCard";
 import { DiscoveryFilters, EMPTY_FILTERS, type FilterState } from "@/components/discovery/DiscoveryFilters";
@@ -12,16 +17,18 @@ import { PickedForYou } from "@/components/discovery/PickedForYou";
 import { radarQuery, recentQuakesQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
 import { matchesFreshness } from "@/lib/research-utils";
 
+const INITIAL_CARDS = 6;
+
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Demandquake — Discover startups before they exist" },
+      { title: "Demandquake — Find a startup worth building" },
       {
         name: "description",
         content:
           "Explore unclaimed startups generated from live web evidence: real problems, sources, competitors and opportunity assessments — then claim one.",
       },
-      { property: "og:title", content: "Demandquake — Discover startups before they exist" },
+      { property: "og:title", content: "Demandquake — Find a startup worth building" },
       {
         property: "og:description",
         content: "A living map of business problems found on the internet, turned into evidence-backed startups you can claim.",
@@ -48,6 +55,7 @@ function DiscoverPage() {
   const { data: runs } = useSuspenseQuery(recentRunsQuery);
   const { data: quakes } = useSuspenseQuery(recentQuakesQuery);
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
+  const [showAll, setShowAll] = useState(false);
 
   const filteredCards = useMemo(
     () =>
@@ -86,54 +94,90 @@ function DiscoverPage() {
     [nodes, filters],
   );
 
+  const filtersActive = Object.values(filters).some((v) => v !== "all");
+  const visibleCards = showAll ? filteredCards : filteredCards.slice(0, INITIAL_CARDS);
+
   return (
     <div>
-      <SearchHero stats={stats} />
+      <HeroCarousel />
+      <IntroBand stats={stats} />
 
-      <div className="mx-auto max-w-[1400px] space-y-8 px-4 py-10 sm:px-6">
-        <div className="panel sticky top-16 z-30 px-4 py-3 backdrop-blur-xl">
+      <section id="startups" aria-labelledby="startups-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
+        <PickedForYou cards={cards} />
+
+        <SectionHeading
+          id="startups-heading"
+          eyebrow="Find a startup"
+          title="Startups waiting for a founder"
+          description="Each one was drafted from a real problem found in live sources. Open a card to read the evidence, competitors and a first business plan."
+        />
+
+        <div className="mt-10 border-y border-border py-4">
           <DiscoveryFilters value={filters} onChange={setFilters} count={filteredCards.length} total={cards.length} />
         </div>
 
-        <OpportunityRadar nodes={filteredNodes} />
-
-        <PickedForYou cards={cards} />
-
-        <QuakeFeed items={filteredQuakes} />
-
-        <section>
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="eyebrow">Marketplace</p>
-              <h2 className="mt-1 font-display text-2xl font-semibold text-foreground">Newly discovered unclaimed startups</h2>
-            </div>
-            <p className="max-w-md text-sm text-muted-foreground">
-              Each startup was generated from a problem cluster backed by live sources. Open one to inspect the evidence.
+        {filteredCards.length === 0 ? (
+          <div className="mt-8 grid place-items-center rounded-[4px] bg-surface-sunken px-6 py-16 text-center">
+            <Compass className="size-8 text-primary" />
+            <p className="mt-3 font-display text-lg font-bold text-foreground">
+              {cards.length === 0 ? "No startups discovered yet" : "No startups match these filters"}
             </p>
-          </div>
-          {filteredCards.length === 0 ? (
-            <div className="panel grid place-items-center px-6 py-16 text-center">
-              <Radar className="size-8 text-primary" />
-              <p className="mt-3 font-display text-lg text-foreground">
-                {cards.length === 0 ? "No startups discovered yet" : "No startups match these filters"}
-              </p>
-              <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-                {cards.length === 0
-                  ? "Start a discovery above — Demandquake will research the live web and publish its first unclaimed startups here."
-                  : "Clear a filter or run a new discovery focused on this area."}
-              </p>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              {cards.length === 0
+                ? "Start a research run below. Demandquake will read the live web and publish its first startups here."
+                : "Clear a filter, or research this area to find new startups."}
+            </p>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              {filtersActive && (
+                <Button variant="outline" onClick={() => setFilters(EMPTY_FILTERS)}>
+                  Clear filters
+                </Button>
+              )}
+              <Button asChild variant="hero">
+                <Link to="/" hash="discover">
+                  Research a market <ArrowRight />
+                </Link>
+              </Button>
             </div>
-          ) : (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {filteredCards.map((c, i) => (
+          </div>
+        ) : (
+          <>
+            <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {visibleCards.map((c, i) => (
                 <StartupCard key={c.id} card={c} index={i} />
               ))}
             </div>
-          )}
-        </section>
+            {filteredCards.length > INITIAL_CARDS && (
+              <div className="mt-10 flex justify-center">
+                <Button variant="outline" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}>
+                  {showAll ? "Show fewer" : `Show all ${filteredCards.length} startups`}
+                  {showAll ? <ChevronUp /> : <ChevronDown />}
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </section>
 
-        <RecentRuns runs={runs} />
-      </div>
+      <HowItWorksMosaic />
+
+      <SearchHero />
+
+      <QuakeFeed items={filteredQuakes} filtered={filtersActive} />
+
+      <section id="map" aria-labelledby="map-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
+        <SectionHeading
+          id="map-heading"
+          eyebrow="Opportunity map"
+          title="Every problem we found, on one map"
+          description="Bigger dots have more sources behind them. The map follows the filters you picked above."
+        />
+        <div className="mt-10">
+          <OpportunityRadar nodes={filteredNodes} />
+        </div>
+      </section>
+
+      <RecentRuns runs={runs} />
     </div>
   );
 }

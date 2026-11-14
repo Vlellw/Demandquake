@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { motion } from "motion/react";
-import { ArrowUpRight, FileSearch, Swords, Users } from "lucide-react";
+import { ArrowRight, FileSearch, Swords } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
 import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +22,7 @@ const levelBar: Record<Level, string> = {
 export function FreshnessBadge({ iso, prefix = "Researched" }: { iso: string; prefix?: string }) {
   const bucket = freshnessOf(iso);
   return (
-    <span className="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted-foreground">
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
       <span
         className={cn(
           "size-1.5 rounded-full",
@@ -58,9 +58,15 @@ export function AssessmentStrip({ card }: { card: Pick<StartupCardDTO, "assessme
   );
 }
 
+/**
+ * Lindström-style article card: a brand-colored block where a photo would sit, then an uppercase
+ * category line, bold title, short text and outlined tags. The whole card opens the startup.
+ */
 export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?: number }) {
+  const claimed = card.claim_count > 0;
   return (
     <motion.div
+      className="h-full"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: Math.min(index, 12) * 0.04, duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
@@ -69,57 +75,49 @@ export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?:
         to="/startup/$slug"
         params={{ slug: card.slug }}
         style={brandStyle(card.brand)}
-        className="group panel relative flex h-full flex-col overflow-hidden p-5 transition-all duration-300 hover:-translate-y-1 hover:border-border-strong hover:shadow-lift"
+        className="group flex h-full flex-col overflow-hidden rounded-[4px] bg-card shadow-panel transition-shadow duration-300 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div className="brand-surface pointer-events-none absolute inset-x-0 top-0 h-24 opacity-40 transition-opacity duration-300 group-hover:opacity-70" />
-        <div className="relative flex items-start gap-3">
-          <StartupMark brand={card.brand} />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <h3 className="truncate font-display text-lg font-semibold text-foreground">{card.name}</h3>
-              <ArrowUpRight className="ml-auto size-4 shrink-0 text-faint transition-all group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
-            </div>
-            <p className="mt-0.5 flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-              <span className="size-1.5 rounded-full" style={{ background: industryColor(card.industry) }} />
-              {card.industry} · {card.geography}
-            </p>
-          </div>
+        <div className="brand-banner relative flex h-32 items-end justify-between p-4">
+          <StartupMark brand={card.brand} size="lg" className="border-transparent shadow-panel" />
+          <span className="rounded-[3px] bg-background px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.06em] text-foreground">
+            {claimed ? `${card.claim_count} building` : "Unclaimed"}
+          </span>
         </div>
-        <p className="relative mt-4 line-clamp-2 text-[15px] leading-snug text-foreground/90">{card.tagline}</p>
-        {card.problem_title && (
-          <p className="relative mt-3 line-clamp-1 text-xs text-muted-foreground">
-            <span className="text-observed">Problem found:</span> {card.problem_title}
-          </p>
-        )}
-        <div className="relative mt-auto pt-5">
-          <div className="flex items-end justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-              <span className="inline-flex items-center gap-1">
-                <FileSearch className="size-3.5 text-observed" /> {card.evidence_count} sources
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <Swords className="size-3.5" /> {card.competitor_count} rivals
-              </span>
-              {card.claim_count > 0 && (
-                <span className="inline-flex items-center gap-1">
-                  <Users className="size-3.5" /> {card.claim_count} building
-                </span>
-              )}
-            </div>
-            <AssessmentStrip card={card} />
-          </div>
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-border pt-3">
-            <span className="whitespace-nowrap">
-              <FreshnessBadge iso={card.last_scanned_at ?? card.research_at} prefix={card.last_scanned_at ? "Scanned" : "Researched"} />
+        <div className="flex flex-1 flex-col p-5">
+          <p className="flex items-center gap-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">
+            <span className="size-2 rounded-full" style={{ background: industryColor(card.industry) }} aria-hidden="true" />
+            <span className="truncate">
+              {card.industry ?? "Other"} · {card.geography ?? "Global"}
             </span>
-            <div className="flex min-w-0 items-center gap-1.5">
-              {card.business_model_type && (
-                <Badge variant="outline" className="block max-w-36 truncate">
-                  {card.business_model_type}
-                </Badge>
-              )}
-              <Badge variant="live" className="whitespace-nowrap">Unclaimed</Badge>
-            </div>
+          </p>
+          <h3 className="mt-2 font-display text-xl font-bold text-foreground transition-colors group-hover:text-primary">
+            {card.name}
+          </h3>
+          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-foreground/85">{card.tagline}</p>
+          {card.problem_title && (
+            <p className="mt-2 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+              <span className="font-semibold text-observed">Problem found: </span>
+              {card.problem_title}
+            </p>
+          )}
+          <div className="mt-4 flex flex-wrap gap-1.5">
+            <Badge variant="observed">
+              <FileSearch /> {card.evidence_count} sources
+            </Badge>
+            <Badge variant="outline">
+              <Swords /> {card.competitor_count} competitors
+            </Badge>
+            {card.business_model_type && (
+              <Badge variant="default" className="max-w-full truncate">
+                {card.business_model_type}
+              </Badge>
+            )}
+          </div>
+          <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+            <FreshnessBadge iso={card.last_scanned_at ?? card.research_at} prefix={card.last_scanned_at ? "Scanned" : "Researched"} />
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-primary">
+              View <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+            </span>
           </div>
         </div>
       </Link>

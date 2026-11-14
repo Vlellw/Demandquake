@@ -27,7 +27,7 @@ function FilterSelect({
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger
         aria-label={label}
-        className={`h-8 w-auto min-w-[8.5rem] gap-2 bg-surface text-xs ${value !== "all" ? "border-primary/50 text-foreground" : "border-border text-muted-foreground"}`}
+        className={`h-10 w-auto min-w-[9.5rem] gap-2 rounded-full bg-background px-4 text-sm font-semibold ${value !== "all" ? "border-primary bg-accent text-primary" : "border-ink/40 text-foreground"}`}
       >
         <SelectValue />
       </SelectTrigger>
@@ -46,8 +46,8 @@ export function DiscoveryFilters({ value, onChange, count, total }: { value: Fil
   const active = Object.values(value).some((v) => v !== "all");
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="mr-1 inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-        <SlidersHorizontal className="size-3.5" /> Filter
+      <span className="mr-1 inline-flex items-center gap-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">
+        <SlidersHorizontal className="size-3.5" /> Filter by
       </span>
       <FilterSelect
         label="Industry"
@@ -56,10 +56,10 @@ export function DiscoveryFilters({ value, onChange, count, total }: { value: Fil
         options={[{ value: "all", label: "All industries" }, ...INDUSTRIES.map((i) => ({ value: i, label: i }))]}
       />
       <FilterSelect
-        label="Geography"
+        label="Region"
         value={value.geography}
         onChange={(geography) => onChange({ ...value, geography })}
-        options={[{ value: "all", label: "All geographies" }, ...GEOGRAPHIES.map((g) => ({ value: g, label: g }))]}
+        options={[{ value: "all", label: "All regions" }, ...GEOGRAPHIES.map((g) => ({ value: g, label: g }))]}
       />
       <FilterSelect
         label="Business model"
@@ -68,18 +68,18 @@ export function DiscoveryFilters({ value, onChange, count, total }: { value: Fil
         options={[{ value: "all", label: "All business models" }, ...BUSINESS_MODELS.map((m) => ({ value: m, label: m }))]}
       />
       <FilterSelect
-        label="Research freshness"
+        label="How recent"
         value={value.freshness}
         onChange={(freshness) => onChange({ ...value, freshness })}
-        options={FRESHNESS_FILTERS.map((f) => ({ value: f.value, label: f.value === "all" ? "Any freshness" : f.label }))}
+        options={FRESHNESS_FILTERS.map((f) => ({ value: f.value, label: f.value === "all" ? "Any date" : f.label }))}
       />
       {active && (
-        <Button variant="ghost" size="sm" onClick={() => onChange(EMPTY_FILTERS)}>
-          <X /> Clear
+        <Button variant="ghost" onClick={() => onChange(EMPTY_FILTERS)}>
+          <X /> Clear filters
         </Button>
       )}
-      <span className="ml-auto font-mono text-xs text-muted-foreground">
-        {count} of {total} startups
+      <span className="ml-auto text-sm text-muted-foreground" aria-live="polite">
+        <span className="font-bold text-foreground">{count}</span> of {total} startups
       </span>
     </div>
   );
