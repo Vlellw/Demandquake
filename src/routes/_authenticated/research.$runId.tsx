@@ -186,14 +186,6 @@ function ResearchPage() {
         <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
           <aside className="panel h-fit p-5 lg:sticky lg:top-20">
             <StageRail detail={detail} />
-            <div className="mt-6 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
-              <p className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full bg-observed" /> Observed — from Context.dev
-              </p>
-              <p className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full border border-dashed border-inferred" /> AI synthesis — to validate
-              </p>
-            </div>
           </aside>
 
           <div className="min-w-0 space-y-6">
