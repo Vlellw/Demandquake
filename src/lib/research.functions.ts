@@ -1,6 +1,8 @@
 // Public server functions for discovery, research runs, catalog reads and market scans.
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
+import { normalizeQueryKey } from './research-utils';
 
 const uuid = z.string().uuid();
 
@@ -59,29 +61,37 @@ const startSchema = z.object({
   industry: z.string().max(60).nullable().optional(),
   geography: z.string().max(60).nullable().optional(),
   force: z.boolean().optional(),
+  environment: z.enum(['sandbox','live']),
+  requestId: z.string().uuid(),
+  expectedCost: z.number().int().min(0),
 });
 
 export const startDiscovery = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: z.input<typeof startSchema>) => startSchema.parse(d))
-  .handler(async ({ data }) => {
-    const { createRun, userMessageOf } = await import("./pipeline.server");
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
     try {
-      const res = await createRun({
-        query: data.query,
-        industry: data.industry || null,
-        geography: data.geography || null,
-        force: Boolean(data.force),
+      const { data: result, error } = await supabaseAdmin.rpc('start_paid_discovery', {
+        p_user: context.userId, p_env: data.environment, p_request: data.requestId,
+        p_query: data.query, p_key: normalizeQueryKey(data.query, data.industry ?? null, data.geography ?? null),
+        p_industry: data.industry ?? '', p_geography: data.geography ?? '', p_force: Boolean(data.force), p_expected_cost: data.expectedCost,
       });
+      if (error) return { ok: false as const, error: error.message };
+      const res = z.object({ runId: z.string().uuid(), reused: z.enum(['cached','in_progress']).nullable(), cost: z.number() }).parse(result);
       return { ok: true as const, ...res };
     } catch (err) {
       console.error("[startDiscovery]", err);
-      return { ok: false as const, error: userMessageOf(err) };
+      return { ok: false as const, error: err instanceof Error ? err.message : 'Could not start research' };
     }
   });
 
 export const advanceDiscovery = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: { runId: string }) => ({ runId: uuid.parse(d.runId) }))
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { data: reservations, error } = await context.supabase.from('credit_reservations').select('id').eq('run_id', data.runId).eq('user_id', context.userId).eq('status','reserved').limit(1);
+    if (error || !reservations?.length) return { ok: false as const, error: 'Only a researcher with reserved credits can advance this run.' };
     const { advanceRun, userMessageOf } = await import("./pipeline.server");
     try {
       return { ok: true as const, ...(await advanceRun(data.runId)) };
@@ -92,8 +102,12 @@ export const advanceDiscovery = createServerFn({ method: "POST" })
   });
 
 export const retryDiscovery = createServerFn({ method: "POST" })
-  .inputValidator((d: { runId: string }) => ({ runId: uuid.parse(d.runId) }))
-  .handler(async ({ data }) => {
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { runId: string; environment: 'sandbox' | 'live' }) => z.object({ runId: uuid, environment: z.enum(['sandbox','live']) }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const reserved = await supabaseAdmin.rpc('renew_discovery_reservation', { p_user: context.userId, p_env: data.environment, p_run: data.runId });
+    if (reserved.error) throw new Error(reserved.error.message);
     const { retryRun } = await import("./pipeline.server");
     await retryRun(data.runId);
     return { ok: true as const };

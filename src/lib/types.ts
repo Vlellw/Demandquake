@@ -218,6 +218,7 @@ export interface ResearchPlan {
 }
 
 export interface RunStats {
+  billing_api_failed?: boolean;
   sources?: number;
   domains?: number;
   news?: number;

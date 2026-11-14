@@ -190,6 +190,7 @@ export async function advanceRun(runId: string): Promise<AdvanceResult> {
       await generateStartup(run, cluster.id);
     } catch (err) {
       console.error(`[pipeline] startup generation failed for cluster ${cluster.id}`, err);
+      await mergeStats(runId, { billing_api_failed: true });
       await db
         .from("clusters")
         .update({ generation_status: "failed", generation_error: userMessageOf(err) })
@@ -204,7 +205,7 @@ export async function advanceRun(runId: string): Promise<AdvanceResult> {
 
 async function failRun(runId: string, failedStage: string, message: string) {
   const run = await loadRun(runId);
-  const stats = { ...((run.stats as RunStats) ?? {}), failed_stage: failedStage };
+  const stats = { ...((run.stats as RunStats) ?? {}), failed_stage: failedStage, billing_api_failed: true };
   await db
     .from("discovery_runs")
     .update({ status: "failed", error: message, stage_started_at: null, stats: stats as Json })
@@ -424,6 +425,7 @@ async function stageSearch(run: RunRow) {
     }
   });
 
+  if (firstError) await mergeStats(run.id, { billing_api_failed: true });
   if (rows.length === 0 && firstError) throw firstError;
   if (rows.length < 4) {
     throw new PipelineError("Context.dev found too little evidence for this topic. Try a broader or differently worded search.");
@@ -702,6 +704,7 @@ async function stageCompetitors(run: RunRow) {
     await db.from("clusters").update({ competitor_source_ids: ids }).eq("id", c.id);
   }
 
+  if (firstError) await mergeStats(run.id, { billing_api_failed: true });
   if (clusters && clusters.length > 0 && failures === clusters.length && firstError) throw firstError;
   const fresh = await loadRun(run.id);
   const prevCredits = ((fresh.stats as RunStats) ?? {}).credits_used ?? 0;

@@ -5,8 +5,8 @@ import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
 const environment = z.enum(['sandbox', 'live']);
 const envSchema = z.object({ environment });
 export const getCreditCatalog = createServerFn({ method: 'GET' }).handler(async () => {
-  const { publicDB } = await import('./public-db.server');
-  const db = publicDB();
+  const { publicDb } = await import('./public-db.server');
+  const db = publicDb();
   const [packages, settings] = await Promise.all([db.from('credit_packages').select('*').eq('active', true).order('amount'), db.from('credit_settings').select('*')]);
   if (packages.error || settings.error) throw new Error('Credit pricing is unavailable');
   return { packages: packages.data, settings: Object.fromEntries(settings.data.map(s => [s.key, s.value])) };
