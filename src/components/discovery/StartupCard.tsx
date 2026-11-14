@@ -87,7 +87,6 @@ export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?:
         </div>
         <div className="flex flex-1 flex-col p-5">
           <p className="flex items-center gap-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">
-            <span className="size-2 rounded-full" style={{ background: industryColor(card.industry) }} aria-hidden="true" />
             <span className="truncate">
               {card.industry ?? "Other"} · {card.geography ?? "Global"}
             </span>
