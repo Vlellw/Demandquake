@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_rate_events: {
+        Row: {
+          created_at: string
+          id: number
+          provider: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          provider: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          provider?: string
+        }
+        Relationships: []
+      }
       clusters: {
         Row: {
           affected_users: string | null
@@ -486,7 +504,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      reserve_rate_slot: {
+        Args: { p_limit: number; p_provider: string; p_window_ms: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never

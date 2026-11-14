@@ -137,11 +137,13 @@ async function fetchStage(scan: ScanRow): Promise<string> {
   const queries = (startup.monitor_queries?.length ? startup.monitor_queries : [problem.statement ?? startup.name]).slice(0, 2);
   const fromMs = Date.now() - scan.window_days * 24 * 3600_000;
 
+  // Two requests per scan keeps market monitoring within the Context.dev per-minute limit.
+  const webQuery = queries[1] ?? queries[0];
   const tasks = [
-    ...queries.map((q) => newsSearch({ query: q, limit: 10, fromMs }).then((r) => ({ kind: "news" as const, q, r }))),
-    webSearch({ query: queries[0], numResults: 8, freshness: "last_month", highlightChars: 800 }).then((r) => ({
+    newsSearch({ query: queries[0], limit: 12, fromMs }).then((r) => ({ kind: "news" as const, q: queries[0], r })),
+    webSearch({ query: webQuery, numResults: 8, freshness: "last_month", highlightChars: 800 }).then((r) => ({
       kind: "web" as const,
-      q: queries[0],
+      q: webQuery,
       r,
     })),
   ];

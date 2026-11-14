@@ -15,6 +15,13 @@
       "when": 1794620082324,
       "tag": "0001_cluster_competitor_research",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794620925886,
+      "tag": "0002_context_rate_gate",
+      "breakpoints": true
     }
   ]
 }

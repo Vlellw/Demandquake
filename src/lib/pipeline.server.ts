@@ -3,7 +3,7 @@
 // → competitors (Context.dev) → generate startups (one per top cluster) → complete
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
-import { webSearch, newsSearch, domainOf, ContextDevError } from "./contextdev.server";
+import { webSearch, newsSearch, domainOf, ContextDevError, type WaitReporter } from "./contextdev.server";
 import { generateJSON, AIError, s } from "./ai.server";
 import { INDUSTRIES, GEOGRAPHIES, BUSINESS_MODELS } from "./taxonomy";
 import {
@@ -69,6 +69,17 @@ async function mergeStats(runId: string, patch: Partial<RunStats>) {
   const run = await loadRun(runId);
   const stats = { ...((run.stats as RunStats) ?? {}), ...patch };
   await db.from("discovery_runs").update({ stats: stats as Json }).eq("id", runId);
+}
+
+/** Records when research is queued behind the Context.dev rate limit so the UI can say so. */
+function waitReporter(runId: string): WaitReporter {
+  let lastUntil = 0;
+  return async (ms) => {
+    const until = Date.now() + ms;
+    if (Math.abs(until - lastUntil) < 4000) return;
+    lastUntil = until;
+    await mergeStats(runId, { rate_wait_until: new Date(until).toISOString() });
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -260,7 +271,7 @@ async function maybeFinalize(runId: string): Promise<boolean> {
 // ---------------------------------------------------------------------------
 // Stage 1: research plan
 // ---------------------------------------------------------------------------
-const SEARCH_INTENTS = ["complaints", "regulation", "market_news", "technology", "requests"] as const;
+const SEARCH_INTENTS = ["complaints", "regulation", "market_news", "technology"] as const;
 
 async function stagePlan(run: RunRow) {
   const constraints = [
@@ -274,7 +285,7 @@ async function stagePlan(run: RunRow) {
     name: "research_plan",
     instructions: `You are the research planner for Demandquake, a platform that discovers startup opportunities from live web evidence.
 Turn the user's request into a web research plan that surfaces REAL, CURRENT business problems — not solutions.
-Write exactly 5 web search queries, one per intent: complaints (pain points, frustrations, reviews, forum threads), regulation (new or upcoming rules and policy changes), market_news (industry developments, shortages, cost pressures), technology (shifts that create new needs or break old workflows), requests (people asking for a tool or service that does not exist yet).
+Write exactly 4 web search queries, one per intent: complaints (pain points, frustrations, reviews, forum threads, people asking for a tool that does not exist yet), regulation (new or upcoming rules and policy changes), market_news (industry developments, shortages, cost pressures), technology (shifts that create new needs or break old workflows).
 Each query must be a natural-language query a search engine answers well: concrete nouns, the target customer, and the geography if one is implied. No boolean operators, no quotes, no site: filters. Today is ${new Date().toISOString().slice(0, 10)}; prefer recent framing.
 Also write one news_query describing the developments to look for in news coverage.
 Pick the single best-fitting industry and geography from the allowed lists.`,
@@ -288,7 +299,7 @@ Pick the single best-fitting industry and geography from the allowed lists.`,
     }),
   });
 
-  const searches = (plan.searches ?? []).filter((q) => q.query?.trim()).slice(0, 5);
+  const searches = (plan.searches ?? []).filter((q) => q.query?.trim()).slice(0, 4);
   if (searches.length === 0) throw new PipelineError("The AI could not build a research plan for this topic. Try rephrasing.");
   const cleanPlan: ResearchPlan = {
     interpretation: plan.interpretation,
@@ -326,8 +337,9 @@ const EXCLUDE_DOMAINS = ["pinterest.com", "facebook.com", "instagram.com", "tikt
 async function stageSearch(run: RunRow) {
   const fresh = await loadRun(run.id);
   const plan = (fresh.plan as ResearchPlan) ?? {};
-  const searches = plan.searches ?? [];
+  const searches = (plan.searches ?? []).slice(0, 4);
   const yearAgo = Date.now() - 365 * 24 * 3600_000;
+  const onWait = waitReporter(run.id);
 
   const webTasks = searches.map((sq) =>
     webSearch({
@@ -336,9 +348,10 @@ async function stageSearch(run: RunRow) {
       highlightChars: 1000,
       excludeDomains: EXCLUDE_DOMAINS,
       freshness: sq.intent === "complaints" || sq.intent === "requests" ? undefined : "last_year",
+      onWait,
     }).then((r) => ({ sq, ...r })),
   );
-  const newsTask = newsSearch({ query: plan.news_query || run.query, limit: 12, fromMs: yearAgo });
+  const newsTask = newsSearch({ query: plan.news_query || run.query, limit: 12, fromMs: yearAgo, onWait });
 
   const settled = await Promise.allSettled([...webTasks, newsTask]);
   const rows: SourceInsert[] = [];
@@ -432,6 +445,7 @@ async function stageSearch(run: RunRow) {
     news: rows.filter((r) => r.origin === "news").length,
     by_intent: byIntent,
     credits_used: credits,
+    rate_wait_until: null,
   });
 }
 
@@ -625,6 +639,7 @@ async function stageCompetitors(run: RunRow) {
   let credits = 0;
   let total = 0;
   let failures = 0;
+  const onWait = waitReporter(run.id);
   let firstError: unknown = null;
 
   const results = await Promise.allSettled(
@@ -634,6 +649,7 @@ async function stageCompetitors(run: RunRow) {
         numResults: 7,
         highlightChars: 700,
         excludeDomains: EXCLUDE_DOMAINS,
+        onWait,
       }).then((r) => ({ c, ...r })),
     ),
   );
@@ -686,7 +702,7 @@ async function stageCompetitors(run: RunRow) {
   if (clusters && clusters.length > 0 && failures === clusters.length && firstError) throw firstError;
   const fresh = await loadRun(run.id);
   const prevCredits = ((fresh.stats as RunStats) ?? {}).credits_used ?? 0;
-  await mergeStats(run.id, { competitors: total, credits_used: prevCredits + credits });
+  await mergeStats(run.id, { competitors: total, credits_used: prevCredits + credits, rate_wait_until: null });
 }
 
 // ---------------------------------------------------------------------------

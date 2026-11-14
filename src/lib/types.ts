@@ -225,4 +225,5 @@ export interface RunStats {
   credits_used?: number;
   failed_stage?: string;
   cached_hits?: number;
+  rate_wait_until?: string | null;
 }

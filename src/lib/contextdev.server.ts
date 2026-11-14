@@ -1,7 +1,47 @@
 // Context.dev REST client (fetch-based, Worker-safe). Server-only.
 // Docs: https://docs.context.dev — search, news, answers.
+// Requests pass a shared database rate gate so concurrent research runs stay under the
+// organization's per-minute limit (CONTEXT_DEV_RPM, default 10), and 429s are retried
+// after the server-provided delay.
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 const BASE_URL = "https://api.context.dev/v1";
+const MAX_GATE_WAIT_MS = 110_000;
+
+export type WaitReporter = (waitMs: number) => void | Promise<void>;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function reserveSlot(onWait?: WaitReporter): Promise<void> {
+  const rpm = Math.max(1, Number(process.env["CONTEXT_DEV_RPM"] ?? 10) - 1);
+  const started = Date.now();
+  for (;;) {
+    const { data, error } = await supabaseAdmin.rpc("reserve_rate_slot", {
+      p_provider: "context.dev",
+      p_limit: rpm,
+      p_window_ms: 61_000,
+    });
+    if (error) {
+      console.error("[context.dev] rate gate unavailable", error);
+      return; // fail open: Context.dev still enforces its own limit (handled via 429 retry)
+    }
+    const wait = Number(data ?? 0);
+    if (wait <= 0) return;
+    if (Date.now() - started + wait > MAX_GATE_WAIT_MS) {
+      throw new ContextDevError("Rate gate wait budget exceeded", 429, friendlyMessage(429));
+    }
+    await onWait?.(wait);
+    await sleep(Math.min(wait + Math.random() * 400, 20_000));
+  }
+}
+
+function retryDelayMs(res: Response, body: string): number {
+  const header = Number(res.headers.get("retry-after"));
+  if (Number.isFinite(header) && header > 0) return header * 1000;
+  const m = body.match(/Retry in (\d+) seconds?/i);
+  if (m) return Number(m[1]) * 1000;
+  return 15_000;
+}
 
 export class ContextDevError extends Error {
   status: number;
@@ -17,7 +57,7 @@ export class ContextDevError extends Error {
 function friendlyMessage(status: number): string {
   if (status === 401 || status === 403) return "Context.dev rejected the API key. Check the key in project secrets.";
   if (status === 402) return "The Context.dev account is out of credits.";
-  if (status === 429) return "Context.dev rate limit reached. Wait a few seconds and retry.";
+  if (status === 429) return "Live research capacity is busy (Context.dev rate limit). Retry in a minute.";
   if (status === 408 || status === 504) return "Context.dev research timed out. Retry with a narrower topic.";
   if (status === 400 || status === 422) return "Context.dev could not process this research request.";
   return "Context.dev is temporarily unavailable. Retry in a moment.";
@@ -28,14 +68,21 @@ export interface CallMeta {
   cacheStatus: string | null;
 }
 
-async function call<T>(path: string, body: unknown, timeoutMs = 45_000): Promise<{ data: T; meta: CallMeta }> {
+async function call<T>(
+  path: string,
+  body: unknown,
+  opts: { timeoutMs?: number; onWait?: WaitReporter } = {},
+): Promise<{ data: T; meta: CallMeta }> {
+  const timeoutMs = opts.timeoutMs ?? 45_000;
   const apiKey = process.env["CONTEXT_DEV_API_KEY"];
   if (!apiKey) {
     throw new ContextDevError("CONTEXT_DEV_API_KEY missing", 500, "Live research is not configured yet (missing Context.dev key).");
   }
 
   let lastError: ContextDevError | null = null;
-  for (let attempt = 0; attempt < 2; attempt++) {
+  let rateRetries = 0;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    await reserveSlot(opts.onWait);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -52,6 +99,13 @@ async function call<T>(path: string, body: unknown, timeoutMs = 45_000): Promise
         const text = await res.text().catch(() => "");
         console.error(`[context.dev] ${path} -> ${res.status}: ${text.slice(0, 400)}`);
         lastError = new ContextDevError(`Context.dev ${path} failed: ${res.status}`, res.status, friendlyMessage(res.status));
+        if (res.status === 429 && rateRetries < 2) {
+          rateRetries++;
+          const wait = Math.min(retryDelayMs(res, text) + 500 + Math.random() * 1500, 62_000);
+          await opts.onWait?.(wait);
+          await sleep(wait);
+          continue;
+        }
         if ([500, 502, 503].includes(res.status) && attempt === 0) {
           await new Promise((r) => setTimeout(r, 1200));
           continue;
@@ -101,6 +155,7 @@ export async function webSearch(opts: {
   freshness?: "last_24_hours" | "last_week" | "last_month" | "last_year";
   excludeDomains?: string[];
   highlightChars?: number;
+  onWait?: WaitReporter;
 }): Promise<{ results: WebResult[]; meta: CallMeta }> {
   const body: Record<string, unknown> = {
     query: opts.query.slice(0, 480),
@@ -119,7 +174,7 @@ export async function webSearch(opts: {
       relevance?: string;
       highlights?: { highlights?: string[]; code?: string };
     }>;
-  }>("/web/search", body);
+  }>("/web/search", body, { onWait: opts.onWait });
 
   const results: WebResult[] = (data.results ?? [])
     .filter((r) => typeof r.url === "string" && r.url.startsWith("http"))
@@ -152,6 +207,7 @@ export async function newsSearch(opts: {
   query: string;
   limit?: number;
   fromMs?: number;
+  onWait?: WaitReporter;
 }): Promise<{ articles: NewsArticle[]; meta: CallMeta }> {
   const body: Record<string, unknown> = {
     searchBy: { type: "natural_language", query: opts.query.slice(0, 900) },
@@ -170,7 +226,7 @@ export async function newsSearch(opts: {
       type?: string | null;
       source?: { name?: string | null; domain?: string | null };
     }>;
-  }>("/news/search", body);
+  }>("/news/search", body, { onWait: opts.onWait });
 
   const seenStories = new Set<string>();
   const articles: NewsArticle[] = [];
