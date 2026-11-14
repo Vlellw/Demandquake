@@ -1,7 +1,7 @@
 // Startup banner images. Server-only.
 // Generates one topic-related banner per startup with the fastest Gemini image model,
 // stores it in the private "startup-banners" bucket and remembers it on the startup row.
-// The image is decorative artwork, never a claim — when generation fails the startup
+// The image is decorative artwork, never a claim - when generation fails the startup
 // keeps its plain brand-colored banner (no invented placeholder content).
 import { generateImage, GatewayError } from "@lovable.dev/ai-gateway";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";

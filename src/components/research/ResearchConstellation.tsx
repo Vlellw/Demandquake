@@ -127,7 +127,7 @@ export function ResearchConstellation({
               <text x={p.x - 12} y={p.y + 3.5} textAnchor="end" className="fill-muted-foreground text-[10px]">
                 {s.domain.length > 22 ? s.domain.slice(0, 21) + "…" : s.domain}
               </text>
-              <title>{`${s.title} — ${s.domain} (${signalLabel(s.signal_type)})`}</title>
+              <title>{`${s.title} - ${s.domain} (${signalLabel(s.signal_type)})`}</title>
             </motion.g>
           );
         })}

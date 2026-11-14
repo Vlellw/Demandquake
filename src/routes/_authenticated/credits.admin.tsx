@@ -13,7 +13,7 @@ import { CreditLedger } from './credits.history';
 
 export const Route = createFileRoute('/_authenticated/credits/admin')({
   loader: ({ context }) => context.queryClient.ensureQueryData(creditAdminQuery()),
-  head: () => ({ meta: [{ title: 'Credit administration — Demandquake' },{name:'description',content:'Manage Demandquake credit balances, research costs and packages.'},{property:'og:title',content:'Credit administration — Demandquake'},{property:'og:description',content:'Secure credit and payment administration.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'}] }),
+  head: () => ({ meta: [{ title: 'Credit administration - Demandquake' },{name:'description',content:'Manage Demandquake credit balances, research costs and packages.'},{property:'og:title',content:'Credit administration - Demandquake'},{property:'og:description',content:'Secure credit and payment administration.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'}] }),
   component: CreditAdmin,
 });
 function CreditAdmin() {

@@ -34,10 +34,10 @@ export const Route = createFileRoute("/_authenticated/research/$runId")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: loaderData ? `Live research: ${loaderData.query} — Demandquake` : "Live research — Demandquake" },
+      { title: loaderData ? `Live research: ${loaderData.query} - Demandquake` : "Live research - Demandquake" },
       { name: "description", content: "Watch Demandquake research the live web and turn evidence into startup opportunities." },
-      { property: "og:title", content: loaderData ? `Live research: ${loaderData.query}` : "Live research — Demandquake" },
-      { property: "og:description", content: "Live web sources, problem clusters and generated startups — with provenance." },
+      { property: "og:title", content: loaderData ? `Live research: ${loaderData.query}` : "Live research - Demandquake" },
+      { property: "og:description", content: "Live web sources, problem clusters and generated startups - with provenance." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -169,14 +169,14 @@ function ResearchPage() {
         {waitSecs > 0 && !isDone && !isFailed && (
           <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex items-center gap-3 rounded-[4px] border border-moderate/40 bg-moderate/[0.08] px-4 py-3 text-sm text-foreground">
             <Hourglass className="size-4 text-moderate" />
-            Queued behind the Context.dev request limit to protect live research — resuming in about {waitSecs}s.
+            Queued behind the Context.dev request limit to protect live research - resuming in about {waitSecs}s.
           </motion.div>
         )}
 
         {isFailed && (
           <div className="mt-6 flex flex-wrap items-center gap-3 rounded-[4px] border border-negative/40 bg-negative/[0.06] px-4 py-3">
             <TriangleAlert className="size-4 text-negative" />
-            <p className="flex-1 text-sm text-foreground/90">{driverError ?? run.error ?? "This research step failed."} No results were invented — completed steps are kept.</p>
+            <p className="flex-1 text-sm text-foreground/90">{driverError ?? run.error ?? "This research step failed."} No results were invented - completed steps are kept.</p>
             <Button variant="outline" size="sm" onClick={onRetry} disabled={retrying}>
               {retrying ? <Loader2 className="animate-spin" /> : <RotateCcw />} Retry step
             </Button>

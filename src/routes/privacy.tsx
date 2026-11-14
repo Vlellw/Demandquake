@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy Policy — Demandquake" },
+      { title: "Privacy Policy - Demandquake" },
       { name: "description", content: "How Demandquake collects, uses and protects your data: accounts, payments, research activity and visitor analytics." },
-      { property: "og:title", content: "Privacy Policy — Demandquake" },
+      { property: "og:title", content: "Privacy Policy - Demandquake" },
       { property: "og:description", content: "How Demandquake collects, uses and protects your data." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -83,19 +83,19 @@ function PrivacyPage() {
       <Section title="Third-party services">
         <ul className="list-disc space-y-2 pl-5">
           <li>
-            <strong className="font-semibold text-foreground">Context.dev</strong> — powers the live web research behind each
+            <strong className="font-semibold text-foreground">Context.dev</strong> - powers the live web research behind each
             opportunity. Search queries are sent to Context.dev to retrieve public sources; no personal account data is sent.
           </li>
           <li>
-            <strong className="font-semibold text-foreground">AI models</strong> — summarise sources, draft startup concepts
+            <strong className="font-semibold text-foreground">AI models</strong> - summarise sources, draft startup concepts
             and generate banner artwork. AI-drafted content is always labelled as such on the page.
           </li>
           <li>
-            <strong className="font-semibold text-foreground">Stripe</strong> — processes payments and sends us confirmed
+            <strong className="font-semibold text-foreground">Stripe</strong> - processes payments and sends us confirmed
             payment events.
           </li>
           <li>
-            <strong className="font-semibold text-foreground">Lovable Cloud</strong> — hosts the database, authentication and
+            <strong className="font-semibold text-foreground">Lovable Cloud</strong> - hosts the database, authentication and
             file storage for the site.
           </li>
         </ul>

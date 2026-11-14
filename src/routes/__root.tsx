@@ -73,7 +73,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Demandquake — Discover startups before they exist" },
+      { title: "Demandquake - Discover startups before they exist" },
       {
         name: "description",
         content:
@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "Demandquake" },
       { name: "theme-color", content: "#ffffff" },
       { property: "og:site_name", content: "Demandquake" },
-      { property: "og:title", content: "Demandquake — Discover startups before they exist" },
+      { property: "og:title", content: "Demandquake - Discover startups before they exist" },
       {
         property: "og:description",
         content: "Live web research → evidence-backed, unclaimed startups you can investigate and claim.",

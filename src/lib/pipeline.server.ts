@@ -285,7 +285,7 @@ async function stagePlan(run: RunRow) {
   const plan = await generateJSON<ResearchPlan & { searches: { intent: string; query: string }[] }>({
     name: "research_plan",
     instructions: `You are the research planner for Demandquake, a platform that discovers startup opportunities from live web evidence.
-Turn the user's request into a web research plan that surfaces REAL, CURRENT business problems — not solutions.
+Turn the user's request into a web research plan that surfaces REAL, CURRENT business problems - not solutions.
 Write exactly 4 web search queries, one per intent: complaints (pain points, frustrations, reviews, forum threads, people asking for a tool that does not exist yet), regulation (new or upcoming rules and policy changes), market_news (industry developments, shortages, cost pressures), technology (shifts that create new needs or break old workflows).
 Each query must be a natural-language query a search engine answers well: concrete nouns, the target customer, and the geography if one is implied. No boolean operators, no quotes, no site: filters. Today is ${new Date().toISOString().slice(0, 10)}; prefer recent framing.
 Also write one news_query describing the developments to look for in news coverage.
@@ -476,7 +476,7 @@ type SourceRow = {
 function sourceDigest(ref: string, src: SourceRow, maxChars = 700): string {
   const body = [src.snippet ?? "", ...(src.highlights ?? [])].join(" … ").replace(/\s+/g, " ").trim().slice(0, maxChars);
   const date = src.published_at ? `published ${src.published_at.slice(0, 10)}` : "publication date unknown";
-  return `[${ref}] ${src.title} — ${src.domain} (${src.origin}, ${date})\n${body}`;
+  return `[${ref}] ${src.title} - ${src.domain} (${src.origin}, ${date})\n${body}`;
 }
 
 async function stageAnalyze(run: RunRow) {
@@ -819,7 +819,7 @@ export async function generateStartup(run: RunRow, clusterId: string) {
     instructions: `You are Demandquake's venture architect. You turn ONE evidence-backed problem cluster into a commercially plausible, unclaimed startup concept.
 Hard rules on provenance:
 - Facts must come from the sources. Any factual claim (problem.facts, assessment reasoning, timeline notes) must cite refs like "S2" or "C1" that actually support it. Never invent statistics, customer quotes, company names, funding, or dates.
-- Everything else (name, solution, pricing, customers, roadmap, differentiation, pitch) is an AI hypothesis — write it confidently but do not present it as verified.
+- Everything else (name, solution, pricing, customers, roadmap, differentiation, pitch) is an AI hypothesis - write it confidently but do not present it as verified.
 - competitors: only companies/products that are explicitly named in the C-ref (or S-ref) source text. ref = the source that mentions it. company_domain = the company's own website domain only if it is evident from the source URL or text, otherwise null. description = what the source says about it. strengths/gap/scope/segment/feature_coverage are your interpretation. If no real competitor is named, return an empty list rather than guessing. 2-5 competitors max. feature_coverage must use exactly the solution feature titles.
 - assessment: exactly 6 dimensions with keys problem_evidence, market_timing, customer_clarity, differentiation, monetization, validation_status. Use qualitative levels only (strong / moderate / weak / unknown) and explain the reasoning explicitly, citing refs where facts are used. validation_status MUST be "unknown": no customer conversations have happened yet. No percentages or success probabilities anywhere.
 - timeline: 3-8 events, each tied to ONE ref (prefer sources with a publication date). Categories: demand_signal, market_development, competitor_activity, regulatory_change, tech_breakthrough, potential_threat. implication = how it affects this opportunity (positive / negative / uncertain).

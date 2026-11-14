@@ -17,7 +17,7 @@ export function BusinessPlanPanel({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-2 rounded-xl border border-dashed border-inferred/30 bg-inferred/[0.05] px-4 py-3 text-sm text-foreground/85">
-        <span>Everything on this tab is an AI-generated starting point for a founder — not verified market data.</span>
+        <span>Everything on this tab is an AI-generated starting point for a founder - not verified market data.</span>
         <InferredTag />
       </div>
 

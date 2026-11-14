@@ -8,7 +8,7 @@ const requested = new Map<string, Promise<{ url: string | null }>>();
 
 /**
  * The startup's banner image URL. When the startup has none yet, asks the server to generate
- * it once (cached on the startup row afterwards). Returns null until then — callers keep the
+ * it once (cached on the startup row afterwards). Returns null until then - callers keep the
  * plain brand-colored banner as the fallback.
  */
 export function useStartupBanner(startup: { id: string; banner_image_url: string | null }) {

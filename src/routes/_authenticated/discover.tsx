@@ -14,13 +14,13 @@ export const Route = createFileRoute("/_authenticated/discover")({
   search: { middlewares: [stripSearchParams(DISCOVER_DEFAULTS)] },
   head: () => ({
     meta: [
-      { title: "Discover evidence-backed startups — Demandquake" },
+      { title: "Discover evidence-backed startups - Demandquake" },
       {
         name: "description",
         content:
           "Choose an industry, see the best-documented startup ideas found in live web evidence, inspect their sources and competitors, then claim one.",
       },
-      { property: "og:title", content: "Discover evidence-backed startups — Demandquake" },
+      { property: "og:title", content: "Discover evidence-backed startups - Demandquake" },
       {
         property: "og:description",
         content: "A step-by-step way to find a startup worth building: choose an idea, inspect the evidence, claim it.",

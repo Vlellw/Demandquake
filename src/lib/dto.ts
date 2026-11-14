@@ -260,7 +260,7 @@ export interface ProjectTeamDTO {
   is_owner: boolean;
   owner_name: string | null;
   members: ProjectMemberDTO[];
-  /** Active invite links — only returned to the owner. */
+  /** Active invite links - only returned to the owner. */
   invites: ProjectInviteDTO[];
 }
 

@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** Red round mark with a white seismograph line — the Demandquake symbol. */
+/** Red round mark with a white seismograph line - the Demandquake symbol. */
 export function DemandquakeMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={cn("size-7", className)} aria-hidden="true">

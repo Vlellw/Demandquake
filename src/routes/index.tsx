@@ -8,9 +8,9 @@ import { useAuthUser } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
-    { title: "Demandquake — Find a startup worth building" },
+    { title: "Demandquake - Find a startup worth building" },
     { name: "description", content: "Find startup ideas grounded in real web evidence. Sign in to explore sources, AI-labelled hypotheses and founder workspaces." },
-    { property: "og:title", content: "Demandquake — Find a startup worth building" },
+    { property: "og:title", content: "Demandquake - Find a startup worth building" },
     { property: "og:description", content: "Evidence-first startup discovery, with source-linked facts and clearly labelled AI hypotheses." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary_large_image" },

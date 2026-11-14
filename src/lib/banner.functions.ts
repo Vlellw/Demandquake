@@ -9,7 +9,7 @@ const uuid = z.string().uuid();
 /**
  * Returns the startup's banner image URL, generating it once when missing.
  * Cards call this lazily; the result is cached on the startup row forever.
- * Returns { url: null } when generation failed — the caller keeps the plain brand banner.
+ * Returns { url: null } when generation failed - the caller keeps the plain brand banner.
  */
 export const ensureStartupBanner = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

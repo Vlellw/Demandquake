@@ -1,5 +1,5 @@
 // Context.dev REST client (fetch-based, Worker-safe). Server-only.
-// Docs: https://docs.context.dev — search, news, answers.
+// Docs: https://docs.context.dev - search, news, answers.
 // Requests pass a shared database rate gate so concurrent research runs stay under the
 // organization's per-minute limit (CONTEXT_DEV_RPM, default 10), and 429s are retried
 // after the server-provided delay.

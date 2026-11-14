@@ -17,7 +17,7 @@ const toneText: Record<string, string> = {
   uncertain: "text-uncertain",
 };
 
-/** Qualitative 3-segment meter. "Unvalidated" renders as hollow segments — never a percentage. */
+/** Qualitative 3-segment meter. "Unvalidated" renders as hollow segments - never a percentage. */
 export function LevelMeter({ level, className, showLabel = true, compact = false }: { level: Level; className?: string; showLabel?: boolean; compact?: boolean }) {
   const meta = LEVEL_META[level] ?? LEVEL_META.unknown;
   return (

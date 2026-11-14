@@ -35,7 +35,7 @@ function InviteRow({ invite, onRevoke, revoking }: { invite: ProjectInviteDTO; o
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);
     } catch {
-      toast.error("Couldn’t copy — select the link and copy it manually.");
+      toast.error("Couldn’t copy - select the link and copy it manually.");
     }
   }
   return (
@@ -77,7 +77,7 @@ export function TeamPanel({ project, currentUserId, onLeft }: { project: Project
   const [creating, setCreating] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
 
-  // A new teammate joining also writes to the activity feed — pull the latest project when the roster changes.
+  // A new teammate joining also writes to the activity feed - pull the latest project when the roster changes.
   const memberCount = team?.members.length;
   const lastCount = useRef<number | undefined>(undefined);
   useEffect(() => {
@@ -96,7 +96,7 @@ export function TeamPanel({ project, currentUserId, onLeft }: { project: Project
       await refetch();
       try {
         await navigator.clipboard.writeText(inviteUrl(invite.token));
-        toast.success("Invite link copied — send it to your co-founder.");
+        toast.success("Invite link copied - send it to your co-founder.");
       } catch {
         toast.success("Invite link created.");
       }
@@ -112,7 +112,7 @@ export function TeamPanel({ project, currentUserId, onLeft }: { project: Project
     try {
       await revokeFn({ data: { inviteId: id } });
       await refetch();
-      toast.success("Invite link revoked — it no longer works.");
+      toast.success("Invite link revoked - it no longer works.");
     } catch {
       toast.error("Couldn’t revoke this link.");
     } finally {

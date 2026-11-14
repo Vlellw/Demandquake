@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/method")({
   head: () => ({
     meta: [
-      { title: "How Demandquake works — evidence-first startup discovery" },
+      { title: "How Demandquake works - evidence-first startup discovery" },
       {
         name: "description",
         content: "How Demandquake researches the live web with Context.dev, separates sourced facts from AI hypotheses, and assesses opportunities without fake success scores.",
@@ -33,7 +33,7 @@ const PHASES: { name: string; summary: string; steps: Step[] }[] = [
     summary: "Find problems people already describe online.",
     steps: [
       { icon: Brain, title: "Plan the search", body: "Your question becomes a research plan: targeted searches for complaints, regulation, market news, technology shifts and explicit requests.", tag: "ai" },
-      { icon: Globe2, title: "Search the live web", body: "Context.dev web and news search retrieves real publications — each stored with its link, publisher, publication date and when we read it.", tag: "observed" },
+      { icon: Globe2, title: "Search the live web", body: "Context.dev web and news search retrieves real publications - each stored with its link, publisher, publication date and when we read it.", tag: "observed" },
       { icon: FileSearch, title: "Pick out signals", body: "Each source is read for concrete signals: a complaint, a rule change, a funding round, a capability that didn’t exist before.", tag: "ai" },
       { icon: Boxes, title: "Group into problems", body: "Signals from different sources are grouped into recurring problems. Evidence strength reflects how many independent sources agree.", tag: "ai" },
     ],
@@ -51,7 +51,7 @@ const PHASES: { name: string; summary: string; steps: Step[] }[] = [
     summary: "Claim the idea and keep an eye on the market.",
     steps: [
       { icon: Radar, title: "Watch for market changes", body: "A market scan searches the news again and explains whether each new development strengthens or weakens the idea. Claimed workspaces re-check on their own when their evidence is over a week old.", tag: "observed" },
-      { icon: Flag, title: "Claim and test it", body: "Founders claim a startup into a private workspace with the research, assumptions and an experiment checklist — and can invite co-founders to edit it with them.", tag: "you" },
+      { icon: Flag, title: "Claim and test it", body: "Founders claim a startup into a private workspace with the research, assumptions and an experiment checklist - and can invite co-founders to edit it with them.", tag: "you" },
     ],
   },
 ];
@@ -60,7 +60,7 @@ const LIMITS = [
   "People complaining online is not proof they’ll pay. Every startup starts as “Not validated with customers yet”.",
   "Search coverage is broad but not complete. An empty competitor list means none were named in sources, not that none exist.",
   "Publication dates come from the publisher. Undated pages are marked as undated rather than guessed.",
-  "Startup ideas are public and more than one founder can claim the same one — how you build it is what counts.",
+  "Startup ideas are public and more than one founder can claim the same one - how you build it is what counts.",
 ];
 
 function StepTagLabel({ tag }: { tag: StepTag }) {
@@ -85,7 +85,7 @@ function MethodPage() {
             as="h1"
             align="left"
             title="Evidence first. Guesses labelled. No fake odds."
-            description="Demandquake suggests startups that don’t exist yet by reading what the internet is already saying — and shows you which parts come from real sources and which are the AI’s suggestions."
+            description="Demandquake suggests startups that don’t exist yet by reading what the internet is already saying - and shows you which parts come from real sources and which are the AI’s suggestions."
           />
         </div>
       </section>
@@ -144,7 +144,7 @@ function MethodPage() {
               <Sparkles className="size-7 text-inferred" aria-hidden="true" />
               <h3 className="mt-4 font-display text-xl font-bold text-foreground">AI suggestions</h3>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-                Shown with a dashed purple outline. Names, solutions, prices, customers and plans are suggestions to start from — not findings.
+                Shown with a dashed purple outline. Names, solutions, prices, customers and plans are suggestions to start from - not findings.
               </p>
               <div className="mt-5">
                 <InferredTag />

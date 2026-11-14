@@ -11,7 +11,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Demandquake design system — follows the Lindström Group web design system.
+ * Demandquake design system - follows the Lindström Group web design system.
  * Light, calm pages: white canvas with light-gray bands, navy primary, ink-black text,
  * Libre Franklin throughout, pill buttons, near-square cards with soft shadows and
  * colored mosaic tiles (green / purple / magenta). Observed facts are teal; AI
@@ -168,7 +168,7 @@
   --positive: oklch(0.52 0.14 129);
   --negative: oklch(0.53 0.207 22.3);
   --uncertain: oklch(0.52 0.03 255);
-  /* Qualitative "moderate" rating — ochre, distinct from the purple AI-hypothesis color */
+  /* Qualitative "moderate" rating - ochre, distinct from the purple AI-hypothesis color */
   --moderate: oklch(0.522 0.111 73.8);
 
   /* Google sign-in button, light theme per Google branding (#FFFFFF / #747775 / #1F1F1F) */
@@ -199,7 +199,7 @@
   --shadow-glow-value: 0 0 0 3px oklch(0.363 0.104 250.6 / 18%);
   --shadow-lift-value: 0 2px 4px oklch(0 0 0 / 5%), 0 14px 32px -12px oklch(0 0 0 / 22%);
 
-  /* Industry category palette (radar, legends) — saturated mid tones readable on white */
+  /* Industry category palette (radar, legends) - saturated mid tones readable on white */
   --cat-1: oklch(0.45 0.12 250);
   --cat-2: oklch(0.55 0.2 25);
   --cat-3: oklch(0.6 0.13 80);

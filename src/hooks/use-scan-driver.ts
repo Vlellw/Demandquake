@@ -47,7 +47,7 @@ export function useScanDriver(scanId: string, slug: string, status: string | und
           console.error("[scan] advance failed", err);
           failures++;
           if (failures >= 3) {
-            setError({ scanId, message: "Lost connection to the research engine. Your scan is saved — retry to continue." });
+            setError({ scanId, message: "Lost connection to the research engine. Your scan is saved - retry to continue." });
             break;
           }
           await sleep(3000 * failures);

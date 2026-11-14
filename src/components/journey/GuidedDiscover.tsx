@@ -52,7 +52,7 @@ export function GuidedDiscover({
           <h2 id="choose-heading" className="section-title mt-2 text-xl leading-tight sm:text-2xl">
             Which market interests you?{" "}
             <InfoTip align="start">
-              Pick an industry. We show the ideas with the most evidence behind them — open one to check its sources before you decide.
+              Pick an industry. We show the ideas with the most evidence behind them - open one to check its sources before you decide.
             </InfoTip>
           </h2>
         </div>
@@ -103,7 +103,7 @@ export function GuidedDiscover({
                 <InfoTip align="start">
                   {selected === FOR_YOU
                     ? `Matched on industry and region with ${projectNames.join(", ")}.`
-                    : "Ordered by how much independent evidence backs each problem — not by chance of success."}
+                    : "Ordered by how much independent evidence backs each problem - not by chance of success."}
                 </InfoTip>
               </h2>
             </div>

@@ -125,7 +125,7 @@ function brandTokens(v: string): string[] {
 
 /**
  * A domain's brand only belongs to a competitor when the names plausibly refer to the same
- * company — guards against a source page's domain (e.g. a review site) lending its logo.
+ * company - guards against a source page's domain (e.g. a review site) lending its logo.
  */
 export function brandMatchesCompetitor(competitorName: string, domain: string, brandTitle: string | null): boolean {
   const name = competitorName.toLowerCase().replace(/[^a-z0-9]/g, "");

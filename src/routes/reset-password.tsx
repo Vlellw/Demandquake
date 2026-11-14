@@ -10,9 +10,9 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
-      { title: "Choose a new password — Demandquake" },
+      { title: "Choose a new password - Demandquake" },
       { name: "description", content: "Set a new password for your Demandquake account." },
-      { property: "og:title", content: "Reset password — Demandquake" },
+      { property: "og:title", content: "Reset password - Demandquake" },
       { property: "og:description", content: "Set a new password for your Demandquake account." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

@@ -34,7 +34,7 @@ export const Route = createFileRoute("/_authenticated/startup_/$slug/quake/$scan
   head: ({ loaderData }) => {
     const title = loaderData ? `Market scan: ${loaderData.name} | Demandquake` : "Market scan | Demandquake";
     const description = loaderData?.headline
-      ? `${loaderData.headline} — a live market scan of ${loaderData.name}.`
+      ? `${loaderData.headline} - a live market scan of ${loaderData.name}.`
       : "A live market scan comparing new web developments against a startup opportunity.";
     return {
       meta: [
@@ -120,7 +120,7 @@ function QuakePage() {
             {!done && !failed && (
               <div className="mt-10 max-w-2xl">
                 <h1 className="section-title text-3xl sm:text-4xl">Checking the market for news…</h1>
-                <p className="mt-3 text-base text-muted-foreground">This takes about 30 seconds. You can stay on this page — it updates by itself.</p>
+                <p className="mt-3 text-base text-muted-foreground">This takes about 30 seconds. You can stay on this page - it updates by itself.</p>
                 <ol className="mt-6 space-y-3">
                   <ScanStep active={scan.status === "fetching"} done={scan.status !== "fetching"} icon={<Search className="size-4" />}>
                     Searching Context.dev news and web for developments in the last {scan.window_days} days
@@ -187,7 +187,7 @@ function QuakePage() {
                   <div>
                     <h2 className="mt-1 font-display text-xl font-semibold text-foreground">How the opportunity moved</h2>
                   </div>
-                  <span className="font-mono text-[11px] text-muted-foreground">Qualitative levels — no scores</span>
+                  <span className="font-mono text-[11px] text-muted-foreground">Qualitative levels - no scores</span>
                 </div>
                 <AssessmentDiff before={scan.assessment_before} after={scan.assessment_after} />
               </section>
@@ -292,7 +292,7 @@ function AssessmentDiff({ before, after }: { before: Assessment; after: Assessme
 
   return (
     <div className="mt-5">
-      {visible.length === 0 && <p className="text-sm text-muted-foreground">No dimension changed — the assessment holds.</p>}
+      {visible.length === 0 && <p className="text-sm text-muted-foreground">No dimension changed - the assessment holds.</p>}
       <div className="space-y-3">
         {visible.map(({ key, b, a }) => {
           const levelMoved = a.level !== b.level;

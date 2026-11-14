@@ -39,7 +39,7 @@ export function AssessmentPanel({
           ))}
         </div>
         <p className="mt-4 text-[11px] text-muted-foreground">
-          Qualitative levels only — Demandquake never assigns success percentages. Each level is reasoning you can audit against its cited sources.
+          Qualitative levels only - Demandquake never assigns success percentages. Each level is reasoning you can audit against its cited sources.
         </p>
       </section>
 
@@ -72,7 +72,7 @@ export function AssessmentPanel({
                   <ShieldQuestion className="size-3.5" /> Not validated with customers yet
                 </span>
               ) : (
-                <span className="text-xs text-faint">No direct source — reasoning is an AI hypothesis</span>
+                <span className="text-xs text-faint">No direct source - reasoning is an AI hypothesis</span>
               )}
             </div>
           </motion.div>

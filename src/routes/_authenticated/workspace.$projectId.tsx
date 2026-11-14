@@ -64,9 +64,9 @@ export const Route = createFileRoute("/_authenticated/workspace/$projectId")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: loaderData ? `${loaderData.name} workspace — Demandquake` : "Workspace — Demandquake" },
+      { title: loaderData ? `${loaderData.name} workspace - Demandquake` : "Workspace - Demandquake" },
       { name: "description", content: "Private founder workspace: concept, assumptions, validation and roadmap." },
-      { property: "og:title", content: "Founder workspace — Demandquake" },
+      { property: "og:title", content: "Founder workspace - Demandquake" },
       { property: "og:description", content: "Private founder workspace on Demandquake." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -174,7 +174,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
                   <Pencil /> Edit
                 </Button>
                 <InfoTip align="start" label="How this workspace works">
-                  Press Edit to change the name, pitch, checklist, assumptions and notes — everything saves
+                  Press Edit to change the name, pitch, checklist, assumptions and notes - everything saves
                   automatically{shared ? " and your co-founders see your changes." : "."}
                 </InfoTip>
               </div>
@@ -289,7 +289,7 @@ function SaveIndicator({ state, savedAt, onRetry }: { state: SaveState; savedAt:
   if (state === "error")
     return (
       <button onClick={onRetry} className="inline-flex items-center gap-1.5 font-mono text-[11px] text-negative">
-        <CloudOff className="size-3" /> Not saved — retry
+        <CloudOff className="size-3" /> Not saved - retry
       </button>
     );
   if (state === "saved")
@@ -453,7 +453,7 @@ function ResearchSnapshot({ project: p }: { project: ProjectDTO }) {
           <ul className="mt-2 space-y-1.5 text-xs">
             {r.competitors.map((c) => (
               <li key={c.name}>
-                <span className="font-medium text-foreground">{c.name}</span> <span className="text-muted-foreground">— {c.gap}</span>
+                <span className="font-medium text-foreground">{c.name}</span> <span className="text-muted-foreground">- {c.gap}</span>
               </li>
             ))}
           </ul>
@@ -532,7 +532,7 @@ function MarketWatch({ slug, project: p, update }: { slug: string; project: Proj
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="mt-1 text-sm text-muted-foreground">
-            Re-searches live news for developments that strengthen or weaken this opportunity — automatically once a week when you visit.
+            Re-searches live news for developments that strengthen or weaken this opportunity - automatically once a week when you visit.
           </p>
         </div>
         <Radar className={cn("size-5 shrink-0 text-observed", running && "animate-pulse")} />
@@ -544,7 +544,7 @@ function MarketWatch({ slug, project: p, update }: { slug: string; project: Proj
             <Loader2 className="size-4 animate-spin text-observed" />
             {SCAN_STAGE_COPY[running.status] ?? "Scanning the market…"}
           </p>
-          {autoStarted && <p className="mt-1 text-[11px] text-muted-foreground">Started automatically — the last check was over a week ago.</p>}
+          {autoStarted && <p className="mt-1 text-[11px] text-muted-foreground">Started automatically - the last check was over a week ago.</p>}
           {driverError ? (
             <p className="mt-2 text-xs text-negative">
               {driverError}{" "}

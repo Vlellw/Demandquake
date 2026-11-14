@@ -25,7 +25,7 @@ export function mergeById<T extends WithId>(base: T[], local: T[], server: T[], 
       // changed here; if the teammate changed it too, combine where possible
       out.push(mergeItem && !same(s, b) ? mergeItem(b, l, s) : l);
     } else if (l && !b && !same(l, s)) {
-      out.push(l); // both added the same id (e.g. a logged scan) — keep this browser's copy
+      out.push(l); // both added the same id (e.g. a logged scan) - keep this browser's copy
     } else {
       out.push(s);
     }
@@ -57,7 +57,7 @@ export function mergeProject(base: EditableProject, local: EditableProject, serv
   };
 }
 
-/** Fields where `next` differs from `server` — what still needs saving after a merge. */
+/** Fields where `next` differs from `server` - what still needs saving after a merge. */
 export function changedFields(next: EditableProject, server: EditableProject): Partial<EditableProject> {
   const out: Partial<EditableProject> = {};
   for (const f of EDITABLE_FIELDS) {

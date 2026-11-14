@@ -158,7 +158,7 @@ async function pickCandidate(
         `What the source says about it: ${n.description.slice(0, 500) || "(no description)"}`,
         `Market of the startup being analysed: ${industry ?? "unknown"}`,
         "Directory entries:",
-        ...candidates.map((c, i) => `${i + 1}. ${c.name} — ${c.domain} — ${(c.description ?? "no description").slice(0, 320)}`),
+        ...candidates.map((c, i) => `${i + 1}. ${c.name} - ${c.domain} - ${(c.description ?? "no description").slice(0, 320)}`),
       ].join("\n"),
       schema: schema.obj({ choice: schema.int("1-based number of the matching entry, or 0 if none clearly matches") }),
     });

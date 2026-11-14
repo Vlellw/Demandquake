@@ -23,7 +23,7 @@ export const Route = createFileRoute("/auth")({
   }),
   head: () => ({
     meta: [
-      { title: "Sign in — Demandquake" },
+      { title: "Sign in - Demandquake" },
       { name: "description", content: "Sign in to claim startup opportunities and track them in your private founder workspace." },
       { property: "og:title", content: "Sign in to Demandquake" },
       { property: "og:description", content: "Claim evidence-backed startup opportunities and build them in your workspace." },
@@ -161,7 +161,7 @@ function AuthPage() {
             <MailCheck className="mx-auto size-8 text-observed" />
             <p className="mt-3 font-medium text-foreground">Confirm your email</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              We sent a confirmation link to <span className="text-foreground">{sentTo}</span>. Open it to finish creating your account — you’ll come right back here.
+              We sent a confirmation link to <span className="text-foreground">{sentTo}</span>. Open it to finish creating your account - you’ll come right back here.
             </p>
             <Button variant="ghost" size="sm" className="mt-3" onClick={() => setSentTo(null)}>
               Use a different email

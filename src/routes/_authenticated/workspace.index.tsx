@@ -15,9 +15,9 @@ export const Route = createFileRoute("/_authenticated/workspace/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(myProjectsQuery),
   head: () => ({
     meta: [
-      { title: "My startups — Demandquake" },
+      { title: "My startups - Demandquake" },
       { name: "description", content: "Your claimed startup opportunities, validation progress and roadmaps." },
-      { property: "og:title", content: "My startups — Demandquake" },
+      { property: "og:title", content: "My startups - Demandquake" },
       { property: "og:description", content: "Your private founder workspace on Demandquake." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

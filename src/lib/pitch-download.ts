@@ -3,7 +3,7 @@ export async function createPitchPdf(slides: HTMLElement[], name: string, onProg
   const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas-pro"), import("jspdf")]);
   await document.fonts.ready;
   const pdf = new jsPDF({ orientation: "landscape", unit: "pt", format: [800, 600], compress: true });
-  pdf.setProperties({ title: `${name} — pitch`, subject: "AI-generated startup pitch", creator: "Demandquake" });
+  pdf.setProperties({ title: `${name} - pitch`, subject: "AI-generated startup pitch", creator: "Demandquake" });
   for (const [index, slide] of slides.entries()) {
     if (index) pdf.addPage([800, 600], "landscape");
     const canvas = await html2canvas(slide, { scale: 2, useCORS: true, backgroundColor: null, logging: false });

@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Use — Demandquake" },
+      { title: "Terms of Use - Demandquake" },
       { name: "description", content: "The terms that govern your use of Demandquake: accounts, credits, claims, evidence and acceptable use." },
-      { property: "og:title", content: "Terms of Use — Demandquake" },
+      { property: "og:title", content: "Terms of Use - Demandquake" },
       { property: "og:description", content: "The terms that govern your use of Demandquake." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -55,7 +55,7 @@ function TermsPage() {
 
       <Section title="Credits and payments">
         <ul className="list-disc space-y-2 pl-5">
-          <li>Some actions cost credits — for example, a successful market search or claiming a startup. The price in credits is always shown before you confirm.</li>
+          <li>Some actions cost credits - for example, a successful market search or claiming a startup. The price in credits is always shown before you confirm.</li>
           <li>You are never charged for an action that fails.</li>
           <li>Credits are bought in packages through Stripe and are added to your balance after the payment is confirmed.</li>
           <li>Credits are not money, cannot be exchanged for cash, and are not transferable between accounts.</li>
@@ -66,7 +66,7 @@ function TermsPage() {
       <Section title="Claims and workspaces">
         <p>
           Claiming a startup gives you a private workspace for that opportunity. A claim is a organisational tool inside
-          Demandquake — it is not a legal right, trademark, or exclusivity over an idea, a market, or a company name. Other
+          Demandquake - it is not a legal right, trademark, or exclusivity over an idea, a market, or a company name. Other
           founders can research the same market.
         </p>
         <p>
@@ -96,7 +96,7 @@ function TermsPage() {
       <Section title="Availability and changes">
         <p>
           We work to keep the service available and accurate, but we provide it "as is" without warranties. We may change or
-          discontinue features, and we may update these terms — the date above shows the latest version, and continued use
+          discontinue features, and we may update these terms - the date above shows the latest version, and continued use
           means you accept it.
         </p>
       </Section>

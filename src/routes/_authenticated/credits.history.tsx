@@ -7,7 +7,7 @@ import { StatRule } from '@/components/common/StatRule';
 
 export const Route = createFileRoute('/_authenticated/credits/history')({
   loader: async ({ context }) => { const { data: { user } } = await supabase.auth.getUser(); if (!user) throw new Error('Sign in required'); await context.queryClient.ensureQueryData(creditAccountQuery(user.id)); return { userId: user.id }; },
-  head: () => ({ meta: [{ title: 'Credit transactions — Demandquake' }, { name: 'description', content: 'Your Demandquake credit balance, research charges and payment history.' }, { property: 'og:title', content: 'Credit transactions — Demandquake' }, { property: 'og:description', content: 'Review credit purchases, searches, refunds and adjustments.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
+  head: () => ({ meta: [{ title: 'Credit transactions - Demandquake' }, { name: 'description', content: 'Your Demandquake credit balance, research charges and payment history.' }, { property: 'og:title', content: 'Credit transactions - Demandquake' }, { property: 'og:description', content: 'Review credit purchases, searches, refunds and adjustments.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
   component: History,
 });
 export function CreditLedger({ rows }: { rows: Awaited<ReturnType<typeof import('@/lib/credits.functions').getCreditAccount>>['transactions'] }) {

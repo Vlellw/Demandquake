@@ -13,9 +13,9 @@ export const Route = createFileRoute("/_authenticated/invite/$token")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(invitePreviewQuery(params.token)),
   head: () => ({
     meta: [
-      { title: "Join a startup workspace — Demandquake" },
+      { title: "Join a startup workspace - Demandquake" },
       { name: "description", content: "You were invited to co-found a startup workspace on Demandquake." },
-      { property: "og:title", content: "Join a startup workspace — Demandquake" },
+      { property: "og:title", content: "Join a startup workspace - Demandquake" },
       { property: "og:description", content: "Accept the invite to edit this founder workspace together." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -87,7 +87,7 @@ function InvitePage() {
           {invite.tagline && <p className="mt-2 text-muted-foreground">{invite.tagline}</p>}
           <p className="mt-6 text-sm text-foreground/85">
             {invite.status === "owner"
-              ? "This is your own workspace — you shared this link."
+              ? "This is your own workspace - you shared this link."
               : invite.status === "member"
                 ? "You’re already a co-founder on this workspace."
                 : `${invite.owner_name ?? "The founder"} invited you to build this startup together. You’ll be able to edit the concept, checklist, assumptions, roadmap and notes.`}

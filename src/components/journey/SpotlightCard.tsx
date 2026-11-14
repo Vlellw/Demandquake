@@ -7,7 +7,7 @@ import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * Step 1 spotlight: one idea explained in plain words — the problem found, who has it and why now —
+ * Step 1 spotlight: one idea explained in plain words - the problem found, who has it and why now -
  * so a newcomer can decide which one to inspect without opening every card.
  */
 export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDTO; index?: number; reason?: string | undefined }) {

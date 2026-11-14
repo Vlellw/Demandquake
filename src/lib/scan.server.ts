@@ -289,7 +289,7 @@ async function analyzeStage(scan: ScanRow) {
     refMap.set(ref, src);
     const body = [src.snippet ?? "", ...(src.highlights ?? [])].join(" … ").replace(/\s+/g, " ").slice(0, 650);
     const date = src.published_at ? `published ${src.published_at.slice(0, 10)}` : "date unknown";
-    return `[${ref}] ${src.title} — ${src.domain} (${date})\n${body}`;
+    return `[${ref}] ${src.title} - ${src.domain} (${date})\n${body}`;
   });
 
   type Out = {
@@ -318,13 +318,13 @@ updated_dimensions: include ONLY assessment dimensions whose level or reasoning 
 new_competitors: only companies explicitly named in a relevant new publication that offer a competing solution.
 verdict: strengthened / weakened / mixed / unchanged. headline: ≤ 10 words. summary: 2-3 sentences explaining what changed and why it matters (or clearly that nothing meaningful changed).
 - Never write ref labels (like S2 or C1) inside prose text. Put citations ONLY in the ref/refs fields; prose should read naturally (e.g. \"Reuters reports…\").`,
-    input: `STARTUP: ${startup.name} — ${startup.tagline}
+    input: `STARTUP: ${startup.name} - ${startup.tagline}
 Problem: ${problem?.statement ?? ""}
 Why now (at generation): ${problem?.why_now ?? ""}
 Solution: ${solution?.summary ?? ""}
 Known competitors: ${competitors.map((c) => c.name).join(", ") || "none identified"}
 CURRENT ASSESSMENT:
-${(before?.dimensions ?? []).map((d) => `- ${d.key}: ${d.level} — ${d.reasoning}`).join("\n")}
+${(before?.dimensions ?? []).map((d) => `- ${d.key}: ${d.level} - ${d.reasoning}`).join("\n")}
 
 NEW PUBLICATIONS (last ${scan.window_days} days, not previously stored):
 ${digests.join("\n\n")}`,
@@ -414,8 +414,8 @@ ${digests.join("\n\n")}`,
       source_id: src.id,
       description: nc.description,
       kind: "direct",
-      strengths: "Newly detected in a market scan — not yet analyzed in depth.",
-      gap: "Unknown — investigate before positioning against it.",
+      strengths: "Newly detected in a market scan - not yet analyzed in depth.",
+      gap: "Unknown - investigate before positioning against it.",
       scope: "point",
       segment: "mid_market",
       feature_coverage: [],

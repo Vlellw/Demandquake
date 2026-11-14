@@ -80,7 +80,7 @@ export const updateCreditPackage = createServerFn({ method: 'POST' }).middleware
       const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
       await supabaseAdmin.from('credit_packages').update({ active: false }).eq('id',data.id);
       await stripe.prices.create({ product: productId, unit_amount: data.amount, currency: 'eur', lookup_key: pkg.data.price_key, transfer_lookup_key: true, tax_behavior: 'inclusive', nickname: product.name, metadata: { lovable_external_id: pkg.data.price_key } }, { idempotencyKey: `price:${data.requestId}` });
-      await stripe.products.update(productId, { name: `Demandquake ${pkg.data.name} — ${data.credits.toLocaleString('en-US')} credits` });
+      await stripe.products.update(productId, { name: `Demandquake ${pkg.data.name} - ${data.credits.toLocaleString('en-US')} credits` });
       const result = await supabaseAdmin.from('credit_packages').update({ credits: data.credits, amount: data.amount, active: true }).eq('id',data.id);
       if (result.error) throw new Error(result.error.message);
       return { ok: true as const };

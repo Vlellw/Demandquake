@@ -128,7 +128,7 @@ export function MarketLandscape({
           <CircleDashed className="mx-auto size-8 text-muted-foreground" />
           <p className="mt-3 font-display text-lg text-foreground">No named competitors surfaced in the live research</p>
           <p className="mx-auto mt-2 max-w-lg text-sm text-muted-foreground">
-            Demandquake only lists companies explicitly named in retrieved sources. An empty landscape is a signal to validate — talk to buyers about what they use today.
+            Demandquake only lists companies explicitly named in retrieved sources. An empty landscape is a signal to validate - talk to buyers about what they use today.
           </p>
         </div>
         <Differentiation items={differentiation} />
@@ -314,7 +314,7 @@ function BrandProfile({ brand }: { brand: MatchedBrand }) {
               </span>
             </TooltipTrigger>
             <TooltipContent className="max-w-64">
-              The source names this company without a website. Context.dev found a same-name company whose profile fits what the source says (AI-checked) — confirm it is the same company.
+              The source names this company without a website. Context.dev found a same-name company whose profile fits what the source says (AI-checked) - confirm it is the same company.
             </TooltipContent>
           </Tooltip>
         )}

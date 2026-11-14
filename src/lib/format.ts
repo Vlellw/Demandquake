@@ -20,7 +20,7 @@ export function formatDate(iso: string | null | undefined, opts?: Intl.DateTimeF
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   // Fixed UTC so server-rendered and browser-rendered text always match.
   return (
     new Date(iso).toLocaleString("en-GB", {

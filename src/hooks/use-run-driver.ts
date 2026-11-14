@@ -56,7 +56,7 @@ export function useRunDriver(runId: string, status: string | undefined, enabled 
           console.error("[research] advance failed", err);
           networkFailures++;
           if (networkFailures >= 3) {
-            setDriverError("Lost connection to the research engine. Your progress is saved — retry to continue.");
+            setDriverError("Lost connection to the research engine. Your progress is saved - retry to continue.");
             return;
           }
           await sleep(3000 * networkFailures);

@@ -80,7 +80,7 @@ export const Route = createFileRoute("/_authenticated/startup/$slug")({
     return { name: data.startup.name, tagline: data.startup.tagline, industry: data.startup.industry };
   },
   head: ({ loaderData }) => {
-    const title = loaderData ? `${loaderData.name} — ${loaderData.tagline} | Demandquake` : "Startup profile | Demandquake";
+    const title = loaderData ? `${loaderData.name} - ${loaderData.tagline} | Demandquake` : "Startup profile | Demandquake";
     const description = loaderData
       ? `An unclaimed, evidence-backed ${loaderData.industry ?? ""} startup opportunity discovered from live web research. Explore the evidence, competitors and assessment.`
       : "An evidence-backed startup opportunity discovered by Demandquake.";
@@ -88,7 +88,7 @@ export const Route = createFileRoute("/_authenticated/startup/$slug")({
       meta: [
         { title },
         { name: "description", content: description },
-        { property: "og:title", content: loaderData ? `${loaderData.name} — ${loaderData.tagline}` : "Startup profile" },
+        { property: "og:title", content: loaderData ? `${loaderData.name} - ${loaderData.tagline}` : "Startup profile" },
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },

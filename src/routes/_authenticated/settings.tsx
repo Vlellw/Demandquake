@@ -15,9 +15,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [
-    { title: "Account settings — Demandquake" },
+    { title: "Account settings - Demandquake" },
     { name: "description", content: "Manage your Demandquake email, password and account." },
-    { property: "og:title", content: "Account settings — Demandquake" },
+    { property: "og:title", content: "Account settings - Demandquake" },
     { property: "og:description", content: "Manage your Demandquake account securely." },
     { property: "og:type", content: "website" },
     { name: "twitter:card", content: "summary" },
