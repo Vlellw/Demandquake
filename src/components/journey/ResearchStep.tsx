@@ -17,9 +17,9 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NEXT_STEPS = [
-  { n: "1", title: "We read the live web", body: "About 2–3 minutes. You can watch every source come in." },
-  { n: "2", title: "Problems are grouped", body: "Repeated complaints and requests become problem clusters." },
-  { n: "3", title: "New startups appear", body: "Each one links to its sources and joins the catalog." },
+  { n: "1", title: "We read the live web" },
+  { n: "2", title: "Problems are grouped" },
+  { n: "3", title: "New startups appear" },
 ];
 
 /**
@@ -165,7 +165,7 @@ export function ResearchStep({
             <InfoTip align="start">
               {stage === "form"
                 ? "Describe a market or a group of customers in your own words. We read the live web and add the startups we find to the catalog."
-                : "Check the details below. The research starts right away and you can follow every step."}
+                : "Check the details below. The research starts right away and you can follow every step. Failed research is never charged, and refreshing the page won’t charge you twice."}
             </InfoTip>
           </h2>
           </div>
@@ -289,7 +289,6 @@ export function ResearchStep({
                 </dd>
               </div>
             </dl>
-            <p className="mt-3 text-sm text-muted-foreground">Failed research is never charged, and refreshing the page won’t charge you twice.</p>
 
             {wallet && !affordable && (
               <p role="alert" className="mt-4 rounded-[4px] border border-negative/40 p-3 text-sm text-negative">
@@ -306,7 +305,6 @@ export function ResearchStep({
                   <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary text-xs font-bold text-primary-foreground">{s.n}</span>
                   <span className="min-w-0">
                     <span className="block text-sm font-bold text-foreground">{s.title}</span>
-                    <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">{s.body}</span>
                   </span>
                 </li>
               ))}

@@ -70,15 +70,6 @@ const TAB_LABEL: Record<Tab, string> = {
 
 const ESSENTIAL = new Set<string>(INSPECTION_STEPS.map((s) => s.tab));
 
-const TAB_HINT: Record<Tab, string> = {
-  overview: "The problem, the proposed solution and who would buy it, in short.",
-  evidence: "Every post and article the idea is built on. Click a source to read the original.",
-  landscape: "Companies already working on this problem, and where they leave gaps.",
-  assessment: "How strong the opportunity looks on each dimension, with the reasoning and sources.",
-  updates: "What happened in the market since the research, and how it affects the idea.",
-  plan: "A first business plan and the steps to test it with real customers.",
-};
-
 interface StartupSearch {
   tab?: Tab | undefined;
   claim?: boolean | undefined;
@@ -333,11 +324,6 @@ function StartupPage() {
                   {scanning ? <Loader2 className="animate-spin" /> : <Radar />} Check for market changes
                 </Button>
               </div>
-              <p className="mt-3 max-w-md text-xs leading-relaxed opacity-85">
-                {user && existing
-                  ? "You already work on this idea. Your notes and checklist are in the workspace."
-                  : "Claiming gives you a private workspace with a checklist and notes. The idea stays public, so others can claim it too."}
-              </p>
             </div>
 
             <div className="min-w-0">
@@ -420,7 +406,6 @@ function StartupPage() {
             </div>
           </div>
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pt-6 sm:px-6">
-            <p className="text-sm text-muted-foreground">{TAB_HINT[tab]}</p>
           </div>
 
           <div className="mx-auto max-w-[1400px] px-4 pb-8 pt-4 sm:px-6">
