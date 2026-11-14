@@ -3,7 +3,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, ChevronDown, ChevronUp, Compass } from "lucide-react";
 import { SearchHero } from "@/components/discovery/SearchHero";
-import { HeroCarousel } from "@/components/home/HeroCarousel";
 import { IntroBand } from "@/components/home/IntroBand";
 import { HowItWorksMosaic } from "@/components/home/HowItWorksMosaic";
 import { SectionHeading } from "@/components/common/SectionHeading";
@@ -99,7 +98,6 @@ function DiscoverPage() {
 
   return (
     <div>
-      <HeroCarousel />
       <IntroBand stats={stats} />
 
       <section id="startups" aria-labelledby="startups-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
