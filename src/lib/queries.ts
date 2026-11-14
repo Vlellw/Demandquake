@@ -8,6 +8,8 @@ import {
   getStartupCards,
   getStartupDetail,
   getClusterSignals,
+  getCompetitorBrands,
+  getStartupScans,
 } from "./research.functions";
 import { getProject, listMyProjects } from "./projects.functions";
 
@@ -70,4 +72,18 @@ export const projectQuery = (projectId: string) =>
   queryOptions({
     queryKey: ["project", projectId],
     queryFn: () => getProject({ data: { projectId } }),
+  });
+
+export const competitorBrandsQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["competitor-brands", slug],
+    queryFn: () => getCompetitorBrands({ data: { slug } }),
+    staleTime: 5 * 60_000,
+  });
+
+export const startupScansQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["startup-scans", slug],
+    queryFn: () => getStartupScans({ data: { slug } }),
+    staleTime: 30_000,
   });

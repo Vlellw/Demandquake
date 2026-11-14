@@ -1,6 +1,9 @@
 import { useState } from "react";
+import type { BrandProfileDTO } from "@/lib/dto";
+import { brandMatchesCompetitor } from "@/lib/research-utils";
+import { useCompetitorBrands } from "@/hooks/use-competitor-brands";
 import { motion } from "motion/react";
-import { Check, CircleDashed, Minus, Sparkles, X } from "lucide-react";
+import { Building2, Check, CircleDashed, ExternalLink, Globe2, Loader2, MapPin, Minus, Sparkles, Users, X } from "lucide-react";
 import type { Brand, BusinessModel, Competitor, Coverage, Differentiator, Feature } from "@/lib/types";
 import { StartupMark } from "@/components/brand/StartupMark";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
@@ -29,19 +32,61 @@ function initials(name: string) {
     .join("");
 }
 
-function CompetitorDot({ c, active, onHover }: { c: Competitor; active: boolean; onHover: (n: string | null) => void }) {
+function normalDomain(d: string | null): string | null {
+  if (!d) return null;
+  return d.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/.*$/, "") || null;
+}
+
+type MatchedBrand = BrandProfileDTO & { via: "domain" | "name" };
+
+/** The competitor's verified brand profile, or null when the lookup is missing or names don't match. */
+function brandFor(c: Competitor, profiles: Record<string, BrandProfileDTO>, byName: Record<string, string>): MatchedBrand | null {
+  const d = normalDomain(c.domain);
+  if (d) {
+    const p = profiles[d];
+    if (!p || p.status !== "found") return null;
+    return brandMatchesCompetitor(c.name, p.domain, p.title) ? { ...p, via: "domain" } : null;
+  }
+  const resolved = byName[c.name];
+  const p = resolved ? profiles[resolved] : undefined;
+  return p && p.status === "found" ? { ...p, via: "name" } : null;
+}
+
+function CompetitorMark({ c, brand, className, iconClassName }: { c: Competitor; brand: BrandProfileDTO | null; className?: string; iconClassName?: string }) {
+  const [broken, setBroken] = useState(false);
+  const src = !broken ? (brand?.icon_url ?? null) : null;
+  return (
+    <span className={cn("flex items-center justify-center overflow-hidden border bg-surface-raised text-[10px] font-semibold text-foreground", className)}>
+      {src ? (
+        <img src={src} alt="" className="size-full object-cover" loading="lazy" onError={() => setBroken(true)} />
+      ) : c.domain ? (
+        <SourceFavicon domain={c.domain} className={iconClassName ?? "size-4"} />
+      ) : (
+        initials(c.name)
+      )}
+    </span>
+  );
+}
+
+function CompetitorDot({ c, brand, active, onHover }: { c: Competitor; brand: BrandProfileDTO | null; active: boolean; onHover: (n: string | null) => void }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <button
+          type="button"
+          aria-label={c.name}
           onMouseEnter={() => onHover(c.name)}
           onMouseLeave={() => onHover(null)}
-          className={cn(
-            "flex size-9 items-center justify-center overflow-hidden rounded-full border bg-surface-raised text-[10px] font-semibold text-foreground transition-transform",
-            active ? "scale-110 border-observed" : "border-border-strong",
-          )}
+          onFocus={() => onHover(c.name)}
+          onBlur={() => onHover(null)}
+          className={cn("rounded-full transition-transform", active && "scale-110")}
         >
-          {c.domain ? <SourceFavicon domain={c.domain} className="size-5" /> : initials(c.name)}
+          <CompetitorMark
+            c={c}
+            brand={brand}
+            className={cn("size-9 rounded-full", active ? "border-observed" : "border-border-strong")}
+            iconClassName="size-5"
+          />
         </button>
       </TooltipTrigger>
       <TooltipContent>
@@ -55,12 +100,14 @@ function CompetitorDot({ c, active, onHover }: { c: Competitor; active: boolean;
 }
 
 export function MarketLandscape({
+  slug,
   startup,
   competitors,
   features,
   differentiation,
   businessModel,
 }: {
+  slug: string;
   startup: { name: string; brand: Brand };
   competitors: Competitor[];
   features: Feature[];
@@ -68,6 +115,8 @@ export function MarketLandscape({
   businessModel: BusinessModel;
 }) {
   const [hover, setHover] = useState<string | null>(null);
+  const { profiles, byName, looking } = useCompetitorBrands(slug);
+  const brandOf = (c: Competitor) => brandFor(c, profiles, byName);
   const proposed = businessModel.target_scope && businessModel.target_segment
     ? { scope: businessModel.target_scope, segment: businessModel.target_segment }
     : null;
@@ -89,8 +138,8 @@ export function MarketLandscape({
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_1fr]">
-        <section className="panel p-5">
+      <div className="grid items-start gap-6 xl:grid-cols-[1.1fr_1fr]">
+        <section className="panel p-5 xl:sticky xl:top-32">
           <div className="flex items-center justify-between gap-2">
             <div>
               <p className="eyebrow">Positioning map</p>
@@ -122,7 +171,7 @@ export function MarketLandscape({
                       )}
                     >
                       {here.map((c) => (
-                        <CompetitorDot key={c.name} c={c} active={hover === c.name} onHover={setHover} />
+                        <CompetitorDot key={c.name} c={c} brand={brandOf(c)} active={hover === c.name} onHover={setHover} />
                       ))}
                       {isProposed && (
                         <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center gap-1">
@@ -144,17 +193,24 @@ export function MarketLandscape({
         </section>
 
         <section className="space-y-3">
-          {competitors.map((c) => (
+          {looking && (
+            <p className="inline-flex items-center gap-2 rounded-full border border-observed/25 bg-observed/[0.06] px-3 py-1 font-mono text-[10px] uppercase tracking-wider text-observed">
+              <Loader2 className="size-3 animate-spin" /> Looking up company brands on Context.dev
+            </p>
+          )}
+          {competitors.map((c) => {
+            const brand = brandOf(c);
+            const accent = brand?.colors[0]?.hex;
+            return (
             <div
               key={c.name}
               onMouseEnter={() => setHover(c.name)}
               onMouseLeave={() => setHover(null)}
-              className={cn("panel p-4 transition-colors", hover === c.name && "border-observed/50")}
+              className={cn("panel relative overflow-hidden p-4 transition-colors", hover === c.name && "border-observed/50")}
             >
+              {accent && <span aria-hidden className="absolute inset-y-0 left-0 w-[3px]" style={{ background: accent }} />}
               <div className="flex flex-wrap items-center gap-2">
-                <span className="flex size-7 items-center justify-center overflow-hidden rounded-md border border-border bg-surface-raised text-[10px] font-semibold">
-                  {c.domain ? <SourceFavicon domain={c.domain} className="size-4" /> : initials(c.name)}
-                </span>
+                <CompetitorMark c={c} brand={brand} className="size-8 rounded-md border-border" />
                 <p className="font-display text-base font-semibold text-foreground">{c.name}</p>
                 <Badge variant="outline">{KIND_LABEL[c.kind]}</Badge>
                 {c.detected_in_scan && <Badge variant="live">New in scan</Badge>}
@@ -176,8 +232,10 @@ export function MarketLandscape({
                   <p className="mt-1 text-xs text-muted-foreground">{c.gap}</p>
                 </div>
               </div>
+              {brand && <BrandProfile brand={brand} />}
             </div>
-          ))}
+            );
+          })}
         </section>
       </div>
 
@@ -201,7 +259,10 @@ export function MarketLandscape({
                 </th>
                 {competitors.map((c) => (
                   <th key={c.name} className={cn("px-2 py-2 text-center font-medium text-foreground/80", hover === c.name && "text-observed")}>
-                    {c.name}
+                    <span className="inline-flex flex-col items-center gap-1">
+                      <CompetitorMark c={c} brand={brandOf(c)} className="size-5 rounded border-border" iconClassName="size-3" />
+                      {c.name}
+                    </span>
                   </th>
                 ))}
               </tr>
@@ -232,6 +293,65 @@ export function MarketLandscape({
       )}
 
       <Differentiation items={differentiation} />
+    </div>
+  );
+}
+
+function BrandProfile({ brand }: { brand: MatchedBrand }) {
+  const facts = [
+    brand.employees && { icon: Users, text: `${brand.employees} employees` },
+    brand.hq_country && { icon: MapPin, text: brand.hq_country },
+  ].filter(Boolean) as { icon: typeof Users; text: string }[];
+  return (
+    <div className="mt-3 rounded-md border border-observed/20 bg-observed/[0.035] p-2.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <p className="data-label inline-flex items-center gap-1 text-observed">
+          <Building2 className="size-3" /> Company profile · Context.dev brand data
+        </p>
+        {brand.via === "name" && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="rounded border border-dashed border-border-strong px-1.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+                Matched by name
+              </span>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-64">
+              The source names this company without a website. Context.dev found a same-name company whose profile fits what the source says (AI-checked) — confirm it is the same company.
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {brand.colors.length > 0 && (
+          <span className="ml-auto flex items-center gap-1" aria-label="Brand colors">
+            {brand.colors.slice(0, 4).map((col) => (
+              <Tooltip key={col.hex}>
+                <TooltipTrigger asChild>
+                  <span className="size-3 rounded-full border border-border-strong" style={{ background: col.hex }} />
+                </TooltipTrigger>
+                <TooltipContent>
+                  {col.name ?? "Brand color"} · {col.hex}
+                </TooltipContent>
+              </Tooltip>
+            ))}
+          </span>
+        )}
+      </div>
+      {brand.slogan && <p className="mt-1.5 text-xs italic text-foreground/80">“{brand.slogan}”</p>}
+      {brand.description && <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{brand.description}</p>}
+      <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] text-muted-foreground">
+        {facts.map((f) => (
+          <span key={f.text} className="inline-flex items-center gap-1">
+            <f.icon className="size-3" /> {f.text}
+          </span>
+        ))}
+        <a
+          href={`https://${brand.domain}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1 text-observed hover:underline"
+        >
+          <Globe2 className="size-3" /> {brand.domain} <ExternalLink className="size-3" />
+        </a>
+      </div>
     </div>
   );
 }

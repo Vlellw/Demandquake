@@ -13,10 +13,15 @@
 - [x] End-to-end checks, page metadata, rule tests, mobile layout pass (phone menu, pitch player, card footers)
 - [x] Hydration-safe relative times; unique startup names
 
+- [x] Competitor logos, colors and company profiles via Context.dev brand data (domain + verified name matches)
+
+- [x] Brand data pre-loaded for all 15 startups
+- [x] Workspace market watch: run scans from the workspace; completed scans auto-log into founder activity
+
 ## In progress
-- [ ] Competitor logos/colors via Context.dev Brand lookup
 
 ## Ready next
+- Weekly automatic market scans for claimed startups (scheduled job) with a "new since last visit" badge
+- Brand marks for competitors detected in market scans (Quake page)
 - Scheduled monitoring via Context.dev search monitors
-- Workspace: "rescan from workspace" that logs scan results into founder activity
 - Shareable OG images per startup (generated brand card)

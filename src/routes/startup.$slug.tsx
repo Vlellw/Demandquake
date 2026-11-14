@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -328,6 +329,7 @@ function StartupPage() {
 
             <TabsContent value="landscape" className="mt-0">
               <MarketLandscape
+                slug={st.slug}
                 startup={{ name: st.name, brand: st.brand }}
                 competitors={st.competitors}
                 features={st.solution.features}
@@ -433,15 +435,6 @@ function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; va
       <p className="mt-1 font-display text-2xl font-semibold text-foreground">{value}</p>
     </div>
   );
-}
-
-export function VerdictBadge({ verdict, status }: { verdict: string | null; status: string }) {
-  if (status === "failed") return <Badge variant="negative">Failed</Badge>;
-  if (status !== "complete") return <Badge variant="live">Scanning</Badge>;
-  if (verdict === "strengthened") return <Badge variant="positive">Strengthened</Badge>;
-  if (verdict === "weakened") return <Badge variant="negative">Weakened</Badge>;
-  if (verdict === "mixed") return <Badge variant="uncertain">Mixed</Badge>;
-  return <Badge variant="outline">No material change</Badge>;
 }
 
 function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab) => void }) {

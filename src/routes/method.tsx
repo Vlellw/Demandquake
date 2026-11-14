@@ -28,7 +28,7 @@ const STEPS = [
   { icon: Globe2, title: "Search the live web", body: "Context.dev web and news search retrieves real publications — each stored with its URL, publisher, publication date and retrieval time.", tag: "observed" },
   { icon: FileSearch, title: "Extract signals", body: "Each source is read for concrete signals: a complaint, a rule change, a funding round, a capability that didn’t exist before.", tag: "ai" },
   { icon: Boxes, title: "Cluster problems", body: "Signals from different sources are grouped into recurring problems. Evidence strength reflects how many independent sources agree.", tag: "ai" },
-  { icon: Swords, title: "Check existing solutions", body: "A second live search looks for companies already addressing each problem. Only companies named in sources are listed.", tag: "observed" },
+  { icon: Swords, title: "Check existing solutions", body: "A second live search looks for companies already addressing each problem. Only companies named in sources are listed; Context.dev brand data then adds each company’s logo, colors and profile, and name-only matches are checked against the industry.", tag: "observed" },
   { icon: Sparkles, title: "Generate the startup", body: "A startup concept is designed around the evidence: brand, solution, customers, business model, risks, pitch and validation plan.", tag: "ai" },
   { icon: Radar, title: "Watch for market change", body: "Opportunity Quake re-searches the news for new developments and explains how each one strengthens or weakens the opportunity.", tag: "observed" },
   { icon: Flag, title: "Claim and validate", body: "Founders claim a startup into a private workspace with the research, assumptions and an experiment checklist.", tag: "you" },

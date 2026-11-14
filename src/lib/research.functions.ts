@@ -125,3 +125,27 @@ export const advanceMarketScan = createServerFn({ method: "POST" })
       return { ok: false as const, error: userMessageOf(err) };
     }
   });
+
+// ---------- Competitor brands (Context.dev brand lookups, cached per domain) ----------
+const slugSchema = z.string().min(1).max(80);
+
+export const getCompetitorBrands = createServerFn({ method: "GET" })
+  .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
+  .handler(async ({ data }) => {
+    const { startupCompetitorBrands } = await import("./brands.server");
+    return startupCompetitorBrands(data.slug);
+  });
+
+export const enrichCompetitorBrands = createServerFn({ method: "POST" })
+  .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
+  .handler(async ({ data }) => {
+    const { enrichStartupCompetitorBrands } = await import("./brands.server");
+    return enrichStartupCompetitorBrands(data.slug);
+  });
+
+export const getStartupScans = createServerFn({ method: "GET" })
+  .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
+  .handler(async ({ data }) => {
+    const { startupScans } = await import("./catalog.server");
+    return startupScans(data.slug);
+  });

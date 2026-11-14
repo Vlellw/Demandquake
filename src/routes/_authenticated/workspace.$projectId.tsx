@@ -1,12 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
   ArrowLeft,
+  ArrowRight,
   Check,
   CheckCircle2,
   CircleDashed,
@@ -16,13 +17,16 @@ import {
   Loader2,
   MessageSquarePlus,
   Plus,
+  Radar,
   Trash2,
   XCircle,
 } from "lucide-react";
-import { projectQuery } from "@/lib/queries";
+import { projectQuery, startupScansQuery } from "@/lib/queries";
+import { startMarketScan } from "@/lib/research.functions";
+import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { deleteProject } from "@/lib/projects.functions";
 import { useProjectSaver, type SaveState } from "@/hooks/use-project-saver";
-import { nextAssumptionStatus, projectProgress } from "@/lib/project-progress";
+import { nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
 import type { ProjectAssumption, ProjectDTO } from "@/lib/dto";
 import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { PitchPlayer } from "@/components/startup/PitchPlayer";
@@ -191,6 +195,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
               className="aspect-[4/3] sm:aspect-[4/3]"
             />
           )}
+          {r.startup_slug && <MarketWatch slug={r.startup_slug} project={p} update={update} />}
           <ResearchSnapshot project={p} />
           <ActivityLog project={p} update={update} />
           <section className="panel border-negative/20 p-5">
@@ -477,6 +482,136 @@ function ResearchSnapshot({ project: p }: { project: ProjectDTO }) {
   );
 }
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+function MarketWatch({ slug, project: p, update }: { slug: string; project: ProjectDTO; update: Update }) {
+  const { data, isLoading, isError, refetch } = useQuery(startupScansQuery(slug));
+  const scanFn = useServerFn(startMarketScan);
+  const navigate = useNavigate();
+  const [starting, setStarting] = useState(false);
+  const scans = data?.scans ?? [];
+  const running = scans.find((s) => s.status !== "complete" && s.status !== "failed");
+  const latestDone = scans.find((s) => s.status === "complete");
+  const [now, setNow] = useState<number | null>(null);
+  useEffect(() => setNow(Date.now()), []);
+  const stale = !!latestDone && now !== null && now - new Date(latestDone.completed_at ?? latestDone.created_at).getTime() > WEEK_MS;
+
+  // Log every completed scan into the activity feed exactly once.
+  const pending = useMemo(() => (data ? scanUpdatesToLog(p.updates, data.scans, slug) : []), [data, p.updates, slug]);
+  useEffect(() => {
+    if (pending.length) update({ updates: [...p.updates, ...pending] }, { immediate: true });
+  }, [pending, p.updates, update]);
+
+  async function run() {
+    if (!data) return;
+    setStarting(true);
+    try {
+      const res = await scanFn({ data: { startupId: data.startupId } });
+      if (!res.ok) {
+        toast.error(res.error);
+        setStarting(false);
+        return;
+      }
+      navigate({ to: "/startup/$slug/quake/$scanId", params: { slug, scanId: res.scanId } });
+    } catch (err) {
+      console.error(err);
+      toast.error("Couldn’t start the market scan. Please try again.");
+      setStarting(false);
+    }
+  }
+
+  return (
+    <section className="panel p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="eyebrow">Market watch</p>
+          <p className="mt-1 text-sm text-muted-foreground">Re-search live news for developments that strengthen or weaken this opportunity.</p>
+        </div>
+        <Radar className="size-5 shrink-0 text-observed" />
+      </div>
+
+      {running ? (
+        <Button asChild variant="outline" className="mt-4 w-full">
+          <Link to="/startup/$slug/quake/$scanId" params={{ slug, scanId: running.id }}>
+            <Loader2 className="animate-spin" /> Scan in progress — watch it
+          </Link>
+        </Button>
+      ) : (
+        <Button onClick={run} disabled={starting || !data} variant="outline" className="mt-4 w-full">
+          {starting ? <Loader2 className="animate-spin" /> : <Radar />} {latestDone ? "Scan again for changes" : "Run first market scan"}
+        </Button>
+      )}
+      {stale && <p className="mt-2 text-[11px] text-uncertain">Last scan was over a week ago — worth re-checking.</p>}
+
+      {isLoading && (
+        <div className="mt-4 space-y-2" aria-label="Loading scans">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-14 animate-pulse rounded-lg bg-foreground/[0.05]" />
+          ))}
+        </div>
+      )}
+      {isError && (
+        <p className="mt-4 text-sm text-negative">
+          Couldn’t load scan history.{" "}
+          <button className="underline" onClick={() => refetch()}>
+            Retry
+          </button>
+        </p>
+      )}
+      {data && scans.length === 0 && (
+        <p className="mt-4 rounded-lg border border-dashed border-border p-3 text-xs text-muted-foreground">
+          No scans yet. A scan compares recent news with this opportunity’s evidence and explains what changed.
+        </p>
+      )}
+      {scans.length > 0 && (
+        <ul className="mt-4 space-y-2">
+          {scans.slice(0, 5).map((s) => (
+            <li key={s.id}>
+              <Link
+                to="/startup/$slug/quake/$scanId"
+                params={{ slug, scanId: s.id }}
+                className="block rounded-lg border border-border p-3 transition-colors hover:border-observed/40 hover:bg-foreground/[0.03]"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <VerdictBadge verdict={s.verdict} status={s.status} />
+                  <span className="font-mono text-[10px] text-muted-foreground">
+                    <TimeAgo iso={s.completed_at ?? s.created_at} />
+                  </span>
+                </div>
+                {s.headline && <p className="mt-1.5 line-clamp-2 text-sm text-foreground/90">{s.headline}</p>}
+                {s.status === "complete" && (
+                  <p className="mt-1 font-mono text-[10px] text-faint">
+                    {s.changes.length} change{s.changes.length === 1 ? "" : "s"} · {s.candidates_count} new sources checked
+                  </p>
+                )}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+const QUAKE_URL = /^\/startup\/([^/]+)\/quake\/([^/]+)$/;
+
+function UpdateLink({ url }: { url: string }) {
+  const m = url.match(QUAKE_URL);
+  if (m?.[1] && m[2]) {
+    return (
+      <Link to="/startup/$slug/quake/$scanId" params={{ slug: m[1], scanId: m[2] }} className="mt-1 inline-flex items-center gap-1 text-xs text-observed hover:underline">
+        View scan result <ArrowRight className="size-3" />
+      </Link>
+    );
+  }
+  if (!/^https?:\/\//.test(url)) return null;
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-xs text-observed hover:underline">
+      Open link <ExternalLink className="size-3" />
+    </a>
+  );
+}
+
 function ActivityLog({ project: p, update }: { project: ProjectDTO; update: Update }) {
   const [note, setNote] = useState("");
   const sorted = useMemo(() => [...p.updates].sort((a, b) => b.at.localeCompare(a.at)), [p.updates]);
@@ -508,6 +643,7 @@ function ActivityLog({ project: p, update }: { project: ProjectDTO; update: Upda
             <p className="font-mono text-[10px] text-muted-foreground">{formatDateTime(u.at)}</p>
             <p className="text-sm font-medium text-foreground">{u.title}</p>
             <p className="whitespace-pre-wrap text-sm text-muted-foreground">{u.text}</p>
+            {u.url && <UpdateLink url={u.url} />}
           </li>
         ))}
       </ol>

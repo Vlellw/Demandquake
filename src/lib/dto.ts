@@ -223,3 +223,27 @@ export interface ProjectResearch {
   sources?: { id: string; title: string; url: string; domain: string; published_at: string | null; signal_type: string | null }[];
   assessment?: Assessment;
 }
+
+/** Context.dev brand profile cached per domain. `status` distinguishes "no brand found" from errors. */
+export interface BrandProfileDTO {
+  domain: string;
+  status: "found" | "not_found" | "error";
+  title: string | null;
+  description: string | null;
+  slogan: string | null;
+  logo_url: string | null;
+  icon_url: string | null;
+  colors: { hex: string; name: string | null }[];
+  employees: string | null;
+  hq_country: string | null;
+  industries: string[];
+  retrieved_at: string;
+}
+
+export interface CompetitorBrandsDTO {
+  profiles: Record<string, BrandProfileDTO>;
+  /** Competitor name → brand domain, for competitors without a sourced domain matched by name. */
+  byName: Record<string, string>;
+  /** Lookups (domains or competitor names) not fetched yet, or a stale failed attempt. */
+  missing: string[];
+}

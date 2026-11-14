@@ -22,6 +22,20 @@
       "when": 1794620925886,
       "tag": "0002_context_rate_gate",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794624750208,
+      "tag": "0003_brand_profiles",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794624964670,
+      "tag": "0004_brand_name_lookups",
+      "breakpoints": true
     }
   ]
 }

@@ -113,3 +113,39 @@ export function replaceBrandName<T>(value: T, oldName: string, nextName: string)
   const safeNext = JSON.stringify(nextName).slice(1, -1);
   return JSON.parse(JSON.stringify(value).replace(pattern, () => safeNext)) as T;
 }
+
+function brandTokens(v: string): string[] {
+  return v
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s.-]/g, " ")
+    .split(/[\s.-]+/)
+    .filter((t) => t.length >= 3 && !["inc", "the", "com", "corp", "llc", "ltd", "health", "software", "app", "www"].includes(t));
+}
+
+/**
+ * A domain's brand only belongs to a competitor when the names plausibly refer to the same
+ * company — guards against a source page's domain (e.g. a review site) lending its logo.
+ */
+export function brandMatchesCompetitor(competitorName: string, domain: string, brandTitle: string | null): boolean {
+  const name = competitorName.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (!name) return false;
+  const label = (domain.toLowerCase().replace(/^www\./, "").split(".")[0] ?? "").replace(/[^a-z0-9]/g, "");
+  const title = (brandTitle ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (label.length >= 3 && (name.includes(label) || label.includes(name))) return true;
+  if (title.length >= 3 && (name.includes(title) || title.includes(name))) return true;
+  const a = new Set(brandTokens(competitorName));
+  return [...brandTokens(brandTitle ?? ""), ...brandTokens(label)].some((t) => a.has(t));
+}
+
+/** Directory candidates that plausibly carry the competitor's name, exact matches first. */
+export function sameNameCandidates<C extends { domain: string; name: string }>(competitorName: string, candidates: C[], max = 5): C[] {
+  const norm = (v: string) => v.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const target = norm(competitorName);
+  const plausible = candidates.filter((c) => brandMatchesCompetitor(competitorName, c.domain, c.name));
+  return [...plausible.filter((c) => norm(c.name) === target), ...plausible.filter((c) => norm(c.name) !== target)].slice(0, max);
+}
+
+export function brandNameKey(name: string, industry: string | null): string {
+  return `${name.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()}|${(industry ?? "").toLowerCase()}`;
+}

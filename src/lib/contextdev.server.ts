@@ -71,8 +71,9 @@ export interface CallMeta {
 async function call<T>(
   path: string,
   body: unknown,
-  opts: { timeoutMs?: number; onWait?: WaitReporter | undefined } = {},
+  opts: { timeoutMs?: number; onWait?: WaitReporter | undefined; method?: "GET" | "POST" } = {},
 ): Promise<{ data: T; meta: CallMeta }> {
+  const isGet = opts.method === "GET";
   const timeoutMs = opts.timeoutMs ?? 45_000;
   const apiKey = process.env["CONTEXT_DEV_API_KEY"];
   if (!apiKey) {
@@ -86,13 +87,15 @@ async function call<T>(
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const res = await fetch(`${BASE_URL}${path}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
+      const url = isGet
+        ? `${BASE_URL}${path}?${new URLSearchParams(body as Record<string, string>).toString()}`
+        : `${BASE_URL}${path}`;
+      const res = await fetch(url, {
+        method: isGet ? "GET" : "POST",
+        headers: isGet
+          ? { Authorization: `Bearer ${apiKey}` }
+          : { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        ...(isGet ? {} : { body: JSON.stringify(body) }),
         signal: controller.signal,
       });
       if (!res.ok) {
@@ -257,4 +260,106 @@ export function domainOf(url: string): string {
   } catch {
     return url;
   }
+}
+
+export interface BrandInfo {
+  domain: string;
+  title: string | null;
+  description: string | null;
+  slogan: string | null;
+  logoUrl: string | null;
+  iconUrl: string | null;
+  colors: { hex: string; name: string | null }[];
+  employees: string | null;
+  hqCountry: string | null;
+  /** Context.dev industry classification (EIC top-level industries). */
+  industries: string[];
+}
+
+type RawLogo = { url?: string; type?: "icon" | "logo"; mode?: "light" | "dark" | "has_opaque_background" };
+
+/** Pick a logo that reads well on the app's dark surfaces: prefer dark-mode or opaque marks. */
+function pickLogo(logos: RawLogo[], type: "icon" | "logo"): string | null {
+  const ofType = logos.filter((l) => l.type === type && typeof l.url === "string" && l.url.startsWith("http"));
+  const rank = (l: RawLogo) => (l.mode === "dark" ? 0 : l.mode === "has_opaque_background" ? 1 : 2);
+  return ofType.sort((a, b) => rank(a) - rank(b))[0]?.url ?? null;
+}
+
+/**
+ * Brand lookup by domain (logos, colors, description). Returns null when Context.dev has no
+ * brand for the domain; throws ContextDevError for transport, credit or rate problems.
+ */
+export async function brandRetrieve(
+  target: { domain: string } | { name: string },
+  opts: { onWait?: WaitReporter } = {},
+): Promise<{ brand: BrandInfo | null; meta: CallMeta }> {
+  const request =
+    "domain" in target
+      ? { type: "by_domain", domain: target.domain }
+      : { type: "by_name", name: target.name.slice(0, 120) };
+  try {
+    const { data, meta } = await call<{
+      brand?: {
+        title?: string;
+        description?: string;
+        slogan?: string;
+        domain?: string;
+        logos?: RawLogo[];
+        colors?: { hex?: string; name?: string }[];
+        employees?: { range?: string; exact?: number };
+        address?: { country?: string };
+        industries?: { eic?: { industry?: string }[] };
+      };
+    }>(
+      "/brand/retrieve",
+      { ...request, maxSpeed: true, maxAgeMs: 30 * 24 * 60 * 60 * 1000, timeoutOpts: { milliseconds: 20_000 } },
+      { timeoutMs: 30_000, onWait: opts.onWait },
+    );
+    const b = data.brand;
+    if (!b || (!b.title && !b.logos?.length)) return { brand: null, meta };
+    const logos = b.logos ?? [];
+    const domain = (b.domain ?? ("domain" in target ? target.domain : "")).toLowerCase().replace(/^www\./, "");
+    if (!domain) return { brand: null, meta };
+    return {
+      brand: {
+        domain,
+        title: b.title?.trim() || null,
+        description: b.description?.trim() || null,
+        slogan: b.slogan?.trim() || null,
+        logoUrl: pickLogo(logos, "logo"),
+        iconUrl: pickLogo(logos, "icon"),
+        colors: (b.colors ?? [])
+          .filter((c): c is { hex: string; name?: string } => typeof c.hex === "string" && /^#[0-9a-f]{3,8}$/i.test(c.hex))
+          .slice(0, 5)
+          .map((c) => ({ hex: c.hex, name: c.name ?? null })),
+        employees: b.employees?.range ?? (b.employees?.exact ? String(b.employees.exact) : null),
+        hqCountry: b.address?.country ?? null,
+        industries: [...new Set((b.industries?.eic ?? []).map((e) => e.industry).filter((x): x is string => !!x))],
+      },
+      meta,
+    };
+  } catch (err) {
+    if (err instanceof ContextDevError && [400, 404, 422].includes(err.status)) {
+      return { brand: null, meta: { creditsUsed: 0, cacheStatus: null } };
+    }
+    throw err;
+  }
+}
+
+export interface BrandCandidate {
+  domain: string;
+  name: string;
+  description: string | null;
+}
+
+/** Brand directory search by company name (cheap); candidates still need verification. */
+export async function brandSearch(name: string, opts: { onWait?: WaitReporter } = {}): Promise<BrandCandidate[]> {
+  const { data } = await call<{ results?: { domain?: string; name?: string; description?: string }[] }>(
+    "/brand/search",
+    { query: name.slice(0, 100), queryBy: "name", autocomplete: "false" },
+    { method: "GET", timeoutMs: 20_000, onWait: opts.onWait },
+  );
+  return (data.results ?? [])
+    .filter((r): r is { domain: string; name: string; description?: string } => typeof r.domain === "string" && typeof r.name === "string")
+    .map((r) => ({ domain: r.domain.toLowerCase().replace(/^www\./, ""), name: r.name, description: r.description ?? null }));
 }

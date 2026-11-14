@@ -321,3 +321,19 @@ export async function scanDetail(scanId: string): Promise<ScanDetailDTO | null> 
     sources: ((src ?? []) as unknown as Record<string, unknown>[]).map(toSource),
   };
 }
+
+/** Lightweight scan history for a startup (used by the founder workspace's market watch). */
+export async function startupScans(slug: string): Promise<{ startupId: string; slug: string; scans: ScanSummaryDTO[] } | null> {
+  const db = publicDb();
+  const { data: st, error } = await db.from("startups").select("id, slug").eq("slug", slug).maybeSingle();
+  if (error) throw error;
+  if (!st) return null;
+  const { data, error: scanErr } = await db
+    .from("market_scans")
+    .select("id, status, verdict, headline, summary, candidates_count, changes, created_at, completed_at")
+    .eq("startup_id", st.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
+  if (scanErr) throw scanErr;
+  return { startupId: st.id, slug: st.slug, scans: ((data ?? []) as unknown as Record<string, unknown>[]).map(toScanSummary) };
+}

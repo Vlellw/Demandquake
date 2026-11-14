@@ -37,3 +37,4 @@ use the editor.
 - Relative times render through `<TimeAgo>` and absolute dates format in fixed UTC (`src/lib/format.ts`) so server and browser text match during hydration.
 - Generated startup names must be unique: generation is told the taken names and `ensureUniqueName` renames the newer duplicate after insert, because clusters generate in parallel.
 - `Badge` renders a `<span>` so it can sit inside paragraphs without invalid nesting.
+- Competitor brand data is fetched lazily per startup (`brands.server.ts`) and cached per domain in `brand_profiles`; name-only competitors resolve through brand search, same-name filtering (`sameNameCandidates`) and an AI check against the source description, cached in `brand_name_lookups`, so each company costs credits once and lookalike brands are never shown.

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { safeRedirect } from "@/lib/safe-redirect";
-import { nextAssumptionStatus, projectProgress } from "@/lib/project-progress";
-import { computeEvidenceStrength, freshnessOf, matchesFreshness, normalizeUrl, stripRefLabels, cleanRefLabels, replaceBrandName } from "@/lib/research-utils";
+import { nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
+import { computeEvidenceStrength, freshnessOf, matchesFreshness, normalizeUrl, stripRefLabels, cleanRefLabels, replaceBrandName, brandMatchesCompetitor, sameNameCandidates } from "@/lib/research-utils";
 import { buildProjectFromStartup, type StartupForClaim } from "@/lib/claim";
 
 describe("post sign-in redirect", () => {
@@ -106,5 +106,62 @@ describe("renaming a duplicate startup rewrites its own copy", () => {
   });
   it("leaves words that merely contain the name untouched", () => {
     expect(replaceBrandName("Tallywakers love Tallywake", "Tallywake", "Yieldglass")).toBe("Tallywakers love Yieldglass");
+  });
+});
+
+describe("a domain's brand is only shown for the matching competitor", () => {
+  it("accepts the company's own domain", () => {
+    expect(brandMatchesCompetitor("Sully.ai", "sully.ai", "Sully")).toBe(true);
+    expect(brandMatchesCompetitor("Epic Systems", "epic.com", "Epic")).toBe(true);
+  });
+  it("rejects a review or news site's brand", () => {
+    expect(brandMatchesCompetitor("Sully.ai", "g2.com", "G2")).toBe(false);
+    expect(brandMatchesCompetitor("Abridge", "fiercehealthcare.com", "Fierce Healthcare")).toBe(false);
+  });
+});
+
+describe("name-only competitors are matched against same-name brands only", () => {
+  const found = [
+    { domain: "litmus.com", name: "Litmus" },
+    { domain: "litmus.io", name: "Litmus" },
+    { domain: "litmusworld.com", name: "LitmusWorld" },
+    { domain: "acme.com", name: "Acme" },
+  ];
+  it("keeps exact-name brands first and drops unrelated ones", () => {
+    expect(sameNameCandidates("Litmus", found).map((c) => c.domain)).toEqual(["litmus.com", "litmus.io", "litmusworld.com"]);
+  });
+  it("caps how many candidates are verified", () => {
+    expect(sameNameCandidates("Litmus", found, 2)).toHaveLength(2);
+  });
+});
+
+describe("market scans are logged into the founder activity once", () => {
+  const scan = (id: string, status: string, verdict: string | null) => ({
+    id,
+    status,
+    verdict,
+    headline: "Payers tighten prior authorization rules",
+    summary: null,
+    candidates_count: 4,
+    changes: [],
+    created_at: "2026-11-10T10:00:00Z",
+    completed_at: status === "complete" ? "2026-11-10T10:01:00Z" : null,
+  });
+  it("logs completed scans with their verdict and result link", () => {
+    const out = scanUpdatesToLog([], [scan("a1", "complete", "strengthened")], "chartweft-coml");
+    expect(out).toEqual([
+      {
+        id: "scan-a1",
+        at: "2026-11-10T10:01:00Z",
+        kind: "scan",
+        title: "Market scan · opportunity strengthened",
+        text: "Payers tighten prior authorization rules",
+        url: "/startup/chartweft-coml/quake/a1",
+      },
+    ]);
+  });
+  it("skips scans already logged and scans still running", () => {
+    const existing = [{ id: "scan-a1", at: "x", kind: "scan" as const, title: "t", text: "t" }];
+    expect(scanUpdatesToLog(existing, [scan("a1", "complete", "weakened"), scan("b2", "scanning", null)], "s")).toEqual([]);
   });
 });

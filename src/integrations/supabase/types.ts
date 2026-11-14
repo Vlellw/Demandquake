@@ -32,6 +32,84 @@ export type Database = {
         }
         Relationships: []
       }
+      brand_name_lookups: {
+        Row: {
+          domain: string | null
+          error: string | null
+          industry: string | null
+          lookup_key: string
+          name: string
+          retrieved_at: string
+          status: string
+        }
+        Insert: {
+          domain?: string | null
+          error?: string | null
+          industry?: string | null
+          lookup_key: string
+          name: string
+          retrieved_at?: string
+          status: string
+        }
+        Update: {
+          domain?: string | null
+          error?: string | null
+          industry?: string | null
+          lookup_key?: string
+          name?: string
+          retrieved_at?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      brand_profiles: {
+        Row: {
+          colors: Json
+          description: string | null
+          domain: string
+          employees: string | null
+          error: string | null
+          hq_country: string | null
+          icon_url: string | null
+          industries: string[]
+          logo_url: string | null
+          retrieved_at: string
+          slogan: string | null
+          status: string
+          title: string | null
+        }
+        Insert: {
+          colors?: Json
+          description?: string | null
+          domain: string
+          employees?: string | null
+          error?: string | null
+          hq_country?: string | null
+          icon_url?: string | null
+          industries?: string[]
+          logo_url?: string | null
+          retrieved_at?: string
+          slogan?: string | null
+          status?: string
+          title?: string | null
+        }
+        Update: {
+          colors?: Json
+          description?: string | null
+          domain?: string
+          employees?: string | null
+          error?: string | null
+          hq_country?: string | null
+          icon_url?: string | null
+          industries?: string[]
+          logo_url?: string | null
+          retrieved_at?: string
+          slogan?: string | null
+          status?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
       clusters: {
         Row: {
           affected_users: string | null
