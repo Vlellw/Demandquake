@@ -14,7 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreditsRouteImport } from './routes/credits'
 import { Route as MethodRouteImport } from './routes/method'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedCreditsAdminRouteImport } from './routes/_authenticated/credits.admin'
@@ -52,9 +54,19 @@ const MethodRoute = MethodRouteImport.update({
   path: '/method',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
   id: '/reset-password',
   path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
@@ -133,7 +145,9 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/credits': typeof CreditsRoute
   '/method': typeof MethodRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/credits/admin': typeof AuthenticatedCreditsAdminRoute
@@ -152,7 +166,9 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/credits': typeof CreditsRoute
   '/method': typeof MethodRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/credits/admin': typeof AuthenticatedCreditsAdminRoute
@@ -173,7 +189,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/credits': typeof CreditsRoute
   '/method': typeof MethodRoute
+  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/credits/admin': typeof AuthenticatedCreditsAdminRoute
@@ -194,7 +212,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/credits'
     | '/method'
+    | '/privacy'
     | '/reset-password'
+    | '/terms'
     | '/discover'
     | '/settings'
     | '/credits/admin'
@@ -213,7 +233,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/credits'
     | '/method'
+    | '/privacy'
     | '/reset-password'
+    | '/terms'
     | '/discover'
     | '/settings'
     | '/credits/admin'
@@ -233,7 +255,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/credits'
     | '/method'
+    | '/privacy'
     | '/reset-password'
+    | '/terms'
     | '/_authenticated/discover'
     | '/_authenticated/settings'
     | '/_authenticated/credits/admin'
@@ -254,7 +278,9 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CreditsRoute: typeof CreditsRoute
   MethodRoute: typeof MethodRoute
+  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  TermsRoute: typeof TermsRoute
   ApiPublicBannerStartupIdRoute: typeof ApiPublicBannerStartupIdRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
@@ -296,11 +322,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MethodRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/reset-password': {
       id: '/reset-password'
       path: '/reset-password'
       fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/discover': {
@@ -426,7 +466,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CreditsRoute: CreditsRoute,
   MethodRoute: MethodRoute,
+  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  TermsRoute: TermsRoute,
   ApiPublicBannerStartupIdRoute: ApiPublicBannerStartupIdRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }

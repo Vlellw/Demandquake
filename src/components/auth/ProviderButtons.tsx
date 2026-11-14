@@ -13,11 +13,11 @@ const GOOGLE_SVG = (
   </svg>
 );
 
-/** Google + Lovable sign-in. onSignedIn fires when tokens arrive without a full-page redirect. */
+/** Google sign-in. onSignedIn fires when tokens arrive without a full-page redirect. */
 export function ProviderButtons({ onSignedIn, onBeforeRedirect }: { onSignedIn: () => void; onBeforeRedirect: () => void }) {
-  const [busy, setBusy] = useState<"google" | "lovable" | null>(null);
+  const [busy, setBusy] = useState<"google" | null>(null);
 
-  async function signIn(provider: "google" | "lovable") {
+  async function signIn(provider: "google") {
     setBusy(provider);
     onBeforeRedirect();
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: `${window.location.origin}/auth` });
@@ -36,14 +36,6 @@ export function ProviderButtons({ onSignedIn, onBeforeRedirect }: { onSignedIn: 
         {busy === "google" ? <Loader2 className="animate-spin" /> : GOOGLE_SVG}
         Continue with Google
       </Button>
-      <button
-        type="button"
-        className="lovable-auth-button lovable-auth-button--full-width lovable-auth-button--dark"
-        onClick={() => signIn("lovable")}
-        disabled={busy !== null}
-      >
-        Continue with Lovable
-      </button>
     </div>
   );
 }
