@@ -156,10 +156,6 @@ function AuthPage() {
         <h1 className="section-title text-[1.75rem]">
           {resetMode ? "Reset your password" : search.redirect?.includes("claim=1") ? "Sign in to claim this startup" : tab === "signup" ? "Create your account" : "Sign in"}
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {resetMode ? "We’ll email you a secure link." : "Your claimed startups live in a private workspace with their sources and testing checklist."}
-        </p>
-
         {sentTo ? (
           <div className="mt-6 rounded-[4px] border border-observed/40 bg-observed/[0.06] p-5 text-center">
             <MailCheck className="mx-auto size-8 text-observed" />
