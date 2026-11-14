@@ -22,6 +22,7 @@ import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
 import { industryColor } from "@/lib/taxonomy";
 import { markSearchDone } from "@/lib/journey";
+import { JourneySteps } from "@/components/journey/JourneySteps";
 
 import type { RunDetailDTO } from "@/lib/dto";
 import { cn } from "@/lib/utils";
@@ -116,6 +117,7 @@ function ResearchPage() {
 
   return (
     <div className="relative">
+      <JourneySteps current={isDone ? 2 : 1} />
       <Breadcrumbs
         trail={[
           <Link key="d" to="/discover">
