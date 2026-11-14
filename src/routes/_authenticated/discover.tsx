@@ -2,7 +2,7 @@ import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { radarQuery, recentQuakesQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
-import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, normalizeOverview, normalizeView } from "@/lib/journey";
+import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, isSearchDone, normalizeOverview, normalizeView } from "@/lib/journey";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { GuidedDiscover } from "@/components/journey/GuidedDiscover";
 import { CatalogView } from "@/components/journey/CatalogView";
@@ -51,7 +51,12 @@ function DiscoverPage() {
   const navigate = useNavigate({ from: "/discover" });
   const { data: cards } = useSuspenseQuery(startupCardsQuery);
   const { data: stats } = useSuspenseQuery(statsQuery);
+  // Step 2 (the market) stays locked until a search has completed on this browser.
+  const [marketOpen, setMarketOpen] = useState(false);
+  useEffect(() => setMarketOpen(isSearchDone()), []);
+
   const view = normalizeView(search.view);
+  const effectiveView = marketOpen ? view : "guided";
 
   // "Research a market" buttons jump back up to Step 1 instead of opening a pop-up.
   const [focusKey, setFocusKey] = useState(0);
@@ -63,7 +68,7 @@ function DiscoverPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.research]);
   const skipToIdeas = () => document.getElementById("startups")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  const choosing = search.industry !== "all" || view === "all";
+  const choosing = marketOpen && (search.industry !== "all" || view === "all");
 
   return (
     <div>
@@ -74,7 +79,7 @@ function DiscoverPage() {
             <button type="button" onClick={goToSearch} className={`${cls} cursor-pointer hover:opacity-80`}>
               {content}
             </button>
-          ) : n === 2 ? (
+          ) : n === 2 && marketOpen ? (
             <button type="button" onClick={skipToIdeas} className={`${cls} cursor-pointer hover:opacity-80`}>
               {content}
             </button>
@@ -86,10 +91,11 @@ function DiscoverPage() {
         initialIndustry={search.industry}
         rerun={search.rerun}
         focusKey={focusKey}
+        locked={!marketOpen}
         onSkip={skipToIdeas}
       />
-      {view === "guided" ? (
-        <GuidedDiscover cards={cards} stats={stats} industry={search.industry} onResearch={goToSearch} />
+      {effectiveView === "guided" ? (
+        <GuidedDiscover cards={cards} stats={stats} industry={search.industry} locked={!marketOpen} onResearch={goToSearch} />
       ) : (
         <CatalogView
           cards={cards}

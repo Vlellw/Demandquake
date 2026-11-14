@@ -11,6 +11,7 @@ import { creditAccountQuery, creditCatalogQuery } from "@/lib/credit-queries";
 import { canAfford } from "@/lib/credit-rules";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { InfoTip } from "@/components/common/InfoTip";
+import { markSearchDone } from "@/lib/journey";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -31,12 +32,15 @@ export function ResearchStep({
   initialIndustry,
   rerun = false,
   focusKey = 0,
+  locked = false,
   onSkip,
 }: {
   initialQuery?: string;
   initialIndustry?: string | null;
   rerun?: boolean;
   focusKey?: number;
+  /** While locked (no completed search yet), skipping ahead to the market is not offered. */
+  locked?: boolean;
   onSkip: () => void;
 }) {
   const [query, setQuery] = useState(initialQuery);
@@ -121,6 +125,7 @@ export function ResearchStep({
         return;
       }
       requestId.current = null;
+      markSearchDone();
       await qc.invalidateQueries({ queryKey: ["credit-account"] });
       if (res.reused === "cached") {
         toast("Showing recent research for this exact question", {
@@ -167,7 +172,7 @@ export function ResearchStep({
             </InfoTip>
           </h2>
           </div>
-          {stage === "form" && (
+          {stage === "form" && !locked && (
             <Button variant="ghost" onClick={onSkip} className="self-start sm:self-auto">
               Skip — browse existing ideas <ArrowDown />
             </Button>

@@ -10,6 +10,7 @@ import {
   nextInspection,
   normalizeOverview,
   normalizeView,
+  parseSearchDone,
   parseVisited,
   rankSpotlights,
 } from "@/lib/journey";
@@ -108,5 +109,16 @@ describe("step 2 inspection", () => {
   it("reads stored progress safely", () => {
     expect(parseVisited("not json")).toEqual([]);
     expect(parseVisited(JSON.stringify(["evidence", "hacked", 4, "evidence"]))).toEqual(["evidence"]);
+  });
+});
+
+describe("search gate", () => {
+  it("opens the market only when the stored flag is exactly set", () => {
+    expect(parseSearchDone("1")).toBe(true);
+    expect(parseSearchDone(null)).toBe(false);
+    expect(parseSearchDone(undefined)).toBe(false);
+    expect(parseSearchDone("")).toBe(false);
+    expect(parseSearchDone("yes")).toBe(false);
+    expect(parseSearchDone("0")).toBe(false);
   });
 });

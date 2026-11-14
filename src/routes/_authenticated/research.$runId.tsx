@@ -21,6 +21,7 @@ import { StatRule } from "@/components/common/StatRule";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
 import { industryColor } from "@/lib/taxonomy";
+import { markSearchDone } from "@/lib/journey";
 
 import type { RunDetailDTO } from "@/lib/dto";
 import { cn } from "@/lib/utils";
@@ -107,6 +108,11 @@ function ResearchPage() {
 
   const isDone = run.status === "complete";
   const isFailed = run.status === "failed" || Boolean(driverError);
+
+  // A finished search opens Step 2 (the market) on Discover.
+  useEffect(() => {
+    if (isDone) markSearchDone();
+  }, [isDone]);
 
   return (
     <div className="relative">

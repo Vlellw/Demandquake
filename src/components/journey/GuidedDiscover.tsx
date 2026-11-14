@@ -1,7 +1,7 @@
 import { useMemo, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, Compass, LayoutGrid, Sparkles, Telescope } from "lucide-react";
+import { ArrowRight, ArrowUp, Compass, LayoutGrid, Lock, Sparkles, Telescope } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
 import { useAuthUser } from "@/hooks/use-auth";
 import { myProjectsQuery } from "@/lib/queries";
@@ -26,11 +26,14 @@ export function GuidedDiscover({
   cards,
   stats,
   industry,
+  locked = false,
   onResearch,
 }: {
   cards: StartupCardDTO[];
   stats: Stats;
   industry: string;
+  /** While locked (no completed search yet), the market stays closed and only a pointer back to Step 1 shows. */
+  locked?: boolean;
   onResearch: () => void;
 }) {
   const { user } = useAuthUser();
@@ -60,8 +63,24 @@ export function GuidedDiscover({
             </InfoTip>
           </h1>
         </div>
-        <DiscoverViewToggle view="guided" />
+        {!locked && <DiscoverViewToggle view="guided" />}
       </div>
+
+      {locked ? (
+        <div className="mt-10 grid place-items-center rounded-[4px] border border-dashed border-border-strong bg-surface-sunken px-6 py-16 text-center">
+          <span className="grid size-12 place-items-center rounded-full border-2 border-primary text-primary" aria-hidden="true">
+            <Lock className="size-5" />
+          </span>
+          <p className="mt-4 font-display text-lg font-bold text-foreground">The market opens after your first search</p>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            Finish Step 1 above — once your research completes, the ideas found so far appear here.
+          </p>
+          <Button variant="hero" className="mt-5" onClick={onResearch}>
+            Go to Step 1 — search a market <ArrowUp />
+          </Button>
+        </div>
+      ) : (
+        <>
 
       <p className="mt-5 text-sm text-muted-foreground">
         <span className="font-bold text-foreground">{stats.startups.toLocaleString("en-US")}</span> startups ·{" "}
@@ -173,6 +192,8 @@ export function GuidedDiscover({
               </div>
             </div>
           </div>
+        </>
+      )}
         </>
       )}
     </section>

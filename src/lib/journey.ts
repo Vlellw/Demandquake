@@ -7,7 +7,7 @@ import { matchesFreshness } from "./research-utils";
 import { INITIAL_CREDIT_RULES } from "./credit-rules";
 
 export const JOURNEY_STEPS = [
-  { n: 1, key: "search", label: "Search a market", short: "Search", hint: "Describe a market, or skip to browse" },
+  { n: 1, key: "search", label: "Search a market", short: "Search", hint: "Describe a market — this opens the ideas" },
   { n: 2, key: "choose", label: "Choose an idea", short: "Choose", hint: "Pick an industry and open an idea" },
   { n: 3, key: "inspect", label: "Inspect the evidence", short: "Inspect", hint: "Read the sources, competitors and market" },
   { n: 4, key: "claim", label: "Claim & build", short: "Claim", hint: `Get a private workspace for ${INITIAL_CREDIT_RULES.claim} credits` },
@@ -148,6 +148,31 @@ export function rankSpotlights<C extends { evidence_strength: string | null; evi
         new Date(b.research_at).getTime() - new Date(a.research_at).getTime(),
     )
     .slice(0, limit);
+}
+
+// ---------- Step 1 gate: the market opens only after a completed search ----------
+
+export const SEARCH_DONE_KEY = "dq-search-done";
+
+/** Pure check of the stored flag, so the rule is testable without a browser. */
+export function parseSearchDone(raw: string | null | undefined): boolean {
+  return raw === "1";
+}
+
+export function isSearchDone(): boolean {
+  try {
+    return parseSearchDone(window.localStorage.getItem(SEARCH_DONE_KEY));
+  } catch {
+    return false;
+  }
+}
+
+export function markSearchDone(): void {
+  try {
+    window.localStorage.setItem(SEARCH_DONE_KEY, "1");
+  } catch {
+    // Private browsing: the gate simply stays closed.
+  }
 }
 
 // ---------- Step 2: inspection checklist ----------
