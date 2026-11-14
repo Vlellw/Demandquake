@@ -114,7 +114,7 @@ export interface ScanSummaryDTO {
 }
 
 export interface QuakeFeedItemDTO extends ScanSummaryDTO {
-  startup: { slug: string; name: string; industry: string | null; brand: Brand };
+  startup: { slug: string; name: string; industry: string | null; geography: string | null; brand: Brand };
 }
 
 export interface StartupDetailDTO {

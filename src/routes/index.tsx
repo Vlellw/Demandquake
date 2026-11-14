@@ -61,6 +61,20 @@ function DiscoverPage() {
     [cards, filters],
   );
 
+  // The quake feed follows the same filters; one card per startup, newest material changes first.
+  const filteredQuakes = useMemo(
+    () =>
+      quakes
+        .filter(
+          (q) =>
+            (filters.industry === "all" || q.startup.industry === filters.industry) &&
+            (filters.geography === "all" || q.startup.geography === filters.geography) &&
+            matchesFreshness(q.completed_at ?? q.created_at, filters.freshness),
+        )
+        .slice(0, 6),
+    [quakes, filters],
+  );
+
   const filteredNodes = useMemo(
     () =>
       nodes.filter(
@@ -85,7 +99,7 @@ function DiscoverPage() {
 
         <PickedForYou cards={cards} />
 
-        <QuakeFeed items={quakes} />
+        <QuakeFeed items={filteredQuakes} />
 
         <section>
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">

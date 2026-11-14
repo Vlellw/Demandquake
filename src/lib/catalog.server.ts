@@ -340,24 +340,24 @@ export async function startupScans(slug: string): Promise<{ startupId: string; s
   return { startupId: st.id, slug: st.slug, scans: ((data ?? []) as unknown as Record<string, unknown>[]).map(toScanSummary) };
 }
 
-export async function recentQuakes(limit = 6): Promise<QuakeFeedItemDTO[]> {
+export async function recentQuakes(limit = 12): Promise<QuakeFeedItemDTO[]> {
   const db = publicDb();
   const { data, error } = await db
     .from("market_scans")
     .select(
-      "id, status, verdict, headline, summary, candidates_count, changes, created_at, completed_at, startup:startups!market_scans_startup_id_fkey(slug, name, industry, brand)",
+      "id, status, verdict, headline, summary, candidates_count, changes, created_at, completed_at, startup:startups!market_scans_startup_id_fkey(slug, name, industry, geography, brand)",
     )
     .eq("status", "complete")
     .order("completed_at", { ascending: false })
     .limit(30);
   if (error) throw error;
   const items = ((data ?? []) as unknown as Record<string, unknown>[]).flatMap((r) => {
-    const st = r["startup"] as { slug: string; name: string; industry: string | null; brand: Brand | null } | null;
+    const st = r["startup"] as { slug: string; name: string; industry: string | null; geography: string | null; brand: Brand | null } | null;
     if (!st) return [];
     return [
       {
         ...toScanSummary(r),
-        startup: { slug: st.slug, name: st.name, industry: st.industry, brand: st.brand ?? { hue: 40, glyph: "orbit", motto: "" } },
+        startup: { slug: st.slug, name: st.name, industry: st.industry, geography: st.geography, brand: st.brand ?? { hue: 40, glyph: "orbit", motto: "" } },
       } satisfies QuakeFeedItemDTO,
     ];
   });
