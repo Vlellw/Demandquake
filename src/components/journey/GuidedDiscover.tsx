@@ -51,7 +51,7 @@ export function GuidedDiscover({
     <section id="startups" aria-labelledby="choose-heading" className="mx-auto max-w-[1400px] scroll-mt-24 px-4 pb-20 pt-10 sm:px-6 sm:pt-14">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="eyebrow">Discover startups</p>
+          <p className="eyebrow">Step 2 of 4 · Choose an idea</p>
           <h1 id="choose-heading" className="section-title mt-2 text-[2rem] leading-tight sm:text-[2.6rem]">
             Which market interests you?
           </h1>

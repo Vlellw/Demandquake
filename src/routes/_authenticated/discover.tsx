@@ -6,7 +6,8 @@ import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, normalizeOverview, no
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { GuidedDiscover } from "@/components/journey/GuidedDiscover";
 import { CatalogView } from "@/components/journey/CatalogView";
-import { ResearchDialog } from "@/components/journey/ResearchDialog";
+import { ResearchStep } from "@/components/journey/ResearchStep";
+import { useEffect, useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/discover")({
   validateSearch: zodValidator(discoverSearchSchema),
@@ -52,19 +53,43 @@ function DiscoverPage() {
   const { data: stats } = useSuspenseQuery(statsQuery);
   const view = normalizeView(search.view);
 
-  function setResearch(open: boolean) {
-    navigate({
-      search: (p) => ({ ...p, research: open, q: open ? p.q : "", rerun: open ? p.rerun : false }),
-      replace: true,
-      resetScroll: false,
-    });
-  }
+  // "Research a market" buttons jump back up to Step 1 instead of opening a pop-up.
+  const [focusKey, setFocusKey] = useState(0);
+  const goToSearch = () => setFocusKey((k) => k + 1);
+  useEffect(() => {
+    if (!search.research) return;
+    setFocusKey((k) => k + 1);
+    navigate({ search: (p) => ({ ...p, research: false }), replace: true, resetScroll: false });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search.research]);
+  const skipToIdeas = () => document.getElementById("startups")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const choosing = search.industry !== "all" || view === "all";
 
   return (
     <div>
-      <JourneySteps current={1} />
+      <JourneySteps
+        current={choosing ? 2 : 1}
+        renderStep={(n, content, cls) =>
+          n === 1 ? (
+            <button type="button" onClick={goToSearch} className={`${cls} cursor-pointer hover:opacity-80`}>
+              {content}
+            </button>
+          ) : n === 2 ? (
+            <button type="button" onClick={skipToIdeas} className={`${cls} cursor-pointer hover:opacity-80`}>
+              {content}
+            </button>
+          ) : undefined
+        }
+      />
+      <ResearchStep
+        initialQuery={search.q}
+        initialIndustry={search.industry}
+        rerun={search.rerun}
+        focusKey={focusKey}
+        onSkip={skipToIdeas}
+      />
       {view === "guided" ? (
-        <GuidedDiscover cards={cards} stats={stats} industry={search.industry} onResearch={() => setResearch(true)} />
+        <GuidedDiscover cards={cards} stats={stats} industry={search.industry} onResearch={goToSearch} />
       ) : (
         <CatalogView
           cards={cards}
@@ -75,16 +100,9 @@ function DiscoverPage() {
             fresh: search.fresh,
           }}
           panel={normalizeOverview(search.overview)}
-          onResearch={() => setResearch(true)}
+          onResearch={goToSearch}
         />
       )}
-      <ResearchDialog
-        open={search.research}
-        onOpenChange={setResearch}
-        initialQuery={search.q}
-        initialIndustry={search.industry}
-        rerun={search.rerun}
-      />
     </div>
   );
 }

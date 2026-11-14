@@ -318,11 +318,11 @@ function WelcomePanel({ project: p }: { project: ProjectDTO }) {
   ];
   return (
     <section aria-labelledby="welcome-heading" className="border-b border-border bg-surface-sunken">
-      <JourneySteps current={3} complete hints={{ 3: "Done — your workspace is ready" }} className="bg-transparent" />
+      <JourneySteps current={4} complete hints={{ 4: "Done — your workspace is ready" }} className="bg-transparent" />
       <div className="mx-auto max-w-[1300px] px-4 py-8 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">Step 3 complete</p>
+            <p className="eyebrow">Step 4 complete</p>
             <h2 id="welcome-heading" className="section-title mt-2 text-2xl sm:text-[1.75rem]">
               {p.name} is yours to build. Start here:
             </h2>

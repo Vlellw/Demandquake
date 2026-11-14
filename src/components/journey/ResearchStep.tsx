@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ArrowRight, Coins, Factory, Loader2, MapPin, Search, Telescope } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, Coins, Factory, Loader2, MapPin, Search, Telescope } from "lucide-react";
 import { toast } from "sonner";
 import { startDiscovery } from "@/lib/research.functions";
 import { EXAMPLE_QUERIES, GEOGRAPHIES, INDUSTRIES } from "@/lib/taxonomy";
@@ -12,7 +12,6 @@ import { canAfford } from "@/lib/credit-rules";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NEXT_STEPS = [
@@ -22,21 +21,22 @@ const NEXT_STEPS = [
 ];
 
 /**
- * "Research a new market" as a focused two-stage dialog: describe the market, then confirm the
+ * Step 1 of the journey, shown inline at the top of Discover: describe a market, then confirm the
  * credit cost in place. Only a successful search is charged; failed research is free.
+ * `focusKey` changes whenever the page asks to jump here (e.g. "Research a market" buttons).
  */
-export function ResearchDialog({
-  open,
-  onOpenChange,
+export function ResearchStep({
   initialQuery = "",
   initialIndustry,
   rerun = false,
+  focusKey = 0,
+  onSkip,
 }: {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   initialQuery?: string;
   initialIndustry?: string | null;
   rerun?: boolean;
+  focusKey?: number;
+  onSkip: () => void;
 }) {
   const [query, setQuery] = useState(initialQuery);
   const [industry, setIndustry] = useState<string>("any");
@@ -53,15 +53,15 @@ export function ResearchDialog({
   const qc = useQueryClient();
   const { user } = useAuthUser();
   const catalog = useQuery(creditCatalogQuery());
-  const account = useQuery({ ...creditAccountQuery(user?.id ?? ""), enabled: Boolean(user) && open });
+  const account = useQuery({ ...creditAccountQuery(user?.id ?? ""), enabled: Boolean(user) });
   const cost = catalog.data?.settings["discovery"];
   const wallet = account.data?.wallet;
   const available = wallet ? wallet.balance - wallet.reserved : null;
   const affordable = wallet && cost !== undefined ? canAfford(wallet.balance, wallet.reserved, cost) : false;
 
-  // Each opening starts fresh from what the page asked for (e.g. "Run fresh" or the selected industry).
+  const sectionRef = useRef<HTMLElement>(null);
+  // Start from what the page asked for (e.g. "Run fresh" or the selected industry).
   useEffect(() => {
-    if (!open) return;
     const q = initialQuery.trim();
     setQuery(initialQuery);
     setIndustry(initialIndustry && (INDUSTRIES as readonly string[]).includes(initialIndustry) ? initialIndustry : "any");
@@ -70,7 +70,14 @@ export function ResearchDialog({
     setStage(rerun && q.length >= 6 ? "confirm" : "form");
     requestId.current = null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [initialQuery, rerun]);
+
+  useEffect(() => {
+    if (!focusKey) return;
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    setStage((st) => (st === "confirm" ? st : "form"));
+    window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 350);
+  }, [focusKey]);
 
   function review() {
     const text = query.trim();
@@ -138,26 +145,32 @@ export function ResearchDialog({
     cost === undefined ? (catalog.isError ? "Credit price unavailable" : "Loading credit price…") : `${cost} credits per successful search · failed research is free`;
 
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(next) => {
-        if (pending) return;
-        onOpenChange(next);
-      }}
+    <section
+      id="search-step"
+      ref={sectionRef}
+      aria-labelledby="search-heading"
+      className="mx-auto max-w-[1400px] scroll-mt-24 px-4 pt-10 sm:px-6 sm:pt-14"
     >
-      <DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-2xl gap-0 overflow-y-auto rounded-[4px] p-0 sm:rounded-[4px]">
-        <div className="border-b border-border bg-surface-sunken px-6 pb-5 pt-6 sm:px-8">
+      <div className="overflow-hidden rounded-[4px] border border-border bg-background shadow-panel">
+        <div className="flex flex-col gap-4 border-b border-border bg-surface-sunken px-6 pb-5 pt-6 sm:flex-row sm:items-end sm:justify-between sm:px-8">
+          <div className="max-w-3xl">
           <p className="eyebrow flex items-center gap-2">
-            <Telescope className="size-3.5" aria-hidden="true" /> {stage === "form" ? "Research a new market" : "Confirm your research"}
+            <Telescope className="size-3.5" aria-hidden="true" /> Step 1 of 4 · {stage === "form" ? "Search a market" : "Confirm your research"}
           </p>
-          <DialogTitle className="section-title mt-2 text-2xl">
+          <h2 id="search-heading" className="section-title mt-2 text-[1.75rem] leading-tight sm:text-[2.2rem]">
             {stage === "form" ? "What should Demandquake research?" : "Ready to start?"}
-          </DialogTitle>
-          <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground sm:text-base">
             {stage === "form"
               ? "Describe a market or a group of customers in your own words. We read the live web and add the startups we find to the catalog."
               : "Check the details below. The research starts right away and you can follow every step."}
-          </DialogDescription>
+          </p>
+          </div>
+          {stage === "form" && (
+            <Button variant="ghost" onClick={onSkip} className="self-start sm:self-auto">
+              Skip — browse existing ideas <ArrowDown />
+            </Button>
+          )}
         </div>
 
         {stage === "form" ? (
@@ -176,7 +189,6 @@ export function ResearchDialog({
               <input
                 id="research-query"
                 ref={inputRef}
-                autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="e.g. Problems small clinics have with booking"
@@ -314,7 +326,7 @@ export function ResearchDialog({
             </div>
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </section>
   );
 }

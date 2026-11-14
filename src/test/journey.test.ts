@@ -29,10 +29,10 @@ const card = (over: Partial<{ id: string; industry: string | null; geography: st
 
 describe("journey steps", () => {
   it("marks earlier steps done, the current one current and later ones upcoming", () => {
-    expect(journeyStatuses(2)).toEqual(["done", "current", "upcoming"]);
+    expect(journeyStatuses(2)).toEqual(["done", "current", "upcoming", "upcoming"]);
   });
   it("marks every step done once the founder has a workspace", () => {
-    expect(journeyStatuses(3, true)).toEqual(["done", "done", "done"]);
+    expect(journeyStatuses(4, true)).toEqual(["done", "done", "done", "done"]);
   });
 });
 

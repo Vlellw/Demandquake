@@ -24,7 +24,7 @@ export function JourneySteps({
   const statuses = journeyStatuses(current, complete);
   return (
     <nav aria-label="Your progress" className={cn("border-b border-border bg-background", className)}>
-      <ol className="mx-auto grid max-w-[1400px] grid-cols-3 gap-3 px-4 sm:gap-6 sm:px-6">
+      <ol className="mx-auto grid max-w-[1400px] grid-cols-4 gap-2 px-4 sm:gap-6 sm:px-6">
         {JOURNEY_STEPS.map((s, i) => {
           const status = statuses[i]!;
           const content = (
@@ -82,7 +82,7 @@ export function StepKicker({ n, children }: { n: JourneyStepNumber; children?: R
       <span className="grid size-5 place-items-center rounded-full bg-primary text-[0.625rem] text-primary-foreground" aria-hidden="true">
         {n}
       </span>
-      Step {n} of 3{children ? <span className="font-semibold normal-case tracking-normal text-muted-foreground">· {children}</span> : null}
+      Step {n} of {JOURNEY_STEPS.length}{children ? <span className="font-semibold normal-case tracking-normal text-muted-foreground">· {children}</span> : null}
     </p>
   );
 }

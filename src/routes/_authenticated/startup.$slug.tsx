@@ -259,21 +259,28 @@ function StartupPage() {
           current={st.name}
         />
         <JourneySteps
-          current={claimed ? 3 : 2}
+          current={claimed ? 4 : 3}
           complete={claimed}
           hints={{
-            1: st.industry ? `Back to ${st.industry} ideas` : "Back to all ideas",
-            2: `${progress.done} of ${progress.total} checks done`,
-            3: claimed ? "It’s in your workspace" : undefined,
+            1: "Research a new market",
+            2: st.industry ? `Back to ${st.industry} ideas` : "Back to all ideas",
+            3: `${progress.done} of ${progress.total} checks done`,
+            4: claimed ? "It’s in your workspace" : undefined,
           }}
           renderStep={(n, content, cls) => {
             if (n === 1)
+              return (
+                <Link to="/discover" hash="search-step" className={cn(cls, "hover:opacity-80")}>
+                  {content}
+                </Link>
+              );
+            if (n === 2)
               return (
                 <Link to="/discover" search={{ industry: st.industry ?? "all" }} className={cn(cls, "hover:opacity-80")}>
                   {content}
                 </Link>
               );
-            if (n === 2)
+            if (n === 3)
               return (
                 <a href="#inspect" className={cn(cls, "hover:opacity-80")}>
                   {content}
@@ -422,7 +429,7 @@ function StartupPage() {
             </div>
           </div>
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pt-6 sm:px-6">
-            <StepKicker n={2}>{ESSENTIAL.has(tab) ? INSPECTION_STEPS.find((s) => s.tab === tab)?.label : "Optional extra"}</StepKicker>
+            <StepKicker n={3}>{ESSENTIAL.has(tab) ? INSPECTION_STEPS.find((s) => s.tab === tab)?.label : "Optional extra"}</StepKicker>
             <p className="text-sm text-muted-foreground">{TAB_HINT[tab]}</p>
           </div>
 
@@ -575,7 +582,7 @@ function StartupPage() {
           <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center">
             <StartupMark brand={st.brand} size="lg" className="border-transparent" />
             <div className="min-w-0 flex-1">
-              <p className="eyebrow text-primary-foreground">Step 3 of 3 · Claim & build</p>
+              <p className="eyebrow text-primary-foreground">Step 4 of 4 · Claim & build</p>
               <p className="mt-2 font-display text-3xl font-bold">Build {st.name}</p>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-primary-foreground/85">
                 Claiming copies the idea, its sources, the open assumptions and a validation checklist into your private
@@ -599,7 +606,7 @@ function StartupPage() {
       <Dialog open={claimConfirm} onOpenChange={(open) => { if (!claiming) setClaimConfirm(open); }}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl gap-0 overflow-y-auto rounded-[4px] p-0 sm:rounded-[4px]">
           <div className="border-b border-border bg-surface-sunken px-6 pb-5 pt-6 sm:px-8">
-            <StepKicker n={3}>Claim & build</StepKicker>
+            <StepKicker n={4}>Claim & build</StepKicker>
             <DialogTitle className="section-title mt-2 text-2xl">Claim {st.name}</DialogTitle>
             <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
               You get a private workspace for this idea. The idea stays public, so other founders can claim it too.
@@ -816,7 +823,7 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
 }
 
 
-/** Step 2 guidance under every tab: the next essential check, or the way to step 3 once all are done. */
+/** Step 3 guidance under every tab: the next essential check, or the way to step 4 once all are done. */
 function NextCheck({
   tab,
   visited,
@@ -865,7 +872,7 @@ function NextCheck({
         <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-positive" aria-hidden="true" />
         <div>
           <p className="font-display text-lg font-bold text-foreground">
-            {claimed ? "All checks done — keep going in your workspace" : `All ${total} checks done — you’re ready for step 3`}
+            {claimed ? "All checks done — keep going in your workspace" : `All ${total} checks done — you’re ready for step 4`}
           </p>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {claimed ? "Your checklist, assumptions and notes are waiting there." : "Claim the idea to get a private workspace, or keep reading the business plan first."}
