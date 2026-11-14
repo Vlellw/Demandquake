@@ -87,18 +87,11 @@ function MethodPage() {
             title="Evidence first. Guesses labelled. No fake odds."
             description="Demandquake suggests startups that don’t exist yet by reading what the internet is already saying — and shows you which parts come from real sources and which are the AI’s suggestions."
             action={
-              <>
-                <Button asChild size="lg">
-                  <Link to="/discover">
-                    Browse startups <ArrowRight />
-                  </Link>
-                </Button>
                 <Button asChild variant="outline" size="lg">
                   <Link to="/discover" search={{ research: true }}>
                     Research a market
                   </Link>
                 </Button>
-              </>
             }
           />
         </div>
