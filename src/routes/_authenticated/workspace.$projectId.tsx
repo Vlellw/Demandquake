@@ -10,7 +10,6 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
-  CircleDashed,
   CloudOff,
   ExternalLink,
   FlaskConical,
@@ -23,7 +22,6 @@ import {
   Trash2,
   UserPlus,
   X,
-  XCircle,
 } from "lucide-react";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { projectQuery, startupScansQuery } from "@/lib/queries";
@@ -31,11 +29,12 @@ import { startMarketScan } from "@/lib/research.functions";
 import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { deleteProject } from "@/lib/projects.functions";
 import { TeamPanel } from "@/components/workspace/TeamPanel";
+import { AssumptionsBoard } from "@/components/workspace/AssumptionsBoard";
 import { displayName, useAuthUser } from "@/hooks/use-auth";
 import { useProjectSaver, type SaveState } from "@/hooks/use-project-saver";
-import { marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
+import { marketCheckDue, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
 import { useScanDriver } from "@/hooks/use-scan-driver";
-import type { ProjectAssumption, ProjectDTO } from "@/lib/dto";
+import type { ProjectDTO } from "@/lib/dto";
 import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { PitchPlayer } from "@/components/startup/PitchPlayer";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
@@ -223,7 +222,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           </section>
 
           <ChecklistSection project={p} update={update} />
-          <AssumptionsBoard project={p} update={update} />
+          <AssumptionsBoard assumptions={p.assumptions} onChange={(assumptions) => update({ assumptions }, { immediate: true })} />
           <RoadmapSection project={p} update={update} />
         </div>
 
@@ -421,71 +420,6 @@ function ChecklistSection({ project: p, update }: { project: ProjectDTO; update:
           </li>
         ))}
       </ul>
-    </section>
-  );
-}
-
-const ASSUMPTION_COLUMNS: { status: ProjectAssumption["status"]; label: string; icon: React.ReactNode; tone: string }[] = [
-  { status: "untested", label: "Untested", icon: <CircleDashed className="size-3.5" />, tone: "text-uncertain" },
-  { status: "validated", label: "Validated", icon: <CheckCircle2 className="size-3.5" />, tone: "text-positive" },
-  { status: "invalidated", label: "Invalidated", icon: <XCircle className="size-3.5" />, tone: "text-negative" },
-];
-
-function AssumptionsBoard({ project: p, update }: { project: ProjectDTO; update: Update }) {
-  const [draft, setDraft] = useState("");
-  function add() {
-    const text = draft.trim();
-    if (!text) return;
-    update({ assumptions: [...p.assumptions, { id: uid("a"), text: text.slice(0, 600), type: "product", how_to_test: "", status: "untested" }] }, { immediate: true });
-    setDraft("");
-  }
-  function setStatus(id: string, status: ProjectAssumption["status"]) {
-    update({ assumptions: p.assumptions.map((a) => (a.id === id ? { ...a, status } : a)) }, { immediate: true });
-  }
-  return (
-    <section className="panel p-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] text-muted-foreground">Click a card to move it</span>
-      </div>
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        {ASSUMPTION_COLUMNS.map((col) => {
-          const items = p.assumptions.filter((a) => a.status === col.status);
-          return (
-            <div key={col.status} className="rounded-[4px] border border-border bg-muted p-3">
-              <p className={cn("flex items-center gap-1.5 text-xs font-medium", col.tone)}>
-                {col.icon} {col.label} <span className="ml-auto font-mono text-muted-foreground">{items.length}</span>
-              </p>
-              <div className="mt-3 space-y-2">
-                {items.map((a) => (
-                  <motion.button
-                    layout
-                    key={a.id}
-                    onClick={() => setStatus(a.id, nextAssumptionStatus(a.status))}
-                    className="block w-full rounded-lg border border-border bg-surface p-3 text-left text-sm text-foreground/90 transition-colors hover:border-border-strong"
-                    title="Click to change status"
-                  >
-                    {a.text}
-                    {a.how_to_test && <span className="mt-1.5 block text-[11px] text-muted-foreground">Test: {a.how_to_test}</span>}
-                  </motion.button>
-                ))}
-                {items.length === 0 && <p className="py-3 text-center text-[11px] text-faint">Nothing here yet</p>}
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          add();
-        }}
-        className="mt-3 flex gap-2"
-      >
-        <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Add an assumption you need to test…" maxLength={600} />
-        <Button type="submit" variant="outline" disabled={!draft.trim()}>
-          <Plus /> Add
-        </Button>
-      </form>
     </section>
   );
 }
