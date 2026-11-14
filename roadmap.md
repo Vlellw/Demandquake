@@ -23,6 +23,17 @@
 - [x] Newcomer-friendly cleanup: plain-language labels, how-it-works phases, simpler cards, breadcrumbs and clear next steps on every page
 - [x] Every page restyled (startup profile + tabs, research run, market scan, workspace list/detail, how it works, sign-in, reset password, invite, 404) and charts on the light theme; phone layouts and accessibility contrast checked
 
+## In progress — guided founder journey (Choose → Inspect → Claim)
+- [ ] Journey rules module + tests (spotlight ranking, industry choices, inspection progress, discover URL state)
+- [ ] Shared step tracker shown on Discover, startup pages and a new workspace
+- [ ] Discover Step 1: industry pills, three best-documented ideas, "For you" picks, clear secondary actions, Guided / Full catalog toggle
+- [ ] Research a new market moved into a focused dialog with in-place credit confirmation
+- [ ] Full catalog view: URL filters, full grid, market overview tabs (problem map, market changes, latest research)
+- [ ] Remove the mid-page How it works mosaic and stat band from Discover
+- [ ] Startup page Step 2: tab check-offs, next-step guidance, market signals in context (scan traces, related-problem map)
+- [ ] Step 3 claim confirmation with what-you-get list; workspace welcome panel (checklist, invite co-founder, first note)
+- [ ] Update every link that pointed at old Discover page sections
+
 ## Ready next
 - [x] Five-credit startup claims: atomic workspace creation and charge, confirmation, duplicate/failure protection. Verified 25 → 20 credits, one charge, existing workspace opens without another charge, and direct workspace inserts are blocked.
 - [x] Credit wallets and auditable history, 25 welcome credits, 5-credit successful discovery with confirmation, atomic idempotent reservations and settlement, public package page and protected admin controls. Verified a signed-in cached search: 25 → 20 credits, one ledger entry, no phone overflow.

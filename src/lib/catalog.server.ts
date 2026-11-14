@@ -20,7 +20,7 @@ const SOURCE_COLS =
   "id, url, domain, title, snippet, highlights, publisher, published_at, retrieved_at, origin, article_type, search_intent, search_query, relevance, signal_type, scan_id";
 
 const CARD_COLS =
-  "id, slug, name, tagline, industry, geography, business_model_type, brand, research_at, last_scanned_at, claim_count, evidence_source_ids, competitors, assessment, run_id, cluster:clusters!startups_cluster_id_fkey(title, evidence_strength), run:discovery_runs(query)";
+  "id, slug, name, tagline, industry, geography, business_model_type, brand, research_at, last_scanned_at, claim_count, evidence_source_ids, competitors, assessment, run_id, who_is_affected:problem->>who_is_affected, why_now:problem->>why_now, cluster:clusters!startups_cluster_id_fkey(title, evidence_strength), run:discovery_runs(query)";
 
 type CardRow = {
   id: string;
@@ -37,6 +37,8 @@ type CardRow = {
   evidence_source_ids: string[];
   competitors: unknown;
   assessment: unknown;
+  who_is_affected: string | null;
+  why_now: string | null;
   cluster: { title: string; evidence_strength: string } | null;
   run: { query: string } | null;
 };
@@ -59,6 +61,8 @@ function toCard(r: CardRow): StartupCardDTO {
     assessment: (r["assessment"] as Assessment) ?? null,
     evidence_strength: r["cluster"]?.evidence_strength ?? null,
     problem_title: r["cluster"]?.title ?? null,
+    who_is_affected: r["who_is_affected"] || null,
+    why_now: r["why_now"] || null,
     run_query: r["run"]?.query ?? null,
   };
 }

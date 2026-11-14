@@ -37,6 +37,10 @@ export interface StartupCardDTO {
   assessment: Assessment | null;
   evidence_strength: string | null;
   problem_title: string | null;
+  /** AI synthesis of who the sources say is affected. */
+  who_is_affected: string | null;
+  /** AI synthesis of what changed recently, per the sources. */
+  why_now: string | null;
   run_query: string | null;
 }
 

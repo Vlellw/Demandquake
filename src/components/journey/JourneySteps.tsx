@@ -1,0 +1,88 @@
+import type { ReactNode } from "react";
+import { Check } from "lucide-react";
+import { JOURNEY_STEPS, journeyStatuses, type JourneyStepNumber } from "@/lib/journey";
+import { cn } from "@/lib/utils";
+
+/**
+ * Founder journey tracker (Choose → Inspect → Claim), drawn like Lindström's segmented progress bars:
+ * numbered circles, a bold label and a navy rule under every step that is done or current.
+ * `renderStep` can wrap a step in a link or button; return undefined to keep it static.
+ */
+export function JourneySteps({
+  current,
+  complete = false,
+  hints,
+  renderStep,
+  className,
+}: {
+  current: JourneyStepNumber;
+  complete?: boolean;
+  hints?: Partial<Record<JourneyStepNumber, ReactNode>>;
+  renderStep?: (n: JourneyStepNumber, content: ReactNode, className: string) => ReactNode | undefined;
+  className?: string;
+}) {
+  const statuses = journeyStatuses(current, complete);
+  return (
+    <nav aria-label="Your progress" className={cn("border-b border-border bg-background", className)}>
+      <ol className="mx-auto grid max-w-[1400px] grid-cols-3 gap-3 px-4 sm:gap-6 sm:px-6">
+        {JOURNEY_STEPS.map((s, i) => {
+          const status = statuses[i]!;
+          const content = (
+            <>
+              <span
+                className={cn(
+                  "grid size-8 shrink-0 place-items-center rounded-full border-2 text-sm font-bold transition-colors sm:size-9",
+                  status === "current" && "border-primary bg-primary text-primary-foreground",
+                  status === "done" && "border-primary bg-background text-primary",
+                  status === "upcoming" && "border-border-strong bg-background text-muted-foreground",
+                )}
+                aria-hidden="true"
+              >
+                {status === "done" ? <Check className="size-4" strokeWidth={3} /> : s.n}
+              </span>
+              <span className="min-w-0 text-left">
+                <span className="block text-[0.625rem] font-bold uppercase tracking-[0.08em] text-muted-foreground">Step {s.n}</span>
+                <span
+                  className={cn(
+                    "block truncate text-sm font-bold",
+                    status === "upcoming" ? "text-muted-foreground" : status === "current" ? "text-primary" : "text-foreground",
+                  )}
+                >
+                  <span className="sm:hidden">{s.short}</span>
+                  <span className="hidden sm:inline">{s.label}</span>
+                </span>
+                <span className="hidden truncate text-xs text-muted-foreground lg:block">{hints?.[s.n] ?? s.hint}</span>
+              </span>
+              <span className="sr-only">{status === "done" ? "(done)" : status === "current" ? "(you are here)" : "(next)"}</span>
+            </>
+          );
+          const cls = "group flex w-full min-w-0 items-center gap-2.5 py-3.5 sm:gap-3 sm:py-4";
+          return (
+            <li
+              key={s.key}
+              aria-current={status === "current" ? "step" : undefined}
+              className={cn(
+                "relative min-w-0 after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:rounded-full",
+                status === "upcoming" ? "after:bg-border" : "after:bg-primary",
+              )}
+            >
+              {renderStep?.(s.n, content, cls) ?? <div className={cls}>{content}</div>}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
+/** Small "Step 2 of 3" kicker used above step headings. */
+export function StepKicker({ n, children }: { n: JourneyStepNumber; children?: ReactNode }) {
+  return (
+    <p className="eyebrow flex items-center gap-2">
+      <span className="grid size-5 place-items-center rounded-full bg-primary text-[0.625rem] text-primary-foreground" aria-hidden="true">
+        {n}
+      </span>
+      Step {n} of 3{children ? <span className="font-semibold normal-case tracking-normal text-muted-foreground">· {children}</span> : null}
+    </p>
+  );
+}
