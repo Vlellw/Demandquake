@@ -4,11 +4,7 @@ import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
 import { InfoTip } from "@/components/common/InfoTip";
 import { useAuthUser } from "@/hooks/use-auth";
 
-const LINKS = [
-  { to: "/discover", label: "Discover startups" },
-  { to: "/method", label: "How it works" },
-  { to: "/workspace", label: "My startups" },
-] as const;
+const LINKS = [{ to: "/workspace", label: "My startups" }] as const;
 
 const circle =
   "grid size-10 place-items-center rounded-full border border-ink text-foreground transition-colors hover:bg-ink hover:text-ink-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
