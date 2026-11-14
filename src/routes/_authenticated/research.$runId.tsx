@@ -150,7 +150,6 @@ function ResearchPage() {
               <span className="text-xs text-muted-foreground">started <TimeAgo iso={run.created_at} /></span>
             </div>
             <h1 className="section-title mt-2 text-3xl sm:text-[2.5rem]">“{run.query}”</h1>
-            {run.plan.interpretation && <p className="mt-4 text-base leading-relaxed text-foreground">{run.plan.interpretation}</p>}
             <div className="mt-3 flex flex-wrap gap-2">
               {(run.plan.industry || run.industry) && (
                 <Badge variant="outline">
