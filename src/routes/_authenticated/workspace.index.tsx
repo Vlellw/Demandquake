@@ -75,6 +75,13 @@ function WorkspaceList() {
                     <StartupMark brand={p.brand} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-display text-lg font-semibold text-foreground">{p.name}</p>
+                      {!p.is_owner ? (
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-observed">Shared by {p.owner_name ?? "the founder"}</p>
+                      ) : p.member_count > 0 ? (
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                          You + {p.member_count} co-founder{p.member_count === 1 ? "" : "s"}
+                        </p>
+                      ) : null}
                       <p className="line-clamp-2 text-sm text-muted-foreground">{p.tagline}</p>
                     </div>
                     <ArrowUpRight className="size-4 text-faint transition-colors group-hover:text-foreground" />

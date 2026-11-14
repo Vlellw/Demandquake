@@ -25,6 +25,8 @@ import { projectQuery, startupScansQuery } from "@/lib/queries";
 import { startMarketScan } from "@/lib/research.functions";
 import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { deleteProject } from "@/lib/projects.functions";
+import { TeamPanel } from "@/components/workspace/TeamPanel";
+import { displayName, useAuthUser } from "@/hooks/use-auth";
 import { useProjectSaver, type SaveState } from "@/hooks/use-project-saver";
 import { marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
 import { useScanDriver } from "@/hooks/use-scan-driver";
@@ -91,9 +93,26 @@ function WorkspacePage() {
 }
 
 function Workspace({ initial }: { initial: ProjectDTO }) {
-  const { project: p, update, state, savedAt, retry } = useProjectSaver(initial);
+  const { project: p, update, state, savedAt, retry, receiveRemote, mergedFromTeammate } = useProjectSaver(initial);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { user } = useAuthUser();
+  const shared = !p.is_owner || p.member_count > 0;
+
+  // Shared workspaces pull co-founders' edits periodically and on focus; the saver merges them.
+  const { data: remote } = useQuery({ ...projectQuery(p.id), refetchInterval: shared ? 15_000 : false });
+  useEffect(() => {
+    if (remote) receiveRemote(remote);
+  }, [remote, receiveRemote]);
+  useEffect(() => {
+    if (mergedFromTeammate > 0) toast.message("Synced with your co-founder’s latest changes", { id: "team-sync" });
+  }, [mergedFromTeammate]);
+
+  function onLeft() {
+    queryClient.removeQueries({ queryKey: ["project", p.id] });
+    queryClient.invalidateQueries({ queryKey: ["projects"] });
+    navigate({ to: "/workspace", replace: true });
+  }
   const del = useServerFn(deleteProject);
   const [deleting, setDeleting] = useState(false);
   const pr = projectProgress(p);
@@ -128,7 +147,11 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
             <StartupMark brand={p.brand} size="xl" />
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="positive">Claimed by you</Badge>
+                {p.is_owner ? (
+                  <Badge variant="positive">Claimed by you</Badge>
+                ) : (
+                  <Badge variant="observed">Shared by {p.owner_name ?? "the founder"}</Badge>
+                )}
                 {r.startup_slug && (
                   <Link to="/startup/$slug" params={{ slug: r.startup_slug }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
                     Public research profile <ExternalLink className="size-3" />
@@ -198,10 +221,14 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           )}
           {r.startup_slug && <MarketWatch slug={r.startup_slug} project={p} update={update} />}
           <ResearchSnapshot project={p} />
-          <ActivityLog project={p} update={update} />
+          <TeamPanel project={p} currentUserId={user?.id ?? null} onLeft={onLeft} />
+          <ActivityLog project={p} update={update} author={shared && user ? displayName(user) : null} />
+          {p.is_owner && (
           <section className="panel border-negative/20 p-5">
             <p className="eyebrow">Danger zone</p>
-            <p className="mt-2 text-sm text-muted-foreground">Deleting removes your private workspace. The public opportunity stays available.</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Deleting removes this workspace{p.member_count > 0 ? " for every co-founder" : ""}. The public opportunity stays available.
+            </p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="outline" size="sm" className="mt-3 text-negative">
@@ -222,6 +249,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
               </AlertDialogContent>
             </AlertDialog>
           </section>
+          )}
         </aside>
       </div>
     </div>
@@ -657,13 +685,16 @@ function UpdateLink({ url }: { url: string }) {
   );
 }
 
-function ActivityLog({ project: p, update }: { project: ProjectDTO; update: Update }) {
+function ActivityLog({ project: p, update, author }: { project: ProjectDTO; update: Update; author: string | null }) {
   const [note, setNote] = useState("");
   const sorted = useMemo(() => [...p.updates].sort((a, b) => b.at.localeCompare(a.at)), [p.updates]);
   function add() {
     const text = note.trim();
     if (!text) return;
-    update({ updates: [...p.updates, { id: uid("u"), at: new Date().toISOString(), kind: "note", title: "Founder note", text: text.slice(0, 2000) }] }, { immediate: true });
+    update(
+      { updates: [...p.updates, { id: uid("u"), at: new Date().toISOString(), kind: "note", title: "Founder note", text: text.slice(0, 2000), author }] },
+      { immediate: true },
+    );
     setNote("");
   }
   return (
@@ -684,8 +715,16 @@ function ActivityLog({ project: p, update }: { project: ProjectDTO; update: Upda
       <ol className="mt-4 space-y-3 border-l border-border pl-4">
         {sorted.map((u) => (
           <li key={u.id} className="relative">
-            <span className={cn("absolute -left-[21px] top-1.5 size-2 rounded-full", u.kind === "claimed" ? "bg-primary" : u.kind === "scan" ? "bg-observed" : "bg-inferred")} />
-            <p className="font-mono text-[10px] text-muted-foreground">{formatDateTime(u.at)}</p>
+            <span
+              className={cn(
+                "absolute -left-[21px] top-1.5 size-2 rounded-full",
+                u.kind === "claimed" ? "bg-primary" : u.kind === "scan" ? "bg-observed" : u.kind === "member" ? "bg-positive" : "bg-inferred",
+              )}
+            />
+            <p className="font-mono text-[10px] text-muted-foreground">
+              {formatDateTime(u.at)}
+              {u.author && u.kind === "note" ? ` · ${u.author}` : ""}
+            </p>
             <p className="text-sm font-medium text-foreground">{u.title}</p>
             <p className="whitespace-pre-wrap text-sm text-muted-foreground">{u.text}</p>
             {u.url && <UpdateLink url={u.url} />}

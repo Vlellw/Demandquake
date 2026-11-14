@@ -16,6 +16,7 @@ import { Route as MethodRouteImport } from './routes/method'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ResearchRunIdRouteImport } from './routes/research.$runId'
 import { Route as StartupSlugRouteImport } from './routes/startup.$slug'
+import { Route as AuthenticatedInviteTokenRouteImport } from './routes/_authenticated/invite.$token'
 import { Route as AuthenticatedWorkspaceIndexRouteImport } from './routes/_authenticated/workspace.index'
 import { Route as AuthenticatedWorkspaceProjectIdRouteImport } from './routes/_authenticated/workspace.$projectId'
 import { Route as StartupSlugQuakeScanIdRouteImport } from './routes/startup_.$slug.quake.$scanId'
@@ -54,6 +55,12 @@ const StartupSlugRoute = StartupSlugRouteImport.update({
   path: '/startup/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedInviteTokenRoute =
+  AuthenticatedInviteTokenRouteImport.update({
+    id: '/invite/$token',
+    path: '/invite/$token',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedWorkspaceIndexRoute =
   AuthenticatedWorkspaceIndexRouteImport.update({
     id: '/workspace/',
@@ -79,6 +86,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
   '/startup/$slug': typeof StartupSlugRoute
+  '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/workspace/': typeof AuthenticatedWorkspaceIndexRoute
   '/startup/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
   '/startup/$slug': typeof StartupSlugRoute
+  '/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/workspace': typeof AuthenticatedWorkspaceIndexRoute
   '/startup/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
@@ -103,6 +112,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/research/$runId': typeof ResearchRunIdRoute
   '/startup/$slug': typeof StartupSlugRoute
+  '/_authenticated/invite/$token': typeof AuthenticatedInviteTokenRoute
   '/_authenticated/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/_authenticated/workspace/': typeof AuthenticatedWorkspaceIndexRoute
   '/startup_/$slug/quake/$scanId': typeof StartupSlugQuakeScanIdRoute
@@ -116,6 +126,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/research/$runId'
     | '/startup/$slug'
+    | '/invite/$token'
     | '/workspace/$projectId'
     | '/workspace/'
     | '/startup/$slug/quake/$scanId'
@@ -127,6 +138,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/research/$runId'
     | '/startup/$slug'
+    | '/invite/$token'
     | '/workspace/$projectId'
     | '/workspace'
     | '/startup/$slug/quake/$scanId'
@@ -139,6 +151,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/research/$runId'
     | '/startup/$slug'
+    | '/_authenticated/invite/$token'
     | '/_authenticated/workspace/$projectId'
     | '/_authenticated/workspace/'
     | '/startup_/$slug/quake/$scanId'
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StartupSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/invite/$token': {
+      id: '/_authenticated/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof AuthenticatedInviteTokenRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/workspace/': {
       id: '/_authenticated/workspace/'
       path: '/workspace'
@@ -231,11 +251,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedInviteTokenRoute: typeof AuthenticatedInviteTokenRoute
   AuthenticatedWorkspaceProjectIdRoute: typeof AuthenticatedWorkspaceProjectIdRoute
   AuthenticatedWorkspaceIndexRoute: typeof AuthenticatedWorkspaceIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedInviteTokenRoute: AuthenticatedInviteTokenRoute,
   AuthenticatedWorkspaceProjectIdRoute: AuthenticatedWorkspaceProjectIdRoute,
   AuthenticatedWorkspaceIndexRoute: AuthenticatedWorkspaceIndexRoute,
 }

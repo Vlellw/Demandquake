@@ -12,7 +12,7 @@ import {
   getStartupScans,
   getRecentQuakes,
 } from "./research.functions";
-import { getProject, listMyProjects } from "./projects.functions";
+import { getProject, getProjectTeam, listMyProjects, previewInvite } from "./projects.functions";
 
 export const startupCardsQuery = queryOptions({
   queryKey: ["startups"],
@@ -79,6 +79,18 @@ export const projectQuery = (projectId: string) =>
   queryOptions({
     queryKey: ["project", projectId],
     queryFn: () => getProject({ data: { projectId } }),
+  });
+
+export const projectTeamQuery = (projectId: string) =>
+  queryOptions({
+    queryKey: ["project-team", projectId],
+    queryFn: () => getProjectTeam({ data: { projectId } }),
+  });
+
+export const invitePreviewQuery = (token: string) =>
+  queryOptions({
+    queryKey: ["invite", token],
+    queryFn: () => previewInvite({ data: { token } }),
   });
 
 export const competitorBrandsQuery = (slug: string) =>

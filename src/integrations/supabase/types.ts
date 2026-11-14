@@ -316,6 +316,76 @@ export type Database = {
           },
         ]
       }
+      project_invites: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          project_id: string
+          revoked_at: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          id?: string
+          project_id: string
+          revoked_at?: string | null
+          token?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          project_id?: string
+          revoked_at?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_invites_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      project_members: {
+        Row: {
+          display_name: string
+          joined_at: string
+          project_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          display_name?: string
+          joined_at?: string
+          project_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          display_name?: string
+          joined_at?: string
+          project_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_members_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           assumptions: Json
@@ -325,6 +395,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          owner_name: string | null
           pitch: Json
           research: Json
           roadmap: Json
@@ -342,6 +413,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          owner_name?: string | null
           pitch?: Json
           research?: Json
           roadmap?: Json
@@ -359,6 +431,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          owner_name?: string | null
           pitch?: Json
           research?: Json
           roadmap?: Json
@@ -582,6 +655,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_project_invite: {
+        Args: { _display_name: string; _token: string }
+        Returns: string
+      }
+      is_project_member: {
+        Args: { _project: string; _user: string }
+        Returns: boolean
+      }
+      is_project_owner: {
+        Args: { _project: string; _user: string }
+        Returns: boolean
+      }
+      preview_project_invite: {
+        Args: { _token: string }
+        Returns: {
+          brand: Json
+          owner_name: string
+          project_id: string
+          project_name: string
+          status: string
+          tagline: string
+        }[]
+      }
       reserve_rate_slot: {
         Args: { p_limit: number; p_provider: string; p_window_ms: number }
         Returns: number

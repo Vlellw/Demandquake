@@ -36,6 +36,13 @@
       "when": 1794624964670,
       "tag": "0004_brand_name_lookups",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794629752281,
+      "tag": "0005_project_collaboration",
+      "breakpoints": true
     }
   ]
 }

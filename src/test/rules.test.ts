@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { safeRedirect } from "@/lib/safe-redirect";
+import { changedFields, mergeProject } from "@/lib/project-merge";
 import { recommendStartups, marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
 import { pickQuakeFeed, computeEvidenceStrength, freshnessOf, matchesFreshness, normalizeUrl, stripRefLabels, cleanRefLabels, replaceBrandName, brandMatchesCompetitor, sameNameCandidates } from "@/lib/research-utils";
 import { buildProjectFromStartup, type StartupForClaim } from "@/lib/claim";
@@ -230,5 +231,53 @@ describe("personalised recommendations", () => {
   });
   it("returns nothing for founders without projects", () => {
     expect(recommendStartups([card("ind", "Healthcare", "Europe")], [])).toEqual([]);
+  });
+});
+
+describe("co-founder edits merge instead of overwriting each other", () => {
+  const check = (id: string, done = false) => ({ id, title: id, description: "", method: "", success_signal: "", done });
+  const note = (id: string) => ({ id, at: "2026-11-14T10:00:00Z", kind: "note" as const, title: "Founder note", text: id });
+  const base = {
+    name: "Chartweft",
+    tagline: "t",
+    concept: "c",
+    assumptions: [],
+    checklist: [check("a"), check("b")],
+    roadmap: [{ id: "p1", phase: "Validate", horizon: "Month 1", items: [{ id: "i1", text: "x", done: false }, { id: "i2", text: "y", done: false }] }],
+    updates: [note("n1")],
+  };
+
+  it("keeps a teammate's new note while saving my checklist tick", () => {
+    const local = { ...base, checklist: [check("a", true), check("b")] };
+    const server = { ...base, updates: [note("n1"), note("teammate")] };
+    const merged = mergeProject(base, local, server);
+    expect(merged.checklist.find((c) => c.id === "a")?.done).toBe(true);
+    expect(merged.updates.map((u) => u.id)).toEqual(["n1", "teammate"]);
+  });
+
+  it("keeps both people's ticks inside the same roadmap phase", () => {
+    const local = { ...base, roadmap: [{ ...base.roadmap[0]!, items: [{ id: "i1", text: "x", done: true }, { id: "i2", text: "y", done: false }] }] };
+    const server = { ...base, roadmap: [{ ...base.roadmap[0]!, items: [{ id: "i1", text: "x", done: false }, { id: "i2", text: "y", done: true }] }] };
+    const merged = mergeProject(base, local, server);
+    expect(merged.roadmap[0]?.items.map((i) => i.done)).toEqual([true, true]);
+  });
+
+  it("honours deletions made in this browser and additions made by the teammate", () => {
+    const local = { ...base, checklist: [check("b")] };
+    const server = { ...base, checklist: [check("a"), check("b"), check("c")] };
+    expect(mergeProject(base, local, server).checklist.map((c) => c.id)).toEqual(["b", "c"]);
+  });
+
+  it("takes the teammate's text when I did not change that field", () => {
+    const server = { ...base, concept: "teammate rewrite" };
+    expect(mergeProject(base, base, server).concept).toBe("teammate rewrite");
+    expect(changedFields(mergeProject(base, base, server), server)).toEqual({});
+  });
+
+  it("does not duplicate an activity entry both browsers logged", () => {
+    const scanNote = { ...note("scan-1"), kind: "scan" as const };
+    const local = { ...base, updates: [note("n1"), scanNote] };
+    const server = { ...base, updates: [note("n1"), scanNote] };
+    expect(mergeProject(base, local, server).updates.map((u) => u.id)).toEqual(["n1", "scan-1"]);
   });
 });

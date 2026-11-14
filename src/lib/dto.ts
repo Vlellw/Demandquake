@@ -180,6 +180,10 @@ export interface ProjectDTO {
   research: ProjectResearch;
   created_at: string;
   updated_at: string;
+  /** True when the signed-in user claimed this project; false for invited co-founders. */
+  is_owner: boolean;
+  owner_name: string | null;
+  member_count: number;
 }
 
 export interface ProjectAssumption {
@@ -209,10 +213,42 @@ export interface ProjectPhase {
 export interface ProjectUpdate {
   id: string;
   at: string;
-  kind: "claimed" | "note" | "scan";
+  kind: "claimed" | "note" | "scan" | "member";
   title: string;
   text: string;
   url?: string | null;
+  /** Display name of the co-founder who wrote a note or joined. */
+  author?: string | null;
+}
+
+export interface ProjectMemberDTO {
+  user_id: string;
+  display_name: string;
+  joined_at: string;
+}
+
+export interface ProjectInviteDTO {
+  id: string;
+  token: string;
+  created_at: string;
+  expires_at: string;
+}
+
+export interface ProjectTeamDTO {
+  is_owner: boolean;
+  owner_name: string | null;
+  members: ProjectMemberDTO[];
+  /** Active invite links — only returned to the owner. */
+  invites: ProjectInviteDTO[];
+}
+
+export interface InvitePreviewDTO {
+  status: "valid" | "owner" | "member" | "revoked" | "expired" | "not_found";
+  project_id: string | null;
+  project_name: string | null;
+  tagline: string | null;
+  brand: Brand | null;
+  owner_name: string | null;
 }
 
 export interface ProjectResearch {

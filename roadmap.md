@@ -17,6 +17,7 @@
 - [x] Workspace market watch: scans run in place, re-check automatically once a week on visit, and auto-log into founder activity
 - [x] Discovery page "Opportunity quakes" feed: recent market scans drawn as seismograph traces (one spike per change, colored by implication)
 - [x] "Picked for you" on discover for signed-in founders (same industry or concrete region as their claimed startups)
+- [x] Co-founder collaboration: invite links, shared editing with conflict-free merging, live sync, remove/leave, activity entries
 
 ## In progress
 
