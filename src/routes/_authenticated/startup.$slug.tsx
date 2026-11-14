@@ -369,7 +369,13 @@ function StartupPage() {
                 </section>
               )}
               <section className="panel p-5">
-                <SourceStream sources={evidence} limit={evidence.length} />
+                <div className="flex items-center justify-between">
+                  <h2 className="font-display text-xl font-semibold text-foreground">Original publications</h2>
+                  <ObservedTag count={evidence.length} label="Sources" />
+                </div>
+                <div className="mt-4">
+                  <SourceStream sources={evidence} limit={evidence.length} />
+                </div>
               </section>
             </TabsContent>
 
