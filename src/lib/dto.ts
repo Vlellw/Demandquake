@@ -29,6 +29,8 @@ export interface StartupCardDTO {
   geography: string | null;
   business_model_type: string | null;
   brand: Brand;
+  /** Generated banner artwork URL; null until generated (plain brand banner shown). */
+  banner_image_url: string | null;
   research_at: string;
   last_scanned_at: string | null;
   claim_count: number;
@@ -131,6 +133,7 @@ export interface StartupDetailDTO {
     geography: string | null;
     business_model_type: string | null;
     brand: Brand;
+    banner_image_url: string | null;
     problem: StartupProblem;
     solution: StartupSolution;
     customers: CustomerSegment[];

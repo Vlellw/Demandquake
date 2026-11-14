@@ -20,7 +20,7 @@ const SOURCE_COLS =
   "id, url, domain, title, snippet, highlights, publisher, published_at, retrieved_at, origin, article_type, search_intent, search_query, relevance, signal_type, scan_id";
 
 const CARD_COLS =
-  "id, slug, name, tagline, industry, geography, business_model_type, brand, research_at, last_scanned_at, claim_count, evidence_source_ids, competitors, assessment, run_id, who_is_affected:problem->>who_is_affected, why_now:problem->>why_now, cluster:clusters!startups_cluster_id_fkey(title, evidence_strength), run:discovery_runs(query)";
+  "id, slug, name, tagline, industry, geography, business_model_type, brand, banner_image_url, research_at, last_scanned_at, claim_count, evidence_source_ids, competitors, assessment, run_id, who_is_affected:problem->>who_is_affected, why_now:problem->>why_now, cluster:clusters!startups_cluster_id_fkey(title, evidence_strength), run:discovery_runs(query)";
 
 type CardRow = {
   id: string;
@@ -31,6 +31,7 @@ type CardRow = {
   geography: string | null;
   business_model_type: string | null;
   brand: unknown;
+  banner_image_url: string | null;
   research_at: string;
   last_scanned_at: string | null;
   claim_count: number;
@@ -53,6 +54,7 @@ function toCard(r: CardRow): StartupCardDTO {
     geography: r["geography"],
     business_model_type: r["business_model_type"],
     brand: (r["brand"] as Brand) ?? { hue: 40, glyph: "orbit", motto: "" },
+    banner_image_url: r["banner_image_url"] ?? null,
     research_at: r["research_at"],
     last_scanned_at: r["last_scanned_at"],
     claim_count: r["claim_count"],
@@ -278,6 +280,7 @@ export async function startupDetail(db: ResearchDb, slug: string): Promise<Start
       geography: st.geography,
       business_model_type: st.business_model_type,
       brand: st.brand as unknown as StartupDetailDTO["startup"]["brand"],
+      banner_image_url: st.banner_image_url ?? null,
       problem: st.problem as unknown as StartupDetailDTO["startup"]["problem"],
       solution: st.solution as unknown as StartupDetailDTO["startup"]["solution"],
       customers: (st.customers as unknown as StartupDetailDTO["startup"]["customers"]) ?? [],

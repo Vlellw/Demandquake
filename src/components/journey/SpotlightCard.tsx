@@ -2,7 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { ArrowRight, CalendarClock, FileSearch, Sparkles, Swords, Target, Users } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
-import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
+import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
+import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { Badge } from "@/components/ui/badge";
 import { FreshnessBadge } from "@/components/discovery/StartupCard";
 import { EVIDENCE_LABEL } from "@/lib/journey";
@@ -12,6 +13,7 @@ import { EVIDENCE_LABEL } from "@/lib/journey";
  * so a newcomer can decide which one to inspect without opening every card.
  */
 export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDTO; index?: number; reason?: string | undefined }) {
+  const banner = useStartupBanner(card);
   const rows = [
     { icon: Target, label: "Problem found", text: card.problem_title },
     { icon: Users, label: "Who has it", text: card.who_is_affected },
@@ -36,7 +38,7 @@ export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDT
         style={brandStyle(card.brand)}
         className="group flex h-full flex-col overflow-hidden rounded-[4px] bg-card shadow-panel transition-shadow duration-300 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div className="brand-banner flex items-center gap-4 p-5">
+        <div className="brand-banner flex items-center gap-4 p-5" style={bannerBackground(card.brand, banner)}>
           <StartupMark brand={card.brand} size="lg" className="border-transparent shadow-panel" />
           <div className="min-w-0">
             <p className="truncate text-[0.6875rem] font-bold uppercase tracking-[0.06em] opacity-90">

@@ -23,6 +23,7 @@ import { Route as AuthenticatedResearchRunIdRouteImport } from './routes/_authen
 import { Route as AuthenticatedStartupSlugRouteImport } from './routes/_authenticated/startup.$slug'
 import { Route as AuthenticatedWorkspaceIndexRouteImport } from './routes/_authenticated/workspace.index'
 import { Route as AuthenticatedWorkspaceProjectIdRouteImport } from './routes/_authenticated/workspace.$projectId'
+import { Route as ApiPublicBannerStartupIdRouteImport } from './routes/api/public/banner/$startupId'
 import { Route as ApiPublicPaymentsWebhookRouteImport } from './routes/api/public/payments/webhook'
 import { Route as AuthenticatedStartupSlugQuakeScanIdRouteImport } from './routes/_authenticated/startup_.$slug.quake.$scanId'
 
@@ -102,6 +103,12 @@ const AuthenticatedWorkspaceProjectIdRoute =
     path: '/workspace/$projectId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicBannerStartupIdRoute =
+  ApiPublicBannerStartupIdRouteImport.update({
+    id: '/api/public/banner/$startupId',
+    path: '/api/public/banner/$startupId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicPaymentsWebhookRoute =
   ApiPublicPaymentsWebhookRouteImport.update({
     id: '/api/public/payments/webhook',
@@ -129,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/startup/$slug': typeof AuthenticatedStartupSlugRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/workspace/': typeof AuthenticatedWorkspaceIndexRoute
+  '/api/public/banner/$startupId': typeof ApiPublicBannerStartupIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/startup/$slug/quake/$scanId': typeof AuthenticatedStartupSlugQuakeScanIdRoute
 }
@@ -146,6 +154,7 @@ export interface FileRoutesByTo {
   '/startup/$slug': typeof AuthenticatedStartupSlugRoute
   '/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/workspace': typeof AuthenticatedWorkspaceIndexRoute
+  '/api/public/banner/$startupId': typeof ApiPublicBannerStartupIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/startup/$slug/quake/$scanId': typeof AuthenticatedStartupSlugQuakeScanIdRoute
 }
@@ -165,6 +174,7 @@ export interface FileRoutesById {
   '/_authenticated/startup/$slug': typeof AuthenticatedStartupSlugRoute
   '/_authenticated/workspace/$projectId': typeof AuthenticatedWorkspaceProjectIdRoute
   '/_authenticated/workspace/': typeof AuthenticatedWorkspaceIndexRoute
+  '/api/public/banner/$startupId': typeof ApiPublicBannerStartupIdRoute
   '/api/public/payments/webhook': typeof ApiPublicPaymentsWebhookRoute
   '/_authenticated/startup_/$slug/quake/$scanId': typeof AuthenticatedStartupSlugQuakeScanIdRoute
 }
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/startup/$slug'
     | '/workspace/$projectId'
     | '/workspace/'
+    | '/api/public/banner/$startupId'
     | '/api/public/payments/webhook'
     | '/startup/$slug/quake/$scanId'
   fileRoutesByTo: FileRoutesByTo
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/startup/$slug'
     | '/workspace/$projectId'
     | '/workspace'
+    | '/api/public/banner/$startupId'
     | '/api/public/payments/webhook'
     | '/startup/$slug/quake/$scanId'
   id:
@@ -219,6 +231,7 @@ export interface FileRouteTypes {
     | '/_authenticated/startup/$slug'
     | '/_authenticated/workspace/$projectId'
     | '/_authenticated/workspace/'
+    | '/api/public/banner/$startupId'
     | '/api/public/payments/webhook'
     | '/_authenticated/startup_/$slug/quake/$scanId'
   fileRoutesById: FileRoutesById
@@ -230,6 +243,7 @@ export interface RootRouteChildren {
   CreditsRoute: typeof CreditsRoute
   MethodRoute: typeof MethodRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  ApiPublicBannerStartupIdRoute: typeof ApiPublicBannerStartupIdRoute
   ApiPublicPaymentsWebhookRoute: typeof ApiPublicPaymentsWebhookRoute
 }
 
@@ -333,6 +347,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspaceProjectIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/banner/$startupId': {
+      id: '/api/public/banner/$startupId'
+      path: '/api/public/banner/$startupId'
+      fullPath: '/api/public/banner/$startupId'
+      preLoaderRoute: typeof ApiPublicBannerStartupIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/payments/webhook': {
       id: '/api/public/payments/webhook'
       path: '/api/public/payments/webhook'
@@ -385,6 +406,7 @@ const rootRouteChildren: RootRouteChildren = {
   CreditsRoute: CreditsRoute,
   MethodRoute: MethodRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  ApiPublicBannerStartupIdRoute: ApiPublicBannerStartupIdRoute,
   ApiPublicPaymentsWebhookRoute: ApiPublicPaymentsWebhookRoute,
 }
 export const routeTree = rootRouteImport

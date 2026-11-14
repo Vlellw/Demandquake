@@ -96,3 +96,17 @@ export function StartupMark({
 export function brandStyle(brand: Brand | null | undefined): CSSProperties {
   return { "--brand-h": brand?.hue ?? 40 } as CSSProperties;
 }
+
+/**
+ * Background for a `.brand-banner` block: the generated banner artwork under a brand-colored
+ * wash so white text and the mark stay readable. Without an image, the plain brand gradient stays.
+ */
+export function bannerBackground(brand: Brand | null | undefined, imageUrl: string | null | undefined): CSSProperties {
+  if (!imageUrl) return {};
+  const hue = brand?.hue ?? 40;
+  return {
+    backgroundImage: `linear-gradient(hsla(${hue}, 45%, 22%, 0.42), hsla(${hue}, 50%, 30%, 0.3)), url(${imageUrl})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  };
+}

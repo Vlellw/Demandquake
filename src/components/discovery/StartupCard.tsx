@@ -3,7 +3,8 @@ import { TimeAgo } from "@/components/common/TimeAgo";
 import { motion } from "motion/react";
 import { ArrowRight, FileSearch, Swords } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
-import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
+import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
+import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { Badge } from "@/components/ui/badge";
 import { DIMENSION_KEYS, type Level } from "@/lib/types";
 import { DIMENSION_META, LEVEL_META, industryColor } from "@/lib/taxonomy";
@@ -64,6 +65,7 @@ export function AssessmentStrip({ card }: { card: Pick<StartupCardDTO, "assessme
  */
 export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?: number }) {
   const claimed = card.claim_count > 0;
+  const banner = useStartupBanner(card);
   return (
     <motion.div
       className="h-full"
@@ -77,7 +79,7 @@ export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?:
         style={brandStyle(card.brand)}
         className="group flex h-full flex-col overflow-hidden rounded-[4px] bg-card shadow-panel transition-shadow duration-300 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <div className="brand-banner relative flex h-32 items-end justify-between p-4">
+        <div className="brand-banner relative flex h-32 items-end justify-between p-4" style={bannerBackground(card.brand, banner)}>
           <StartupMark brand={card.brand} size="lg" className="border-transparent shadow-panel" />
           <span className="rounded-[3px] bg-background px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.06em] text-foreground">
             {claimed ? `${card.claim_count} building` : "Unclaimed"}

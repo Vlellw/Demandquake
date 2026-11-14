@@ -769,6 +769,7 @@ export type Database = {
       startups: {
         Row: {
           assessment: Json
+          banner_image_url: string | null
           brand: Json
           business_model: Json
           business_model_type: string | null
@@ -800,6 +801,7 @@ export type Database = {
         }
         Insert: {
           assessment?: Json
+          banner_image_url?: string | null
           brand?: Json
           business_model?: Json
           business_model_type?: string | null
@@ -831,6 +833,7 @@ export type Database = {
         }
         Update: {
           assessment?: Json
+          banner_image_url?: string | null
           brand?: Json
           business_model?: Json
           business_model_type?: string | null

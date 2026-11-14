@@ -1021,6 +1021,14 @@ ${competitorBlock.length ? competitorBlock.join("\n\n") : "(competitor search re
 
   await ensureUniqueName(startup.id, name);
 
+  // Decorative banner artwork; a failure here must never fail the run.
+  try {
+    const { generateStartupBanner } = await import("./banner.server");
+    await generateStartupBanner({ id: startup.id, name, tagline: out.tagline, industry: cluster.industry, brand: { hue } });
+  } catch (err) {
+    console.error(`Banner generation failed for ${startup.id}:`, err);
+  }
+
   await db
     .from("clusters")
     .update({ generation_status: "done", startup_id: startup.id, generation_error: null })

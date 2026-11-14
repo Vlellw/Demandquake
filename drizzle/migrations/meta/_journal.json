@@ -92,6 +92,13 @@
       "when": 1794667965747,
       "tag": "0012_atomic_five_credit_startup_claim",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794679950558,
+      "tag": "0013_add_startup_banner_image",
+      "breakpoints": true
     }
   ]
 }

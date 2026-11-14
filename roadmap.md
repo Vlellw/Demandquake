@@ -35,3 +35,6 @@
 - Shareable OG images per startup (generated brand card)
 - Problem map: spread dots wider when only one industry is shown (related-problem map on startup pages is tightly packed)
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
+
+## In progress
+- [ ] AI banner images for startup cards/hero (Gemini 3.1 Flash Lite Image), cached per startup; step-3 tabs restored per Vlad

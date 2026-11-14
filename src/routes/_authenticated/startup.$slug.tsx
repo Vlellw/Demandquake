@@ -25,7 +25,8 @@ import { myProjectsQuery, radarQuery, startupDetailQuery } from "@/lib/queries";
 import { claimStartup } from "@/lib/projects.functions";
 import { startMarketScan } from "@/lib/research.functions";
 import type { StartupDetailDTO } from "@/lib/dto";
-import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
+import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
+import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { PitchPlayer } from "@/components/startup/PitchPlayer";
 import { SourceProvider, Cite, type Citation } from "@/components/startup/SourceDrawer";
 import { EvidenceMap } from "@/components/startup/EvidenceMap";
@@ -137,6 +138,7 @@ function StartupPage() {
   const { data: detail } = useSuspenseQuery(startupDetailQuery(slug));
   if (!detail) throw notFound();
   const st = detail.startup;
+  const banner = useStartupBanner(st);
   const { user, ready } = useAuthUser();
   const { data: myProjects } = useQuery({ ...myProjectsQuery, enabled: !!user });
   const claimFn = useServerFn(claimStartup);
@@ -286,7 +288,7 @@ function StartupPage() {
         />
 
         {/* HERO: brand-colored block with the pitch on the right */}
-        <section className="brand-banner relative overflow-hidden">
+        <section className="brand-banner relative overflow-hidden" style={bannerBackground(st.brand, banner)}>
           <div className="relative mx-auto grid max-w-[1400px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:py-14">
             <div className="flex min-w-0 flex-col">
               <div className="mt-4 flex items-center gap-4">
