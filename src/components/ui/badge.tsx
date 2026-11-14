@@ -3,21 +3,22 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+// Lindström-style tags: small bold uppercase text with a thin colored outline.
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[0.7rem] font-medium leading-5 transition-colors focus:outline-none focus:ring-2 focus:ring-ring [&_svg]:size-3 [&_svg]:shrink-0",
+  "inline-flex items-center gap-1 rounded-[3px] border px-1.5 py-px text-[0.625rem] font-bold uppercase leading-4 tracking-[0.04em] transition-colors focus:outline-none focus:ring-2 focus:ring-ring [&_svg]:size-3 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "border-transparent bg-primary/15 text-primary",
+        default: "border-primary/70 bg-background text-primary",
         secondary: "border-transparent bg-secondary text-secondary-foreground",
-        destructive: "border-transparent bg-destructive/15 text-destructive",
-        outline: "border-border-strong text-muted-foreground",
-        observed: "border-observed/30 bg-observed/10 text-observed",
-        inferred: "border-dashed border-inferred/45 bg-inferred/8 text-inferred",
-        positive: "border-positive/30 bg-positive/10 text-positive",
-        negative: "border-negative/30 bg-negative/10 text-negative",
-        uncertain: "border-uncertain/30 bg-uncertain/10 text-uncertain",
-        live: "border-primary/40 bg-primary/10 text-primary",
+        destructive: "border-destructive/70 bg-background text-destructive",
+        outline: "border-ink/60 bg-background text-foreground",
+        observed: "border-observed/70 bg-background text-observed",
+        inferred: "border-dashed border-inferred/70 bg-background text-inferred",
+        positive: "border-positive/70 bg-background text-positive",
+        negative: "border-negative/70 bg-background text-negative",
+        uncertain: "border-uncertain/60 bg-background text-uncertain",
+        live: "border-primary bg-primary text-primary-foreground",
       },
     },
     defaultVariants: {

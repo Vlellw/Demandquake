@@ -1,8 +1,9 @@
+import { useEffect, useState } from "react";
 import { Link, useHydrated, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { Briefcase, LogOut, Menu, Radar, Sparkles } from "lucide-react";
+import { BookOpen, Briefcase, ChevronDown, ChevronRight, CircleUserRound, Compass, LogOut, Menu, Search } from "lucide-react";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
-import { Button } from "@/components/ui/button";
+import { SiteSearch } from "@/components/layout/SiteSearch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +12,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { displayName, useAuthUser } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
+const NAV = [
+  { to: "/", label: "Discover startups", icon: Compass, match: (p: string) => p === "/" || p.startsWith("/startup") || p.startsWith("/research") },
+  { to: "/method", label: "How it works", icon: BookOpen, match: (p: string) => p === "/method" },
+  { to: "/workspace", label: "My startups", icon: Briefcase, match: (p: string) => p.startsWith("/workspace") || p.startsWith("/invite") },
+] as const;
+
+/**
+ * Two-tier header: a thin ink utility bar with the account link (right), then a white
+ * bar with the logo (left), bold navigation and search (right).
+ */
 export function AppHeader() {
   const { user, ready } = useAuthUser();
   const navigate = useNavigate();
@@ -23,6 +35,18 @@ export function AppHeader() {
   // A protected page can redirect to sign-in before hydration, so the server-rendered highlight may be
   // stale; remounting the nav once hydrated redraws it from the real location.
   const hydrated = useHydrated();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen((o) => !o);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   async function signOut() {
     await queryClient.cancelQueries();
@@ -31,87 +55,158 @@ export function AppHeader() {
     navigate({ to: "/auth", replace: true });
   }
 
-  const navItem = (active: boolean) =>
-    cn(
-      "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-sm transition-colors",
-      active ? "bg-foreground/[0.07] text-foreground" : "text-muted-foreground hover:text-foreground",
-    );
+  const utilityLink =
+    "inline-flex h-8 items-center gap-1.5 text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-ink-foreground hover:underline underline-offset-4";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/75 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-[1400px] items-center gap-3 px-4 sm:gap-6 sm:px-6">
-        <Link to="/" className="shrink-0" aria-label="Demandquake home">
-          <DemandquakeLogo />
-        </Link>
-        <nav key={hydrated ? "client" : "server"} className="hidden items-center gap-1 md:flex">
-          <Link to="/" className={navItem(pathname === "/")} suppressHydrationWarning>
-            <Radar className="size-4" /> Discover
-          </Link>
-          <Link to="/method" className={navItem(pathname === "/method")} suppressHydrationWarning>
-            <Sparkles className="size-4" /> Method
-          </Link>
-          <Link to="/workspace" className={navItem(pathname.startsWith("/workspace"))} suppressHydrationWarning>
-            <Briefcase className="size-4" /> My startups
-          </Link>
-        </nav>
-        <div className="ml-auto flex items-center gap-2">
-          <span className="hidden items-center gap-1.5 rounded-full border border-border px-2.5 py-1 font-mono text-[10px] uppercase tracking-wider text-muted-foreground lg:inline-flex">
-            <span className="relative flex size-1.5">
-              <span className="absolute inline-flex size-full animate-ping rounded-full bg-positive opacity-60" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-positive" />
-            </span>
-            Live web · Context.dev
-          </span>
-          {ready && !user && (
-            <Button asChild variant="outline" size="sm">
-              <Link to="/auth">Sign in</Link>
-            </Button>
-          )}
-          {ready && user && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  className="grid size-8 place-items-center rounded-full border border-border-strong bg-surface-raised font-display text-sm font-semibold text-foreground transition-colors hover:border-primary/50"
-                  aria-label="Account menu"
-                >
-                  {displayName(user).slice(0, 1).toUpperCase()}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="text-sm font-medium text-foreground">{displayName(user)}</div>
-                  <div className="truncate text-xs text-muted-foreground">{user.email}</div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => navigate({ to: "/workspace" })}>
-                  <Briefcase className="size-4" /> My startups
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={signOut}>
-                  <LogOut className="size-4" /> Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
-                <Menu className="size-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 md:hidden">
-              <DropdownMenuItem onSelect={() => navigate({ to: "/" })}>
-                <Radar className="size-4" /> Discover
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate({ to: "/method" })}>
-                <Sparkles className="size-4" /> Method
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => navigate({ to: "/workspace" })}>
-                <Briefcase className="size-4" /> My startups
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <>
+      <div className="bg-ink text-ink-foreground">
+        <div className="mx-auto flex h-8 max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6">
+          <p className="hidden truncate text-[0.6875rem] text-ink-foreground/80 sm:block">
+            Startup ideas built from real problems found on the live web
+          </p>
+          <div className="ml-auto flex items-center gap-5">
+            {ready && !user && (
+              <Link to="/auth" className={utilityLink}>
+                <CircleUserRound className="size-4" /> Sign in
+              </Link>
+            )}
+            {ready && user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger className={cn(utilityLink, "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-foreground/60")}>
+                  <CircleUserRound className="size-4" />
+                  <span className="max-w-40 truncate">{displayName(user)}</span>
+                  <ChevronDown className="size-3.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-60">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="text-sm font-semibold text-foreground">{displayName(user)}</div>
+                    <div className="truncate text-xs text-muted-foreground">{user.email}</div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => navigate({ to: "/workspace" })}>
+                    <Briefcase className="size-4" /> My startups
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onSelect={signOut}>
+                    <LogOut className="size-4" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         </div>
       </div>
-    </header>
+
+      <header className="sticky top-0 z-40 border-b border-border bg-background">
+        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-4 sm:px-6">
+          <Link to="/" className="shrink-0" aria-label="Demandquake home">
+            <DemandquakeLogo />
+          </Link>
+
+          <nav key={hydrated ? "client" : "server"} aria-label="Main" className="ml-auto hidden h-full items-stretch gap-7 md:flex">
+            {NAV.map((item) => {
+              const active = item.match(pathname);
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  aria-current={active ? "page" : undefined}
+                  suppressHydrationWarning
+                  className={cn(
+                    "relative inline-flex items-center text-sm font-bold text-foreground transition-colors hover:text-primary",
+                    "after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-primary after:transition-transform after:duration-200",
+                    active ? "after:scale-x-100" : "after:scale-x-0 hover:after:scale-x-100",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-1 md:ml-4">
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="grid size-10 cursor-pointer place-items-center rounded-full text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              aria-label="Search startups"
+            >
+              <Search className="size-5" />
+            </button>
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <button
+                  type="button"
+                  className="grid size-10 cursor-pointer place-items-center rounded-full text-foreground transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
+                  aria-label="Open menu"
+                >
+                  <Menu className="size-5" />
+                </button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[86vw] max-w-sm p-0">
+                <div className="border-b border-border px-5 py-4">
+                  <SheetTitle asChild>
+                    <span>
+                      <DemandquakeLogo />
+                    </span>
+                  </SheetTitle>
+                  <SheetDescription className="mt-2 text-xs text-muted-foreground">
+                    Startup ideas built from real problems found on the live web.
+                  </SheetDescription>
+                </div>
+                <nav aria-label="Mobile" className="flex flex-col py-2">
+                  {NAV.map((item) => {
+                    const active = item.match(pathname);
+                    return (
+                      <SheetClose asChild key={item.to}>
+                        <Link
+                          to={item.to}
+                          className={cn(
+                            "flex items-center gap-3 border-l-[3px] px-5 py-4 text-base font-bold transition-colors hover:bg-accent",
+                            active ? "border-primary text-primary" : "border-transparent text-foreground",
+                          )}
+                        >
+                          <item.icon className="size-5" />
+                          <span className="flex-1">{item.label}</span>
+                          <ChevronRight className="size-4 text-muted-foreground" />
+                        </Link>
+                      </SheetClose>
+                    );
+                  })}
+                </nav>
+                <div className="border-t border-border px-5 py-4">
+                  {ready && !user && (
+                    <SheetClose asChild>
+                      <Link to="/auth" className="inline-flex h-10 items-center gap-2 rounded-full border border-ink px-5 text-sm font-semibold text-foreground hover:bg-ink hover:text-ink-foreground">
+                        <CircleUserRound className="size-4" /> Sign in
+                      </Link>
+                    </SheetClose>
+                  )}
+                  {ready && user && (
+                    <div className="space-y-3">
+                      <p className="text-xs text-muted-foreground">
+                        Signed in as <span className="font-semibold text-foreground">{displayName(user)}</span>
+                      </p>
+                      <SheetClose asChild>
+                        <button
+                          type="button"
+                          onClick={signOut}
+                          className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-ink px-5 text-sm font-semibold text-foreground hover:bg-ink hover:text-ink-foreground"
+                        >
+                          <LogOut className="size-4" /> Sign out
+                        </button>
+                      </SheetClose>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+        </div>
+      </header>
+
+      <SiteSearch open={searchOpen} onOpenChange={setSearchOpen} />
+    </>
   );
 }

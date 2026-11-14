@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { AppHeader } from "@/components/layout/AppHeader";
+import { AppFooter } from "@/components/layout/AppFooter";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
@@ -22,14 +23,14 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <p className="eyebrow">Signal lost</p>
-        <h1 className="mt-3 font-display text-6xl font-semibold text-foreground">404</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          This page doesn't exist — maybe the opportunity moved, or the link is incomplete.
+        <p className="eyebrow">Page not found</p>
+        <h1 className="section-title mt-3 text-5xl">404</h1>
+        <p className="mt-3 text-base text-muted-foreground">
+          This page doesn't exist. The link may be incomplete, or the startup was removed.
         </p>
         <div className="mt-6">
           <Button asChild variant="hero">
-            <Link to="/">Back to discovery</Link>
+            <Link to="/">Back to the start page</Link>
           </Button>
         </div>
       </div>
@@ -47,9 +48,9 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <p className="eyebrow">Interference</p>
-        <h1 className="mt-3 font-display text-2xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Something went wrong on our end. Try again, or head back to discovery.</p>
+        <p className="eyebrow">Something went wrong</p>
+        <h1 className="section-title mt-3 text-3xl">This page didn't load</h1>
+        <p className="mt-3 text-base text-muted-foreground">Something went wrong on our end. Try again, or go back to the start page.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <Button
             variant="hero"
@@ -81,7 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Demandquake turns live internet evidence into unclaimed, evidence-backed startup opportunities you can explore and claim.",
       },
       { name: "author", content: "Demandquake" },
-      { name: "theme-color", content: "#121620" },
+      { name: "theme-color", content: "#ffffff" },
       { property: "og:site_name", content: "Demandquake" },
       { property: "og:title", content: "Demandquake — Discover startups before they exist" },
       {
@@ -96,7 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Google+Sans:wght@500&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,400..800;1,400..600&family=Google+Sans:wght@500&display=swap",
       },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
@@ -110,7 +111,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -143,16 +144,9 @@ function RootComponent() {
           <main>
             <Outlet />
           </main>
-          <footer className="mt-24 border-t border-border">
-            <div className="mx-auto flex max-w-[1400px] flex-col gap-2 px-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
-              <span>
-                Demandquake surfaces evidence, not guarantees. Problems found online do not prove customer demand — validate before building.
-              </span>
-              <span className="font-mono">Research powered by Context.dev</span>
-            </div>
-          </footer>
+          <AppFooter />
         </div>
-        <Toaster theme="dark" position="bottom-right" />
+        <Toaster theme="light" position="bottom-right" />
       </TooltipProvider>
     </QueryClientProvider>
   );
