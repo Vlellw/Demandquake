@@ -2,6 +2,7 @@
 import { publicDb } from "./public-db.server";
 import type {
   ClusterDTO,
+  QuakeFeedItemDTO,
   RadarNodeDTO,
   RunDTO,
   RunDetailDTO,
@@ -11,6 +12,7 @@ import type {
   StartupDetailDTO,
 } from "./dto";
 import type { Assessment, Brand, Competitor, Signal, SourceRecord } from "./types";
+import { pickQuakeFeed } from "./research-utils";
 
 const SOURCE_COLS =
   "id, url, domain, title, snippet, highlights, publisher, published_at, retrieved_at, origin, article_type, search_intent, search_query, relevance, signal_type, scan_id";
@@ -336,4 +338,31 @@ export async function startupScans(slug: string): Promise<{ startupId: string; s
     .limit(20);
   if (scanErr) throw scanErr;
   return { startupId: st.id, slug: st.slug, scans: ((data ?? []) as unknown as Record<string, unknown>[]).map(toScanSummary) };
+}
+
+export async function recentQuakes(limit = 6): Promise<QuakeFeedItemDTO[]> {
+  const db = publicDb();
+  const { data, error } = await db
+    .from("market_scans")
+    .select(
+      "id, status, verdict, headline, summary, candidates_count, changes, created_at, completed_at, startup:startups!market_scans_startup_id_fkey(slug, name, industry, brand)",
+    )
+    .eq("status", "complete")
+    .order("completed_at", { ascending: false })
+    .limit(30);
+  if (error) throw error;
+  const items = ((data ?? []) as unknown as Record<string, unknown>[]).flatMap((r) => {
+    const st = r["startup"] as { slug: string; name: string; industry: string | null; brand: Brand | null } | null;
+    if (!st) return [];
+    return [
+      {
+        ...toScanSummary(r),
+        startup: { slug: st.slug, name: st.name, industry: st.industry, brand: st.brand ?? { hue: 40, glyph: "orbit", motto: "" } },
+      } satisfies QuakeFeedItemDTO,
+    ];
+  });
+  // One entry per startup keeps the feed varied.
+  const seen = new Set<string>();
+  const unique = pickQuakeFeed(items, items.length).filter((i) => (seen.has(i.startup.slug) ? false : (seen.add(i.startup.slug), true)));
+  return unique.slice(0, limit);
 }

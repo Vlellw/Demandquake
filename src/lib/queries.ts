@@ -10,6 +10,7 @@ import {
   getClusterSignals,
   getCompetitorBrands,
   getStartupScans,
+  getRecentQuakes,
 } from "./research.functions";
 import { getProject, listMyProjects } from "./projects.functions";
 
@@ -35,6 +36,12 @@ export const recentRunsQuery = queryOptions({
   queryKey: ["runs", "recent"],
   queryFn: () => getRecentRuns(),
   staleTime: 15_000,
+});
+
+export const recentQuakesQuery = queryOptions({
+  queryKey: ["quakes", "recent"],
+  queryFn: () => getRecentQuakes(),
+  staleTime: 30_000,
 });
 
 export const runDetailQuery = (runId: string) =>

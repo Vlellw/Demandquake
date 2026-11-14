@@ -15,6 +15,7 @@
 - [x] Competitor logos, colors and company profiles via Context.dev brand data (domain + verified name matches)
 - [x] Brand data pre-loaded for all 15 startups
 - [x] Workspace market watch: scans run in place, re-check automatically once a week on visit, and auto-log into founder activity
+- [x] Discovery page "Opportunity quakes" feed: recent market scans drawn as seismograph traces (one spike per change, colored by implication)
 
 ## In progress
 

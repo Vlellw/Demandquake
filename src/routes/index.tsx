@@ -7,7 +7,8 @@ import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
 import { StartupCard } from "@/components/discovery/StartupCard";
 import { DiscoveryFilters, EMPTY_FILTERS, type FilterState } from "@/components/discovery/DiscoveryFilters";
 import { RecentRuns } from "@/components/discovery/RecentRuns";
-import { radarQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
+import { QuakeFeed } from "@/components/discovery/QuakeFeed";
+import { radarQuery, recentQuakesQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
 import { matchesFreshness } from "@/lib/research-utils";
 
 export const Route = createFileRoute("/")({
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData(radarQuery),
       context.queryClient.ensureQueryData(statsQuery),
       context.queryClient.ensureQueryData(recentRunsQuery),
+      context.queryClient.ensureQueryData(recentQuakesQuery),
     ]),
   component: DiscoverPage,
 });
@@ -43,6 +45,7 @@ function DiscoverPage() {
   const { data: nodes } = useSuspenseQuery(radarQuery);
   const { data: stats } = useSuspenseQuery(statsQuery);
   const { data: runs } = useSuspenseQuery(recentRunsQuery);
+  const { data: quakes } = useSuspenseQuery(recentQuakesQuery);
   const [filters, setFilters] = useState<FilterState>(EMPTY_FILTERS);
 
   const filteredCards = useMemo(
@@ -78,6 +81,8 @@ function DiscoverPage() {
         </div>
 
         <OpportunityRadar nodes={filteredNodes} />
+
+        <QuakeFeed items={quakes} />
 
         <section>
           <div className="mb-5 flex flex-wrap items-end justify-between gap-3">

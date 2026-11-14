@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { safeRedirect } from "@/lib/safe-redirect";
 import { marketCheckDue, nextAssumptionStatus, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
-import { computeEvidenceStrength, freshnessOf, matchesFreshness, normalizeUrl, stripRefLabels, cleanRefLabels, replaceBrandName, brandMatchesCompetitor, sameNameCandidates } from "@/lib/research-utils";
+import { pickQuakeFeed, computeEvidenceStrength, freshnessOf, matchesFreshness, normalizeUrl, stripRefLabels, cleanRefLabels, replaceBrandName, brandMatchesCompetitor, sameNameCandidates } from "@/lib/research-utils";
 import { buildProjectFromStartup, type StartupForClaim } from "@/lib/claim";
 
 describe("post sign-in redirect", () => {
@@ -177,5 +177,26 @@ describe("workspaces re-check the market weekly", () => {
   it("uses the research date when the startup was never scanned", () => {
     expect(marketCheckDue({ lastScanAt: null, researchAt: "2026-11-10T00:00:00Z", now })).toBe(false);
     expect(marketCheckDue({ lastScanAt: null, researchAt: "2026-11-01T00:00:00Z", now })).toBe(true);
+  });
+});
+
+describe("home market-shift feed", () => {
+  const scan = (id: string, verdict: string, changes: number, at: string) => ({
+    id,
+    verdict,
+    changes: Array.from({ length: changes }, () => ({})),
+    completed_at: at,
+    created_at: at,
+  });
+  it("puts scans that changed an assessment before newer no-change scans", () => {
+    const feed = pickQuakeFeed(
+      [scan("a", "unchanged", 0, "2026-11-14T10:00:00Z"), scan("b", "mixed", 3, "2026-11-12T10:00:00Z"), scan("c", "strengthened", 1, "2026-11-13T10:00:00Z")],
+      3,
+    );
+    expect(feed.map((s) => s.id)).toEqual(["c", "b", "a"]);
+  });
+  it("respects the limit", () => {
+    const feed = pickQuakeFeed([scan("a", "mixed", 1, "2026-11-14T10:00:00Z"), scan("b", "weakened", 2, "2026-11-13T10:00:00Z")], 1);
+    expect(feed.map((s) => s.id)).toEqual(["a"]);
   });
 });

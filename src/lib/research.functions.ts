@@ -149,3 +149,8 @@ export const getStartupScans = createServerFn({ method: "GET" })
     const { startupScans } = await import("./catalog.server");
     return startupScans(data.slug);
   });
+
+export const getRecentQuakes = createServerFn({ method: "GET" }).handler(async () => {
+  const { recentQuakes } = await import("./catalog.server");
+  return recentQuakes(6);
+});

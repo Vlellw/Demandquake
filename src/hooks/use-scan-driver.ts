@@ -47,6 +47,7 @@ export function useScanDriver(scanId: string, slug: string, status: string | und
       if (!cancelled) {
         queryClient.invalidateQueries({ queryKey: ["startup", slug] });
         queryClient.invalidateQueries({ queryKey: ["startups"] });
+        queryClient.invalidateQueries({ queryKey: ["quakes"] });
       }
     })();
 

@@ -149,3 +149,17 @@ export function sameNameCandidates<C extends { domain: string; name: string }>(c
 export function brandNameKey(name: string, industry: string | null): string {
   return `${name.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim()}|${(industry ?? "").toLowerCase()}`;
 }
+
+/**
+ * Home-page market-shift feed: scans that changed an assessment come first (newest first),
+ * then "no material change" scans fill remaining slots so the feed never looks empty.
+ */
+export function pickQuakeFeed<T extends { verdict: string | null; changes: unknown[]; completed_at: string | null; created_at: string }>(
+  scans: T[],
+  limit: number,
+): T[] {
+  const at = (s: T) => new Date(s.completed_at ?? s.created_at).getTime();
+  const material = (s: T) => s.verdict !== "unchanged" && s.verdict !== null && s.changes.length > 0;
+  const sorted = [...scans].sort((a, b) => at(b) - at(a));
+  return [...sorted.filter(material), ...sorted.filter((s) => !material(s))].slice(0, limit);
+}
