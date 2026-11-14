@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Sweep all journey navigation: home/method/auth/reset/credits/history/admin/settings/invites/lists remain neutral; research is Search, startup/scan is Inspect, individual workspace is Claim. Removed misleading header Claim link to My startups; 42 navigation tests and signed-in flow verified. No settled records or permissions changed.
 - [x] Keep My startups neutral; only an individual founder workspace belongs to Claim & build. Browser and rule test verified.
 - [x] Keep How it works and other non-journey pages neutral in the step navigation; browser verified.
 - [x] Remove hidden-results blocking, duplicate identity reads, immediate data refetches and oversized workspace lists; fix Back-button hydration redraw. Signed-in search/catalog/inspection/workspace verified, 81 tests passed. Visitor speed samples are insufficient to quantify gains.

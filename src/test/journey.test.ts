@@ -40,6 +40,12 @@ describe("journey steps", () => {
     expect(journeyStepForPath("/workspace/")).toBeNull();
     expect(journeyStepForPath("/workspace/founder-project")).toBe(3);
   });
+  it.each(["/", "/method", "/auth", "/reset-password", "/credits", "/credits/history", "/credits/admin", "/settings", "/invite/example", "/workspace", "/workspace/"])("leaves non-journey page %s neutral", (path) => {
+    expect(journeyStepForPath(path)).toBeNull();
+  });
+  it.each([["/discover", 1], ["/research/example", 1], ["/startup/example", 2], ["/startup/example/quake/scan", 2], ["/workspace/example", 3]] as const)("marks journey page %s as step %i", (path, step) => {
+    expect(journeyStepForPath(path)).toBe(step);
+  });
   it("merges search and idea selection before inspection and claiming", () => {
     expect(JOURNEY_STEPS.map(s => [s.n, s.key])).toEqual([[1, "search"], [2, "inspect"], [3, "claim"]]);
   });
