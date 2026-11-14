@@ -37,6 +37,10 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Keep My startups neutral; only an individual founder workspace belongs to Claim & build. Browser and rule test verified.
+- [x] Keep How it works and other non-journey pages neutral in the step navigation; browser verified.
+- [x] Remove hidden-results blocking, duplicate identity reads, immediate data refetches and oversized workspace lists; fix Back-button hydration redraw. Signed-in search/catalog/inspection/workspace verified, 81 tests passed. Visitor speed samples are insufficient to quantify gains.
+- [x] Restore startup background pictures on My startups; all seven image requests returned successfully and phone layout verified.
 - [x] Add account Settings in the menu with email/password changes and email-verified self-deletion; navigation, validation and confirmation verified, three deletion safety tests passed.
 - [ ] End-to-end account mutation checks require a disposable account; no real email, password or account was changed. Deletion also requires the sign-in email to include its OTP code; template delivery is unverified.
 - [x] Remove menu research shortcut, rename browse to Search startups, and remove two highlighted sign-in descriptions.
@@ -44,7 +48,7 @@
 - [x] Remove optional search-focus controls; center and enlarge the query and example choices; example selection and phone width verified.
 - [x] Compact evidence map with scroll pan and zoom controls; real startup and phone verified.
 - [x] Fix workspace pitch content overlapping its controls and add Recommended actions headline.
-- [ ] Verify workspace pitch visually: requested workspace stays on Loading signal in the available preview session.
+- [x] Verify workspace pitch visually: signed-in workspace opens and pitch content no longer overlaps its controls.
 - [x] Remove the source-card grid only beneath Step 2 Evidence; preserve map source access elsewhere.
 - [x] Add a contextual Back button using the browser's page-opening history without storing private browsing records; return navigation verified.
 - [x] Remove the highlighted Assessment at a glance block from startup inspection.

@@ -7,6 +7,7 @@ import {
   industryChoices,
   inspectionProgress,
   journeyStatuses,
+  journeyStepForPath,
   markVisited,
   nextInspection,
   normalizeOverview,
@@ -30,6 +31,15 @@ const card = (over: Partial<{ id: string; industry: string | null; geography: st
 });
 
 describe("journey steps", () => {
+  it("keeps How it works outside step 1", () => {
+    expect(journeyStepForPath("/method")).toBeNull();
+    expect(journeyStepForPath("/discover")).toBe(1);
+  });
+  it("keeps My startups outside Claim while an individual workspace is step 3", () => {
+    expect(journeyStepForPath("/workspace")).toBeNull();
+    expect(journeyStepForPath("/workspace/")).toBeNull();
+    expect(journeyStepForPath("/workspace/founder-project")).toBe(3);
+  });
   it("merges search and idea selection before inspection and claiming", () => {
     expect(JOURNEY_STEPS.map(s => [s.n, s.key])).toEqual([[1, "search"], [2, "inspect"], [3, "claim"]]);
   });

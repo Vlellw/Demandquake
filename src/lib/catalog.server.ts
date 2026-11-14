@@ -196,13 +196,14 @@ export async function clusterSignals(db: ResearchDb, clusterId: string): Promise
 }
 
 export async function dashboardStats(db: ResearchDb) {
-  const [startups, sources, runs, latest] = await Promise.all([
+  const [startups, sources, runs, latest, domainsResult] = await Promise.all([
     db.from("startups").select("id", { count: "exact", head: true }),
     db.from("sources").select("id", { count: "exact", head: true }),
     db.from("discovery_runs").select("id", { count: "exact", head: true }).eq("status", "complete"),
     db.from("sources").select("retrieved_at").order("retrieved_at", { ascending: false }).limit(1),
+    db.from("sources").select("domain").limit(2000),
   ]);
-  const { data: domainsRows } = await db.from("sources").select("domain").limit(2000);
+  const domainsRows = domainsResult.data;
   return {
     startups: startups.count ?? 0,
     sources: sources.count ?? 0,

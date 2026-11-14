@@ -172,6 +172,21 @@ export interface ScanDetailDTO {
   sources: SourceRecord[];
 }
 
+export interface ProjectSummaryDTO {
+  id: string;
+  startup_id: string | null;
+  name: string;
+  tagline: string | null;
+  brand: Brand;
+  updated_at: string;
+  is_owner: boolean;
+  owner_name: string | null;
+  member_count: number;
+  banner_image_url: string | null;
+  research: Pick<ProjectResearch, "startup_slug" | "industry" | "geography">;
+  progress: { checks: number; checksDone: number; assumptions: number; tested: number };
+}
+
 export interface ProjectDTO {
   id: string;
   startup_id: string | null;

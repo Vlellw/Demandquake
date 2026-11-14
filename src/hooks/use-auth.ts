@@ -9,9 +9,10 @@ export function useAuthUser() {
 
   useEffect(() => {
     let active = true;
-    supabase.auth.getUser().then(({ data }) => {
+    // UI identity comes from the local session; route guards and server middleware still verify access.
+    supabase.auth.getSession().then(({ data }) => {
       if (!active) return;
-      setUser(data.user ?? null);
+      setUser(data.session?.user ?? null);
       setReady(true);
     });
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {

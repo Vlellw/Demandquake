@@ -4,11 +4,12 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
 import { ArrowRight, Briefcase, CheckCircle2, FlaskConical, Radar } from "lucide-react";
 import { myProjectsQuery } from "@/lib/queries";
-import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
+import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
+import { useStartupBanner } from "@/hooks/use-startup-banner";
+import type { ProjectSummaryDTO } from "@/lib/dto";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/common/SectionHeading";
 
-import { projectProgress } from "@/lib/project-progress";
 
 export const Route = createFileRoute("/_authenticated/workspace/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(myProjectsQuery),
@@ -72,7 +73,7 @@ function WorkspaceList() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
             {projects.map((p, i) => {
-              const pr = projectProgress(p);
+              const pr = p.progress;
               return (
                 <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                   <Link
@@ -81,12 +82,12 @@ function WorkspaceList() {
                     style={brandStyle(p.brand)}
                     className="group flex h-full flex-col overflow-hidden rounded-[4px] bg-card shadow-panel transition-shadow duration-300 hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <div className="brand-banner relative flex h-24 items-end justify-between p-4">
+                    <WorkspaceBanner project={p}>
                       <StartupMark brand={p.brand} />
                       <span className="rounded-[3px] bg-surface px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground">
                         {p.is_owner ? (p.member_count > 0 ? `You + ${p.member_count} co-founder${p.member_count === 1 ? "" : "s"}` : "Owner") : `Shared by ${p.owner_name ?? "the founder"}`}
                       </span>
-                    </div>
+                    </WorkspaceBanner>
                     <div className="flex flex-1 flex-col p-5">
                       <h2 className="font-display text-xl font-bold text-foreground group-hover:text-primary">{p.name}</h2>
                       <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.tagline}</p>
@@ -115,6 +116,16 @@ function WorkspaceList() {
 }
 
 const EMPTY_STEPS = ["Browse the startups on the home page.", "Open one that interests you and read its sources.", "Press “Claim this startup” to add it here."];
+
+function WorkspaceBanner({ project, children }: { project: ProjectSummaryDTO; children: React.ReactNode }) {
+  if (!project.startup_id) return <div className="brand-banner relative flex h-24 items-end justify-between p-4">{children}</div>;
+  return <StartupWorkspaceBanner project={project} startupId={project.startup_id}>{children}</StartupWorkspaceBanner>;
+}
+
+function StartupWorkspaceBanner({ project, startupId, children }: { project: ProjectSummaryDTO; startupId: string; children: React.ReactNode }) {
+  const banner = useStartupBanner({ id: startupId, banner_image_url: project.banner_image_url });
+  return <div className="brand-banner relative flex h-24 items-end justify-between p-4" style={bannerBackground(project.brand, banner)}>{children}</div>;
+}
 
 function ProgressRow({ icon, label, done, total }: { icon: React.ReactNode; label: string; done: number; total: number }) {
   return (

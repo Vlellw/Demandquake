@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
-import type { InvitePreviewDTO, ProjectDTO, ProjectInviteDTO, ProjectTeamDTO } from "./dto";
+import type { InvitePreviewDTO, ProjectDTO, ProjectSummaryDTO, ProjectInviteDTO, ProjectTeamDTO } from "./dto";
 import { buildProjectFromStartup, type StartupForClaim } from "./claim";
 
 const uuid = z.string().uuid();
@@ -78,10 +78,21 @@ export const listMyProjects = createServerFn({ method: "GET" })
     // RLS returns projects the caller owns or was invited to.
     const { data, error } = await context.supabase
       .from("projects")
-      .select(PROJECT_COLS)
+      .select("id, startup_id, name, tagline, brand, updated_at, user_id, owner_name, checklist, assumptions, startup_slug:research->>startup_slug, industry:research->>industry, geography:research->>geography, project_members(count), startup:startups!projects_startup_id_fkey(banner_image_url)")
       .order("updated_at", { ascending: false });
     if (error) throw error;
-    return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => toProject(r, context.userId));
+    return ((data ?? []) as unknown as Record<string, unknown>[]).map((r): ProjectSummaryDTO => {
+      const p = toProject(r, context.userId);
+      const startup = r["startup"] as { banner_image_url: string | null } | null;
+      return {
+        id: p.id, startup_id: p.startup_id, name: p.name, tagline: p.tagline,
+        brand: p.brand, updated_at: p.updated_at, is_owner: p.is_owner,
+        owner_name: p.owner_name, member_count: p.member_count,
+        banner_image_url: startup?.banner_image_url ?? null,
+        research: { ...(typeof r["startup_slug"] === "string" ? { startup_slug: r["startup_slug"] } : {}), industry: r["industry"] as string | null, geography: r["geography"] as string | null },
+        progress: { checks: p.checklist.length, checksDone: p.checklist.filter(c => c.done).length, assumptions: p.assumptions.length, tested: p.assumptions.filter(a => a.status !== "untested").length },
+      };
+    });
   });
 
 export const getProject = createServerFn({ method: "GET" })

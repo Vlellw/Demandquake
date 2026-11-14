@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
 import { SiteSearch } from "@/components/layout/SiteSearch";
 import { JourneySteps } from "@/components/journey/JourneySteps";
+import { journeyStepForPath } from "@/lib/journey";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -18,8 +19,10 @@ export function AppHeader() {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [searchOpen, setSearchOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    setHydrated(true);
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -47,7 +50,7 @@ export function AppHeader() {
 
           <div id="header-journey" className="order-last w-full min-w-0 [&:has(>nav)>div]:hidden md:order-none md:ml-auto md:w-auto md:flex-1">
             <div>
-              <JourneySteps inline current={pathname === "/" ? null : pathname.startsWith("/workspace") ? 3 : pathname.startsWith("/startup") ? 2 : 1}
+              <JourneySteps inline current={journeyStepForPath(pathname)}
                 renderStep={(n, content, cls) => n === 1 ? (
                   <Link to="/discover" search={{ research: true }} className={cls}>{content}</Link>
                 ) : n === 3 ? (
@@ -57,7 +60,7 @@ export function AppHeader() {
             </div>
           </div>
           <div className="ml-auto flex items-center gap-1 md:ml-4">
-            {canGoBack && pathname !== "/" && (
+            {hydrated && canGoBack && pathname !== "/" && (
               <Button variant="ghost" size="icon" onClick={() => router.history.back()} aria-label="Back" title="Back">
                 <ArrowLeft className="size-5" />
               </Button>

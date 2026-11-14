@@ -48,6 +48,7 @@ export const runDetailQuery = (runId: string) =>
   queryOptions({
     queryKey: ["run", runId],
     queryFn: () => getRunDetail({ data: { runId } }),
+    staleTime: 2000,
   });
 
 export const startupDetailQuery = (slug: string) =>
@@ -61,6 +62,7 @@ export const scanDetailQuery = (scanId: string) =>
   queryOptions({
     queryKey: ["scan", scanId],
     queryFn: () => getScanDetail({ data: { scanId } }),
+    staleTime: 2000,
   });
 
 export const clusterSignalsQuery = (clusterId: string) =>
@@ -73,18 +75,21 @@ export const clusterSignalsQuery = (clusterId: string) =>
 export const myProjectsQuery = queryOptions({
   queryKey: ["projects"],
   queryFn: () => listMyProjects(),
+  staleTime: 15_000,
 });
 
 export const projectQuery = (projectId: string) =>
   queryOptions({
     queryKey: ["project", projectId],
     queryFn: () => getProject({ data: { projectId } }),
+    staleTime: 10_000,
   });
 
 export const projectTeamQuery = (projectId: string) =>
   queryOptions({
     queryKey: ["project-team", projectId],
     queryFn: () => getProjectTeam({ data: { projectId } }),
+    staleTime: 10_000,
   });
 
 export const invitePreviewQuery = (token: string) =>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { ArrowRight, ChevronDown, ChevronUp, Compass, History, Map as MapIcon, Waves } from "lucide-react";
@@ -115,7 +115,7 @@ function MarketOverview({ filters, panel }: { filters: CatalogFilters; panel: Ov
         title="Look at the whole market"
         description="The map follows your filters. Bigger dots have more sources behind them. Click one to read the posts behind it."
       />
-      <div className="mt-8"><MapPanel filters={filters} /></div>
+      <div className="mt-8"><Suspense fallback={<div role="status" className="py-12 text-muted-foreground">Loading market map…</div>}><MapPanel filters={filters} /></Suspense></div>
     </section>
   );
 }

@@ -1,19 +1,17 @@
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { radarQuery, recentQuakesQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
-import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, isSearchDone, normalizeOverview, normalizeView } from "@/lib/journey";
+import { DISCOVER_DEFAULTS, discoverSearchSchema, isSearchDone } from "@/lib/journey";
 import { JourneySteps } from "@/components/journey/JourneySteps";
-import { GuidedDiscover } from "@/components/journey/GuidedDiscover";
-import { CatalogView } from "@/components/journey/CatalogView";
 import { ResearchStep } from "@/components/journey/ResearchStep";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+
+const MarketResults = lazy(() => import("@/components/journey/MarketResults").then(m => ({ default: m.MarketResults })));
 
 export const Route = createFileRoute("/_authenticated/discover")({
   validateSearch: zodValidator(discoverSearchSchema),
+  loaderDeps: ({ search }) => ({ view: search.view }),
   search: { middlewares: [stripSearchParams(DISCOVER_DEFAULTS)] },
-  loaderDeps: ({ search }) => ({ view: normalizeView(search.view) }),
   head: () => ({
     meta: [
       { title: "Discover evidence-backed startups — Demandquake" },
@@ -31,33 +29,16 @@ export const Route = createFileRoute("/_authenticated/discover")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  loader: ({ context, deps }) =>
-    Promise.all([
-      context.queryClient.ensureQueryData(startupCardsQuery),
-      context.queryClient.ensureQueryData(statsQuery),
-      // Market tools only appear in the full catalog, so the guided view doesn't wait for them.
-      ...(deps.view === "all"
-        ? [
-            context.queryClient.ensureQueryData(radarQuery),
-            context.queryClient.ensureQueryData(recentRunsQuery),
-            context.queryClient.ensureQueryData(recentQuakesQuery),
-          ]
-        : []),
-    ]),
   component: DiscoverPage,
 });
 
 function DiscoverPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/discover" });
-  const { data: cards } = useSuspenseQuery(startupCardsQuery);
-  const { data: stats } = useSuspenseQuery(statsQuery);
   // Ideas remain hidden until a search has completed on this browser.
   const [marketOpen, setMarketOpen] = useState(false);
   useEffect(() => setMarketOpen(isSearchDone()), []);
 
-  const view = normalizeView(search.view);
-  const effectiveView = marketOpen ? view : "guided";
 
   // "Research a market" buttons jump back up to Step 1 instead of opening a pop-up.
   const [focusKey, setFocusKey] = useState(0);
@@ -89,24 +70,9 @@ function DiscoverPage() {
         rerun={search.rerun}
         focusKey={focusKey}
       />
-      {marketOpen && (effectiveView === "guided" ? (
-        // The market section appears only after the first search completes.
-        marketOpen ? (
-          <GuidedDiscover cards={cards} stats={stats} industry={search.industry} onResearch={goToSearch} />
-        ) : null
-      ) : (
-        <CatalogView
-          cards={cards}
-          filters={{
-            industry: search.industry === FOR_YOU ? "all" : search.industry,
-            region: search.region,
-            model: search.model,
-            fresh: search.fresh,
-          }}
-          panel={normalizeOverview(search.overview)}
-          onResearch={goToSearch}
-        />
-      ))}
+      {marketOpen && <Suspense fallback={<div role="status" className="mx-auto max-w-[1400px] px-6 py-12 text-muted-foreground">Loading startups…</div>}>
+        <MarketResults search={search} onResearch={goToSearch} />
+      </Suspense>}
     </div>
   );
 }

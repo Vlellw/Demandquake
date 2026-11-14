@@ -13,6 +13,14 @@ export const JOURNEY_STEPS = [
 export type JourneyStepNumber = (typeof JOURNEY_STEPS)[number]["n"];
 export type JourneyStatus = "done" | "current" | "upcoming";
 
+/** Informational and account pages are outside the founder journey. */
+export function journeyStepForPath(pathname: string): JourneyStepNumber | null {
+  if (pathname === "/discover" || pathname.startsWith("/research/")) return 1;
+  if (pathname.startsWith("/startup/")) return 2;
+  if (/^\/workspace\/[^/]+\/?$/.test(pathname)) return 3;
+  return null;
+}
+
 /** Step states for the tracker: steps before `current` are done; `complete` marks every step done. */
 export function journeyStatuses(current: JourneyStepNumber | null, complete = false): JourneyStatus[] {
   if (current === null) return JOURNEY_STEPS.map(() => "upcoming");
