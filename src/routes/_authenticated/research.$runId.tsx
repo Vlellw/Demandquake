@@ -218,44 +218,6 @@ function ResearchPage() {
               </motion.section>
             )}
 
-            {/* Plan */}
-            {run.plan.searches && run.plan.searches.length > 0 && (
-              <section className="panel p-5">
-                <div className="flex items-center justify-between">
-                  <InferredTag label="AI planned" />
-                </div>
-                <div className="mt-4 grid gap-2 md:grid-cols-2">
-                  {run.plan.searches.map((q, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3"
-                    >
-                      <Search className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <div className="min-w-0">
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                          {intentLabel(q.intent)} · {run.stats.by_intent?.[q.intent] != null ? `${run.stats.by_intent[q.intent]} sources` : idx > 1 ? "0 sources" : "queued"}
-                        </p>
-                        <p className="mt-0.5 text-sm text-foreground/90">{q.query}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                  {run.plan.news_query && (
-                    <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3 md:col-span-2">
-                      <Sparkles className="mt-0.5 size-4 shrink-0 text-observed" />
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                          News search · {run.stats.news != null ? `${run.stats.news} articles` : "queued"}
-                        </p>
-                        <p className="mt-0.5 text-sm text-foreground/90">{run.plan.news_query}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </section>
-            )}
 
             {/* Constellation */}
             {detail.clusters.length > 0 && (
@@ -329,6 +291,45 @@ function ResearchPage() {
                 )}
               </div>
             </section>
+
+            {/* Plan */}
+            {run.plan.searches && run.plan.searches.length > 0 && (
+              <section className="panel p-5">
+                <div className="flex items-center justify-between">
+                  <InferredTag label="AI planned" />
+                </div>
+                <div className="mt-4 grid gap-2 md:grid-cols-2">
+                  {run.plan.searches.map((q, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.08 }}
+                      className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3"
+                    >
+                      <Search className="mt-0.5 size-4 shrink-0 text-primary" />
+                      <div className="min-w-0">
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                          {intentLabel(q.intent)} · {run.stats.by_intent?.[q.intent] != null ? `${run.stats.by_intent[q.intent]} sources` : idx > 1 ? "0 sources" : "queued"}
+                        </p>
+                        <p className="mt-0.5 text-sm text-foreground/90">{q.query}</p>
+                      </div>
+                    </motion.div>
+                  ))}
+                  {run.plan.news_query && (
+                    <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3 md:col-span-2">
+                      <Sparkles className="mt-0.5 size-4 shrink-0 text-observed" />
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                          News search · {run.stats.news != null ? `${run.stats.news} articles` : "queued"}
+                        </p>
+                        <p className="mt-0.5 text-sm text-foreground/90">{run.plan.news_query}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </div>
