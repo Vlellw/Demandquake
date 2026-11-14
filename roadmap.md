@@ -24,6 +24,7 @@
 - [x] Every page restyled (startup profile + tabs, research run, market scan, workspace list/detail, how it works, sign-in, reset password, invite, 404) and charts on the light theme; phone layouts and accessibility contrast checked
 
 ## Ready next
+- Credit monetization: secure per-user balances and ledger, configurable costs, 5-credit successful discovery searches, Stripe Checkout and verified webhooks, packages, purchase/history pages, admin management and a 1,000,000-credit admin grant. Waiting for Stripe setup confirmation, seller country, admin account identity and initial signup allocation.
 - Guided first visit: a short dismissible "how to read this page" tour on the first startup page a newcomer opens
 - Real photography: swap the generated start-page photos for licensed or team-supplied images
 - Server-side scheduled monitoring (needs background execution; scheduled callbacks end after a few seconds, so scans currently run while a founder visits)
