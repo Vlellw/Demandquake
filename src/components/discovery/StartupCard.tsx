@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 
 const levelBar: Record<Level, string> = {
   strong: "bg-positive h-full",
-  moderate: "bg-inferred h-2/3",
+  moderate: "bg-moderate h-2/3",
   weak: "bg-negative h-1/3",
   unknown: "border border-dashed border-uncertain/60 h-full bg-transparent",
 };
@@ -26,7 +26,7 @@ export function FreshnessBadge({ iso, prefix = "Researched" }: { iso: string; pr
       <span
         className={cn(
           "size-1.5 rounded-full",
-          bucket === "24h" ? "bg-positive" : bucket === "7d" ? "bg-inferred" : bucket === "30d" ? "bg-uncertain" : "bg-faint",
+          bucket === "24h" ? "bg-positive" : bucket === "7d" ? "bg-moderate" : bucket === "30d" ? "bg-uncertain" : "bg-faint",
         )}
       />
       {prefix} <TimeAgo iso={iso} />

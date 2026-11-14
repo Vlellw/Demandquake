@@ -199,9 +199,9 @@ export function EvidenceMap({
           minZoom={0.3}
           maxZoom={1.6}
           proOptions={{ hideAttribution: false }}
-          colorMode="dark"
+          colorMode="light"
         >
-          <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="oklch(1 0 0 / 0.08)" />
+          <Background variant={BackgroundVariant.Dots} gap={18} size={1} color="var(--border-strong)" />
           <Controls showInteractive={false} />
         </ReactFlow>
       )}

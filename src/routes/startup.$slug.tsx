@@ -6,19 +6,7 @@ import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-quer
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
 import { toast } from "sonner";
-import {
-  ArrowLeft,
-  CalendarClock,
-  FileSearch,
-  Flag,
-  Loader2,
-  MapPin,
-  Radar,
-  Rocket,
-  Swords,
-  Users,
-  Waves,
-} from "lucide-react";
+import { CalendarClock, Flag, Loader2, Radar, Rocket, Users } from "lucide-react";
 import { myProjectsQuery, startupDetailQuery } from "@/lib/queries";
 import { claimStartup } from "@/lib/projects.functions";
 import { startMarketScan } from "@/lib/research.functions";
@@ -38,11 +26,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthUser } from "@/hooks/use-auth";
-import { DIMENSION_META, industryColor } from "@/lib/taxonomy";
+import { DIMENSION_META } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/format";
 
 const TABS = ["overview", "evidence", "landscape", "assessment", "updates", "plan"] as const;
 type Tab = (typeof TABS)[number];
+
+const TAB_HINT: Record<Tab, string> = {
+  overview: "The problem, the proposed solution and who would buy it, in short.",
+  evidence: "Every post and article the idea is built on. Click a source to read the original.",
+  landscape: "Companies already working on this problem, and where they leave gaps.",
+  assessment: "How strong the opportunity looks on each dimension, with the reasoning and sources.",
+  updates: "What happened in the market since the research, and how it affects the idea.",
+  plan: "A first business plan and the steps to test it with real customers.",
+};
 
 interface StartupSearch {
   tab?: Tab | undefined;
@@ -78,10 +75,11 @@ export const Route = createFileRoute("/startup/$slug")({
   component: StartupPage,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
-      <p className="font-display text-2xl text-foreground">This startup isn’t in the catalog</p>
-      <p className="mt-2 text-sm text-muted-foreground">It may have been removed after a research refresh.</p>
+      <p className="eyebrow">Startup not found</p>
+      <h1 className="section-title mt-2 text-3xl">This startup isn’t in the catalog</h1>
+      <p className="mt-3 text-sm text-muted-foreground">It may have been removed after a research refresh.</p>
       <Button asChild variant="outline" className="mt-6">
-        <Link to="/">Explore opportunities</Link>
+        <Link to="/" hash="startups">Browse all startups</Link>
       </Button>
     </div>
   ),
@@ -185,117 +183,136 @@ function StartupPage() {
   return (
     <SourceProvider sources={orderedSources} citations={citations}>
       <div style={brandStyle(st.brand)}>
-        {/* HERO */}
-        <section className="relative overflow-hidden border-b border-border">
-          <div className="brand-surface pointer-events-none absolute inset-0 opacity-50" />
-          <div className="bg-grid pointer-events-none absolute inset-0 opacity-30" />
-          <div className="relative mx-auto grid max-w-[1400px] gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:py-12">
-            <div className="flex min-w-0 flex-col">
-              <Link to="/" className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-                <ArrowLeft className="size-4" /> All opportunities
+        {/* BREADCRUMB */}
+        <nav aria-label="Breadcrumb" className="border-b border-border bg-background">
+          <ol className="mx-auto flex max-w-[1400px] items-center gap-2 overflow-x-auto whitespace-nowrap px-4 py-3 text-xs sm:px-6">
+            <li>
+              <Link to="/" hash="startups" className="font-semibold text-foreground underline-offset-4 hover:underline">
+                Discover startups
               </Link>
-              <div className="mt-6 flex items-center gap-4">
-                <StartupMark brand={st.brand} size="xl" />
+            </li>
+            {st.industry && (
+              <>
+                <li aria-hidden="true" className="text-faint">/</li>
+                <li className="text-muted-foreground">{st.industry}</li>
+              </>
+            )}
+            <li aria-hidden="true" className="text-faint">/</li>
+            <li aria-current="page" className="font-semibold text-primary">
+              {st.name}
+            </li>
+          </ol>
+        </nav>
+
+        {/* HERO: brand-colored block with the pitch on the right */}
+        <section className="brand-banner relative overflow-hidden">
+          <div className="relative mx-auto grid max-w-[1400px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:py-14">
+            <div className="flex min-w-0 flex-col">
+              <p className="eyebrow text-current">
+                {[st.industry, st.geography].filter(Boolean).join(" · ") || "Startup idea"}
+              </p>
+              <div className="mt-4 flex items-center gap-4">
+                <StartupMark brand={st.brand} size="xl" className="border-transparent shadow-lift" />
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <Badge variant="inferred">Unclaimed · AI-generated concept</Badge>
-                    {st.claim_count > 0 && (
-                      <Badge variant="outline">
-                        <Users /> {st.claim_count} founder{st.claim_count === 1 ? "" : "s"} exploring
-                      </Badge>
-                    )}
-                  </div>
-                  <h1 className="mt-2 font-display text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">{st.name}</h1>
-                  {st.brand.motto && <p className="brand-text mt-1 font-mono text-xs uppercase tracking-[0.2em]">{st.brand.motto}</p>}
+                  <h1 className="font-display text-4xl font-bold leading-[1.02] tracking-[-0.02em] sm:text-6xl">{st.name}</h1>
+                  {st.brand.motto && <p className="mt-2 text-xs font-bold uppercase tracking-[0.12em] opacity-85">{st.brand.motto}</p>}
                 </div>
               </div>
-              <p className="mt-5 max-w-xl font-display text-xl leading-snug text-foreground/90">{st.tagline}</p>
+              <p className="mt-6 max-w-xl text-lg leading-snug opacity-95 sm:text-xl">{st.tagline}</p>
 
               <div className="mt-5 flex flex-wrap gap-2">
-                {st.industry && (
-                  <Badge variant="outline">
-                    <span className="size-1.5 rounded-full" style={{ background: industryColor(st.industry) }} /> {st.industry}
-                  </Badge>
-                )}
-                {st.geography && (
-                  <Badge variant="outline">
-                    <MapPin /> {st.geography}
-                  </Badge>
-                )}
+                <Badge variant="inferred">AI-drafted idea · unclaimed</Badge>
                 {st.business_model_type && <Badge variant="outline">{st.business_model_type}</Badge>}
+                {st.claim_count > 0 && (
+                  <Badge variant="outline">
+                    <Users /> {st.claim_count} founder{st.claim_count === 1 ? "" : "s"} building
+                  </Badge>
+                )}
               </div>
 
-              <div className="mt-6 grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border">
-                <Stat icon={<FileSearch className="size-3.5" />} label="Live sources" value={evidence.length} />
-                <Stat icon={<Swords className="size-3.5" />} label="Competitors" value={st.competitors.length} />
-                <Stat icon={<Waves className="size-3.5" />} label="Market scans" value={detail.scans.length} />
-              </div>
-
-              <div className="mt-6 flex flex-wrap items-center gap-3">
+              <div className="mt-8 flex flex-wrap items-center gap-3">
                 {user && existing ? (
-                  <Button asChild variant="hero" size="lg">
+                  <Button asChild size="lg" className="bg-background font-bold text-foreground hover:bg-accent">
                     <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
                       <Flag /> {existing.is_owner ? "Open your workspace" : "Open shared workspace"}
                     </Link>
                   </Button>
                 ) : (
-                  <Button variant="hero" size="lg" onClick={claim} disabled={claiming || !ready}>
+                  <Button size="lg" onClick={claim} disabled={claiming || !ready} className="bg-background font-bold text-foreground hover:bg-accent">
                     {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup
                   </Button>
                 )}
-                <Button variant="outline" size="lg" onClick={scan} disabled={scanning}>
-                  {scanning ? <Loader2 className="animate-spin" /> : <Radar />} Scan for market changes
+                <Button variant="glass" size="lg" onClick={scan} disabled={scanning}>
+                  {scanning ? <Loader2 className="animate-spin" /> : <Radar />} Check for market changes
                 </Button>
               </div>
-              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1">
-                <FreshnessBadge iso={st.research_at} />
-                {st.last_scanned_at && <FreshnessBadge iso={st.last_scanned_at} prefix="Last scanned" />}
-                {detail.run && (
-                  <Link to="/research/$runId" params={{ runId: detail.run.id }} className="font-mono text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-                    From research: “{detail.run.query}”
-                  </Link>
-                )}
-              </div>
+              <p className="mt-3 max-w-md text-xs leading-relaxed opacity-85">
+                {user && existing
+                  ? "You already work on this idea. Your notes and checklist are in the workspace."
+                  : "Claiming gives you a private workspace with a checklist and notes. The idea stays public, so others can claim it too."}
+              </p>
             </div>
 
             <div className="min-w-0">
-            <PitchPlayer
-              slides={st.pitch.slides}
-              ctx={{
-                name: st.name,
-                tagline: st.tagline,
-                brand: st.brand,
-                evidenceCount: evidence.length,
-                domains,
-                features: st.solution.features.map((f) => f.title),
-                customers: st.customers.map((c) => c.segment),
-                businessModel: st.business_model_type,
-              }}
-            />
+              <PitchPlayer
+                slides={st.pitch.slides}
+                ctx={{
+                  name: st.name,
+                  tagline: st.tagline,
+                  brand: st.brand,
+                  evidenceCount: evidence.length,
+                  domains,
+                  features: st.solution.features.map((f) => f.title),
+                  customers: st.customers.map((c) => c.segment),
+                  businessModel: st.business_model_type,
+                }}
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* KEY NUMBERS */}
+        <section aria-label="Key numbers" className="bg-surface-sunken">
+          <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
+            <dl className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-x-10">
+              <Stat label="Live sources" value={evidence.length} />
+              <Stat label="Competitors" value={st.competitors.length} />
+              <Stat label="Market scans" value={detail.scans.length} />
+              <Stat label="Founders building" value={st.claim_count} />
+            </dl>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-center">
+              <FreshnessBadge iso={st.research_at} />
+              {st.last_scanned_at && <FreshnessBadge iso={st.last_scanned_at} prefix="Last scanned" />}
+              {detail.run && (
+                <Link to="/research/$runId" params={{ runId: detail.run.id }} className="text-xs font-semibold text-primary underline-offset-4 hover:underline">
+                  Found by the research “{detail.run.query}”
+                </Link>
+              )}
             </div>
           </div>
         </section>
 
         {/* TABS */}
         <Tabs value={tab} onValueChange={(v) => navigate({ search: (prev) => ({ ...prev, tab: v === "overview" ? undefined : (v as Tab) }), replace: true, resetScroll: false })}>
-          <div className="sticky top-14 z-30 border-b border-border bg-background/80 backdrop-blur-xl">
+          <div className="sticky top-16 z-30 border-b border-border bg-background">
             <div className="mx-auto max-w-[1400px] overflow-x-auto px-4 sm:px-6">
-              <TabsList variant="line" className="h-12">
+              <TabsList variant="line" className="h-14">
                 <TabsTrigger variant="line" value="overview">Overview</TabsTrigger>
                 <TabsTrigger variant="line" value="evidence">
-                  Evidence <span className="ml-1 font-mono text-[10px] text-observed">{evidence.length}</span>
+                  Evidence <span className="ml-1.5 rounded-[3px] bg-observed px-1.5 text-[10px] font-bold leading-4 text-observed-foreground">{evidence.length}</span>
                 </TabsTrigger>
-                <TabsTrigger variant="line" value="landscape">Market landscape</TabsTrigger>
+                <TabsTrigger variant="line" value="landscape">Competitors</TabsTrigger>
                 <TabsTrigger variant="line" value="assessment">Assessment</TabsTrigger>
                 <TabsTrigger variant="line" value="updates">
-                  Live updates {latestScan && <span className="ml-1 size-1.5 rounded-full bg-primary" />}
+                  Market changes {latestScan && <span className="ml-1.5 size-1.5 rounded-full bg-primary" aria-hidden="true" />}
                 </TabsTrigger>
                 <TabsTrigger variant="line" value="plan">Business plan</TabsTrigger>
               </TabsList>
             </div>
           </div>
+          <p className="mx-auto max-w-[1400px] px-4 pt-6 text-sm text-muted-foreground sm:px-6">{TAB_HINT[tab]}</p>
 
-          <div className="mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
+          <div className="mx-auto max-w-[1400px] px-4 pb-8 pt-4 sm:px-6">
             <TabsContent value="overview" className="mt-0">
               <Overview detail={detail} onTab={(t) => navigate({ search: (p) => ({ ...p, tab: t }), resetScroll: false })} />
             </TabsContent>
@@ -357,31 +374,31 @@ function StartupPage() {
             </TabsContent>
 
             <TabsContent value="updates" className="mt-0 space-y-6">
-              <section className="panel-raised flex flex-wrap items-center gap-4 p-5">
-                <div className="flex size-11 items-center justify-center rounded-xl bg-primary/15 text-primary">
+              <section className="flex flex-wrap items-center gap-4 rounded-[4px] bg-primary p-6 text-primary-foreground">
+                <div className="grid size-12 place-items-center rounded-full border-2 border-primary-foreground">
                   <Radar className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-display text-lg font-semibold text-foreground">Opportunity Quake</p>
-                  <p className="text-sm text-muted-foreground">
-                    Re-search the live web for developments since the last research and see how they shift the assessment.
+                  <p className="font-display text-xl font-bold">Check for market changes</p>
+                  <p className="mt-1 text-sm text-primary-foreground/85">
+                    Searches the live web for news since the last check (about 30 seconds) and shows how each change affects the idea.
                   </p>
                 </div>
-                <Button variant="hero" onClick={scan} disabled={scanning}>
-                  {scanning ? <Loader2 className="animate-spin" /> : <Radar />} Scan for market changes
+                <Button variant="glass" onClick={scan} disabled={scanning}>
+                  {scanning ? <Loader2 className="animate-spin" /> : <Radar />} Run a market scan
                 </Button>
               </section>
               <section className="panel p-5">
                 <div className="flex items-center justify-between">
-                  <p className="eyebrow">Opportunity timeline</p>
-                  <span className="font-mono text-[11px] text-muted-foreground">Click a point to open its source</span>
+                  <p className="eyebrow">Market timeline</p>
+                  <span className="text-xs text-muted-foreground">Click a point to open its source</span>
                 </div>
                 <div className="mt-4">
                   <OpportunityTimeline events={st.timeline} scans={detail.scans.filter((s) => s.status === "complete")} />
                 </div>
               </section>
               <section className="panel p-5">
-                <p className="eyebrow">Scan history</p>
+                <p className="eyebrow">Past market scans</p>
                 {detail.scans.length === 0 ? (
                   <p className="mt-3 text-sm text-muted-foreground">No scans yet. Run the first one to check what changed since {formatDate(st.research_at)}.</p>
                 ) : (
@@ -404,7 +421,7 @@ function StartupPage() {
                     <p className="data-label">What scans watch for</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {st.monitor_queries.map((q) => (
-                        <span key={q} className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground">
+                        <span key={q} className="rounded-full border border-ink/30 px-3 py-1 text-xs text-foreground">
                           {q}
                         </span>
                       ))}
@@ -420,19 +437,29 @@ function StartupPage() {
           </div>
         </Tabs>
 
-        {/* CLAIM CTA */}
-        <section className="border-t border-border">
-          <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-6 px-4 py-10 sm:px-6">
-            <StartupMark brand={st.brand} size="lg" />
+        {/* CLAIM CTA: navy band */}
+        <section className="mt-12 bg-primary text-primary-foreground">
+          <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center">
+            <StartupMark brand={st.brand} size="lg" className="border-transparent" />
             <div className="min-w-0 flex-1">
-              <p className="font-display text-2xl font-semibold text-foreground">Build {st.name}.</p>
-              <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-                Claiming copies the concept, evidence, assumptions and validation checklist into your private workspace. Other founders can claim it too — the opportunity stays public.
+              <p className="eyebrow text-primary-foreground">Ready to build?</p>
+              <p className="mt-2 font-display text-3xl font-bold">Build {st.name}</p>
+              <p className="mt-2 max-w-2xl text-sm leading-relaxed text-primary-foreground/85">
+                Claiming copies the idea, its sources, the open assumptions and a validation checklist into your private
+                workspace. Other founders can claim it too, because the idea stays public.
               </p>
             </div>
-            <Button variant="hero" size="lg" onClick={claim} disabled={claiming || !ready}>
-              {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building
-            </Button>
+            {user && existing ? (
+              <Button asChild variant="glass" size="lg">
+                <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
+                  <Rocket /> {existing.is_owner ? "Open your workspace" : "Open shared workspace"}
+                </Link>
+              </Button>
+            ) : (
+              <Button variant="glass" size="lg" onClick={claim} disabled={claiming || !ready}>
+                {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building
+              </Button>
+            )}
           </div>
         </section>
       </div>
@@ -440,13 +467,11 @@ function StartupPage() {
   );
 }
 
-function Stat({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <div className="bg-surface/80 px-4 py-3">
-      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-        {icon} {label}
-      </p>
-      <p className="mt-1 font-display text-2xl font-semibold text-foreground">{value}</p>
+    <div className="stat-rule flex flex-col-reverse items-center pt-3 text-center">
+      <dt className="mt-1 text-sm text-primary">{label}</dt>
+      <dd className="font-display text-[2rem] font-bold leading-tight text-primary">{value}</dd>
     </div>
   );
 }

@@ -5,12 +5,14 @@ import { cn } from "@/lib/utils";
 const toneBg: Record<string, string> = {
   positive: "bg-positive",
   inferred: "bg-inferred",
+  moderate: "bg-moderate",
   negative: "bg-negative",
   uncertain: "bg-uncertain",
 };
 const toneText: Record<string, string> = {
   positive: "text-positive",
   inferred: "text-inferred",
+  moderate: "text-moderate",
   negative: "text-negative",
   uncertain: "text-uncertain",
 };

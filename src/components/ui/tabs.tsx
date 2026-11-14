@@ -10,7 +10,7 @@ const tabsListVariants = cva("inline-flex items-center text-muted-foreground", {
   variants: {
     variant: {
       default: "h-9 justify-center rounded-lg bg-muted p-1",
-      line: "h-11 gap-1 bg-transparent",
+      line: "h-12 gap-6 bg-transparent",
     },
   },
   defaultVariants: { variant: "default" },
@@ -23,7 +23,7 @@ const tabsTriggerVariants = cva(
       variant: {
         default:
           "rounded-md px-3 py-1 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow",
-        line: "relative h-full px-3 hover:text-foreground data-[state=active]:text-foreground after:absolute after:inset-x-2 after:bottom-0 after:h-0.5 after:rounded-full after:bg-transparent data-[state=active]:after:bg-primary",
+        line: "relative h-full px-0 font-bold text-foreground hover:text-primary data-[state=active]:text-primary after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:bg-transparent hover:after:bg-primary/30 data-[state=active]:after:bg-primary",
       },
     },
     defaultVariants: { variant: "default" },

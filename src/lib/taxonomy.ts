@@ -58,7 +58,7 @@ export function industryColor(industry: string | null | undefined): string {
 
 export const LEVEL_META: Record<Level, { label: string; rank: number; tone: string }> = {
   strong: { label: "Strong", rank: 3, tone: "positive" },
-  moderate: { label: "Moderate", rank: 2, tone: "inferred" },
+  moderate: { label: "Moderate", rank: 2, tone: "moderate" },
   weak: { label: "Weak", rank: 1, tone: "negative" },
   unknown: { label: "Unvalidated", rank: 0, tone: "uncertain" },
 };

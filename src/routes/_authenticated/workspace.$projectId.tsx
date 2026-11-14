@@ -718,7 +718,7 @@ function ActivityLog({ project: p, update, author }: { project: ProjectDTO; upda
             <span
               className={cn(
                 "absolute -left-[21px] top-1.5 size-2 rounded-full",
-                u.kind === "claimed" ? "bg-primary" : u.kind === "scan" ? "bg-observed" : u.kind === "member" ? "bg-positive" : "bg-inferred",
+                u.kind === "claimed" ? "bg-primary" : u.kind === "scan" ? "bg-observed" : u.kind === "member" ? "bg-positive" : "bg-moderate",
               )}
             />
             <p className="font-mono text-[10px] text-muted-foreground">

@@ -159,8 +159,8 @@ function ResearchPage() {
         </header>
 
         {waitSecs > 0 && !isDone && !isFailed && (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex items-center gap-3 rounded-xl border border-inferred/30 bg-inferred/[0.07] px-4 py-3 text-sm text-foreground/90">
-            <Hourglass className="size-4 text-inferred" />
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex items-center gap-3 rounded-[4px] border border-moderate/40 bg-moderate/[0.08] px-4 py-3 text-sm text-foreground">
+            <Hourglass className="size-4 text-moderate" />
             Queued behind the Context.dev request limit to protect live research — resuming in about {waitSecs}s.
           </motion.div>
         )}

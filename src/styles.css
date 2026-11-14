@@ -75,6 +75,7 @@
   --color-positive: var(--positive);
   --color-negative: var(--negative);
   --color-uncertain: var(--uncertain);
+  --color-moderate: var(--moderate);
   --color-google: var(--google);
   --color-google-foreground: var(--google-foreground);
   --color-google-border: var(--google-border);
@@ -167,6 +168,8 @@
   --positive: oklch(0.52 0.14 129);
   --negative: oklch(0.53 0.207 22.3);
   --uncertain: oklch(0.52 0.03 255);
+  /* Qualitative "moderate" rating — ochre, distinct from the purple AI-hypothesis color */
+  --moderate: oklch(0.6 0.125 72);
 
   /* Google sign-in button, light theme per Google branding (#FFFFFF / #747775 / #1F1F1F) */
   --google: oklch(1 0 0);
