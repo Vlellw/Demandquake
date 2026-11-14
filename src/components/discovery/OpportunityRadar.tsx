@@ -130,7 +130,7 @@ export function OpportunityRadar({ nodes }: { nodes: RadarNodeDTO[] }) {
             </div>
           )}
 
-          <svg width={w} height={h} className="absolute inset-0" role="img" aria-label="Opportunity radar of discovered problem clusters">
+          <svg width={w} height={h} className="absolute inset-0" role="group" aria-label="Opportunity radar of discovered problem clusters">
             {layout.anchors.length > 1 &&
               layout.anchors.map((a) => (
                 <text
