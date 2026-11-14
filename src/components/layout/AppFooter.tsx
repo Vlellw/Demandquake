@@ -68,7 +68,7 @@ export function AppFooter() {
                     <Compass className="size-[18px]" />
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>Browse startup ideas found from live market research</TooltipContent>
+                <TooltipContent className="bg-muted text-xs font-normal text-muted-foreground">Browse startup ideas</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -76,7 +76,7 @@ export function AppFooter() {
                     <BookOpen className="size-[18px]" />
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent>See how Demandquake turns web signals into startup ideas</TooltipContent>
+                <TooltipContent className="bg-muted text-xs font-normal text-muted-foreground">How it works</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -89,7 +89,7 @@ export function AppFooter() {
                     <ArrowUp className="size-[18px]" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent>Back to the top of the page</TooltipContent>
+                <TooltipContent className="bg-muted text-xs font-normal text-muted-foreground">Back to top</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
