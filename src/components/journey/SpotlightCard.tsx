@@ -6,13 +6,12 @@ import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { Badge } from "@/components/ui/badge";
 import { FreshnessBadge } from "@/components/discovery/StartupCard";
 import { EVIDENCE_LABEL } from "@/lib/journey";
-import { industryColor } from "@/lib/taxonomy";
 
 /**
  * Step 1 spotlight: one idea explained in plain words — the problem found, who has it and why now —
  * so a newcomer can decide which one to inspect without opening every card.
  */
-export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDTO; index?: number; reason?: string }) {
+export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDTO; index?: number; reason?: string | undefined }) {
   const rows = [
     { icon: Target, label: "Problem found", text: card.problem_title },
     { icon: Users, label: "Who has it", text: card.who_is_affected },
@@ -79,10 +78,7 @@ export function SpotlightCard({ card, index = 0, reason }: { card: StartupCardDT
               <Swords /> {card.competitor_count} competitors
             </Badge>
             {card.evidence_strength && EVIDENCE_LABEL[card.evidence_strength] && (
-              <Badge variant="default">
-                <span className="size-1.5 rounded-full" style={{ background: industryColor(card.industry) }} aria-hidden="true" />
-                {EVIDENCE_LABEL[card.evidence_strength]}
-              </Badge>
+              <Badge variant="default">{EVIDENCE_LABEL[card.evidence_strength]}</Badge>
             )}
           </div>
 

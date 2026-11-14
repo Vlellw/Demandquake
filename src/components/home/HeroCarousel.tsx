@@ -126,7 +126,7 @@ export function HeroCarousel() {
               <div className="mt-8">
                 <Button asChild variant="glass" size="lg">
                   {"search" in s.link ? (
-                    <Link to={s.link.to} search={s.link.search} hash={s.link.search.overview ? "market-overview" : undefined}>
+                    <Link to={s.link.to} search={s.link.search} {...(s.link.search.overview ? { hash: "market-overview" } : {})}>
                       {s.cta} <ArrowRight />
                     </Link>
                   ) : (

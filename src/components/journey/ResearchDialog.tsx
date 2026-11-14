@@ -133,7 +133,7 @@ export function ResearchDialog({
     }
   }
 
-  const selectClass = "h-10 w-full gap-2 rounded-full border-ink/40 bg-background px-4 text-sm font-semibold text-foreground sm:w-auto";
+  const selectClass = "h-10 w-full gap-2 rounded-full border-ink/40 bg-background px-4 text-sm font-semibold text-foreground sm:w-auto [&>span]:flex-1 [&>span]:text-left";
   const priceLine =
     cost === undefined ? (catalog.isError ? "Credit price unavailable" : "Loading credit price…") : `${cost} credits per successful search · failed research is free`;
 

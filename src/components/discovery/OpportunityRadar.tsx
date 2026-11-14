@@ -193,22 +193,34 @@ export function OpportunityRadar({
                     className="transition-all duration-200"
                   />
                   {n.d.startup && <circle cx={n.x} cy={n.y} r={2.6} fill={color} />}
-                  {highlightId === n.d.id && (
-                    <>
-                      <circle cx={n.x} cy={n.y} r={n.r + 6} fill="none" stroke="var(--primary)" strokeWidth={2} strokeDasharray="4 3" />
-                      <text
-                        x={n.x}
-                        y={(n.y ?? 0) - n.r - 12 < 12 ? (n.y ?? 0) + n.r + 22 : (n.y ?? 0) - n.r - 12}
-                        textAnchor="middle"
-                        className="fill-primary text-[11px] font-bold"
-                      >
-                        {highlightLabel}
-                      </text>
-                    </>
-                  )}
                 </motion.g>
               );
             })}
+            {/* Highlight sits in its own top layer so neighbouring dots never cover the ring or its label. */}
+            {(() => {
+              const h = highlightId ? layout.simNodes.find((n) => n.d.id === highlightId) : undefined;
+              if (!h) return null;
+              const x = h.x ?? 0;
+              const y = h.y ?? 0;
+              const labelY = y - h.r - 12 < 14 ? y + h.r + 22 : y - h.r - 12;
+              return (
+                <g pointerEvents="none">
+                  <circle cx={x} cy={y} r={h.r + 6} fill="none" stroke="var(--primary)" strokeWidth={2} strokeDasharray="4 3" />
+                  <text
+                    x={x}
+                    y={labelY}
+                    textAnchor="middle"
+                    stroke="var(--background)"
+                    strokeWidth={4}
+                    paintOrder="stroke"
+                    strokeLinejoin="round"
+                    className="fill-primary text-[11px] font-bold"
+                  >
+                    {highlightLabel}
+                  </text>
+                </g>
+              );
+            })()}
           </svg>
 
           <AnimatePresence>

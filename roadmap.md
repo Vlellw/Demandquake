@@ -22,24 +22,16 @@
 - [x] Lindström-style redesign: light design system, Libre Franklin, pill buttons, utility bar + header with search, photo hero carousel, centered section headings, stat counters, article-style cards, mosaic, navy band, footer
 - [x] Newcomer-friendly cleanup: plain-language labels, how-it-works phases, simpler cards, breadcrumbs and clear next steps on every page
 - [x] Every page restyled (startup profile + tabs, research run, market scan, workspace list/detail, how it works, sign-in, reset password, invite, 404) and charts on the light theme; phone layouts and accessibility contrast checked
-
-## In progress — guided founder journey (Choose → Inspect → Claim)
-- [ ] Journey rules module + tests (spotlight ranking, industry choices, inspection progress, discover URL state)
-- [ ] Shared step tracker shown on Discover, startup pages and a new workspace
-- [ ] Discover Step 1: industry pills, three best-documented ideas, "For you" picks, clear secondary actions, Guided / Full catalog toggle
-- [ ] Research a new market moved into a focused dialog with in-place credit confirmation
-- [ ] Full catalog view: URL filters, full grid, market overview tabs (problem map, market changes, latest research)
-- [ ] Remove the mid-page How it works mosaic and stat band from Discover
-- [ ] Startup page Step 2: tab check-offs, next-step guidance, market signals in context (scan traces, related-problem map)
-- [ ] Step 3 claim confirmation with what-you-get list; workspace welcome panel (checklist, invite co-founder, first note)
-- [ ] Update every link that pointed at old Discover page sections
+- [x] Guided founder journey (Choose → Inspect → Claim): step tracker on Discover, startup pages and new workspaces; industry pills with three best-documented ideas; Guided / Full catalog toggle with linkable filters; research in a focused dialog with credit confirmation; market overview tabs (map, changes, past research); startup tab check-offs with next-check guidance, related-problem map and latest scan trace; claim window listing what you get; workspace welcome panel
 
 ## Ready next
 - [x] Five-credit startup claims: atomic workspace creation and charge, confirmation, duplicate/failure protection. Verified 25 → 20 credits, one charge, existing workspace opens without another charge, and direct workspace inserts are blocked.
 - [x] Credit wallets and auditable history, 25 welcome credits, 5-credit successful discovery with confirmation, atomic idempotent reservations and settlement, public package page and protected admin controls. Verified a signed-in cached search: 25 → 20 credits, one ledger entry, no phone overflow.
-- Credit payments: provider and four products created, embedded checkout and signed webhook fulfillment/refund handling implemented. Blocked: provisioned payment secrets are missing from the app runtime, so purchase/decline/refund end-to-end checks and tax configuration are unverified. Live onboarding is also required; do not claim real purchases work.
+- Credit payments: test-mode payments connected with four products, embedded checkout and signed webhook fulfillment/refunds. Blocked: live payments need the owner to finish payment onboarding; a full test purchase has not been run end to end.
 - Admin allocation: verified-email allowlist configured for the requested account. Blocked: that account does not exist in app auth yet; signup and email verification are required before the million-credit grant and admin checks.
 - Guided first visit: a short dismissible "how to read this page" tour on the first startup page a newcomer opens
 - Real photography: swap the generated start-page photos for licensed or team-supplied images
 - Server-side scheduled monitoring (needs background execution; scheduled callbacks end after a few seconds, so scans currently run while a founder visits)
 - Shareable OG images per startup (generated brand card)
+- Problem map: spread dots wider when only one industry is shown (related-problem map on startup pages is tightly packed)
+- Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices

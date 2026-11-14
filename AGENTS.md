@@ -49,3 +49,4 @@ use the editor.
 - Public credit reads allow only active packages and explicitly advertised cost keys; verified admins can read inactive packages and all settings so internal configuration is not public by default.
 - Payment functions use the shared gateway Stripe utility, authenticated user identity and server-snapshotted orders; only signature-verified webhooks allocate or reverse credits, keeping test purchases separate from live balances.
 - Admin bootstrap uses a service-only allowlist matched to a verified auth email; ordinary browser requests can never assign roles or edit balances.
+- Discover state (industry, view, filters, overview tab, research dialog) lives in validated URL search params defined in `src/lib/journey.ts`, so every journey step is linkable and back-button safe; Step 2 check-offs are per-browser localStorage hints, never billing or account data.

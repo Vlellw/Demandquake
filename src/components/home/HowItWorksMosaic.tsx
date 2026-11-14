@@ -60,7 +60,7 @@ function TileBlock({ tile }: { tile: Tile }) {
       <div className="mt-5">
         <Button asChild variant="glass" size="sm" className="h-9 px-4">
           {"search" in tile.link ? (
-            <Link to={tile.link.to} search={tile.link.search} hash={tile.link.search.overview ? "market-overview" : undefined}>
+            <Link to={tile.link.to} search={tile.link.search} {...(tile.link.search.overview ? { hash: "market-overview" } : {})}>
               {tile.cta} <ArrowRight />
             </Link>
           ) : (
