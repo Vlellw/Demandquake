@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { inspectionProgress, inspectionStorageKey, markVisited, parseVisited, type InspectionTab } from "@/lib/journey";
+import { INSPECTION_STEPS, inspectionProgress, inspectionStorageKey, parseVisited, type InspectionTab } from "@/lib/journey";
+
+const ALL_STEPS = INSPECTION_STEPS.map((s) => s.tab);
 
 /**
- * Step 2 progress for one startup: which essential tabs this browser has opened. Stored per slug in
- * localStorage and read after hydration, so server and browser render the same first frame.
+ * Step 3 progress for one startup. The startup page shows every essential section on one page,
+ * so opening it checks them all off. Stored per slug in localStorage and read after hydration,
+ * so server and browser render the same first frame.
  */
-export function useInspection(slug: string, tab: string) {
+export function useInspection(slug: string) {
   const [state, setState] = useState<{ slug: string; visited: InspectionTab[] }>({ slug, visited: [] });
 
   useEffect(() => {
@@ -19,9 +22,9 @@ export function useInspection(slug: string, tab: string) {
     }
     setState((prev) => {
       const base = storageOk ? parseVisited(stored) : prev.slug === slug ? prev.visited : [];
-      return { slug, visited: markVisited(base, tab) };
+      return { slug, visited: [...new Set([...base, ...ALL_STEPS])] };
     });
-  }, [slug, tab]);
+  }, [slug]);
 
   useEffect(() => {
     if (state.slug !== slug || state.visited.length === 0) return;
