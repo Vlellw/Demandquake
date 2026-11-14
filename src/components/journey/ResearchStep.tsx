@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowDown, ArrowLeft, ArrowRight, Coins, Factory, Loader2, MapPin, Search, Telescope } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, Coins, Factory, Loader2, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 import { startDiscovery } from "@/lib/research.functions";
 import { EXAMPLE_QUERIES, GEOGRAPHIES, INDUSTRIES } from "@/lib/taxonomy";
@@ -160,10 +160,7 @@ export function ResearchStep({
       <div className="overflow-hidden rounded-[4px] border border-border bg-background shadow-panel">
         <div className="flex flex-col gap-4 border-b border-border bg-surface-sunken px-6 pb-5 pt-6 sm:flex-row sm:items-end sm:justify-between sm:px-8">
           <div className="max-w-3xl">
-          <p className="eyebrow flex items-center gap-2">
-            <Telescope className="size-3.5" aria-hidden="true" /> Step 1 of 4 · {stage === "form" ? "Search a market" : "Confirm your research"}
-          </p>
-          <h2 id="search-heading" className="section-title mt-2 text-[1.75rem] leading-tight sm:text-[2.2rem]">
+          <h2 id="search-heading" className="section-title text-[1.75rem] leading-tight sm:text-[2.2rem]">
             {stage === "form" ? "What should Demandquake research?" : "Ready to start?"}{" "}
             <InfoTip align="start">
               {stage === "form"

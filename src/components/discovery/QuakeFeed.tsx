@@ -98,11 +98,7 @@ export function QuakeFeed({ items, filtered, embedded = false }: { items: QuakeF
         ) : (
           <div className={`grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-14 ${embedded ? "" : "mt-12"}`}>
             <div className="min-w-0" aria-live="polite">
-              <p className="eyebrow text-primary-foreground">
-                {q.startup.name}
-                {q.startup.industry ? ` · ${q.startup.industry}` : ""}
-              </p>
-              <blockquote className="mt-3 font-display text-xl font-bold leading-snug sm:text-[1.6rem]">
+              <blockquote className="font-display text-xl font-bold leading-snug sm:text-[1.6rem]">
                 “{q.headline ?? "Market scan completed"}”
               </blockquote>
               <p className="mt-4 text-sm text-primary-foreground/90">
@@ -207,7 +203,6 @@ export function QuakeFeed({ items, filtered, embedded = false }: { items: QuakeF
         <SectionHeading
           id="market-heading"
           tone="inverse"
-          eyebrow="Market watch"
           title="What changed in the market"
           description="Market scans read newly published articles about a startup’s problem. Each spike below is one change that matters."
         />

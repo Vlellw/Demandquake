@@ -48,7 +48,7 @@ import { creditAccountQuery } from "@/lib/credit-queries";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { INITIAL_CREDIT_RULES, canAfford } from "@/lib/credit-rules";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { JourneySteps, StepKicker } from "@/components/journey/JourneySteps";
+import { JourneySteps } from "@/components/journey/JourneySteps";
 import { QuakeTrace } from "@/components/discovery/QuakeFeed";
 import { OpportunityRadar } from "@/components/discovery/OpportunityRadar";
 import { useInspection } from "@/hooks/use-inspection";
@@ -113,7 +113,6 @@ export const Route = createFileRoute("/_authenticated/startup/$slug")({
   component: StartupPage,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
-      <p className="eyebrow">Startup not found</p>
       <h1 className="section-title mt-2 text-3xl">This startup isn’t in the catalog</h1>
       <p className="mt-3 text-sm text-muted-foreground">It may have been removed after a research refresh.</p>
       <Button asChild variant="outline" className="mt-6">
@@ -305,9 +304,6 @@ function StartupPage() {
         <section className="brand-banner relative overflow-hidden">
           <div className="relative mx-auto grid max-w-[1400px] gap-10 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_1.05fr] lg:items-center lg:py-14">
             <div className="flex min-w-0 flex-col">
-              <p className="eyebrow text-current">
-                {[st.industry, st.geography].filter(Boolean).join(" · ") || "Startup idea"}
-              </p>
               <div className="mt-4 flex items-center gap-4">
                 <StartupMark brand={st.brand} size="xl" className="border-transparent shadow-lift" />
                 <div className="min-w-0">
@@ -430,7 +426,6 @@ function StartupPage() {
             </div>
           </div>
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pt-6 sm:px-6">
-            <StepKicker n={3}>{ESSENTIAL.has(tab) ? INSPECTION_STEPS.find((s) => s.tab === tab)?.label : "Optional extra"}</StepKicker>
             <p className="text-sm text-muted-foreground">{TAB_HINT[tab]}</p>
           </div>
 
@@ -443,7 +438,6 @@ function StartupPage() {
               <section className="panel p-5">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <p className="eyebrow">Evidence map</p>
                     <h2 className="mt-1 font-display text-xl font-semibold text-foreground">How the problem and startup were derived</h2>
                     <p className="mt-1 text-sm text-muted-foreground">Click any source to inspect the original publication.</p>
                   </div>
@@ -459,7 +453,6 @@ function StartupPage() {
               {detail.cluster && detail.cluster.signals.length > 0 && (
                 <section className="panel p-5">
                   <div className="flex items-center justify-between">
-                    <p className="eyebrow">Signals extracted from sources</p>
                     <ObservedTag count={detail.cluster.signals.length} />
                   </div>
                   <ul className="mt-4 grid gap-2 md:grid-cols-2">
@@ -473,7 +466,6 @@ function StartupPage() {
                 </section>
               )}
               <section className="panel p-5">
-                <p className="eyebrow">All evidence sources</p>
                 <div className="mt-4">
                   <SourceStream sources={evidence} limit={40} />
                 </div>
@@ -516,7 +508,6 @@ function StartupPage() {
               <LatestScan slug={slug} scans={detail.scans} />
               <section className="panel p-5">
                 <div className="flex items-center justify-between">
-                  <p className="eyebrow">Market timeline</p>
                   <span className="text-xs text-muted-foreground">Click a point to open its source</span>
                 </div>
                 <div className="mt-4">
@@ -524,7 +515,6 @@ function StartupPage() {
                 </div>
               </section>
               <section className="panel p-5">
-                <p className="eyebrow">Past market scans</p>
                 {detail.scans.length === 0 ? (
                   <p className="mt-3 text-sm text-muted-foreground">No scans yet. Run the first one to check what changed since {formatDate(st.research_at)}.</p>
                 ) : (
@@ -585,7 +575,6 @@ function StartupPage() {
           <div className="mx-auto flex max-w-[1400px] flex-col items-start gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center">
             <StartupMark brand={st.brand} size="lg" className="border-transparent" />
             <div className="min-w-0 flex-1">
-              <p className="eyebrow text-primary-foreground">Step 4 of 4 · Claim & build</p>
               <p className="mt-2 font-display text-3xl font-bold">Build {st.name}</p>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-primary-foreground/85">
                 Claiming copies the idea, its sources, the open assumptions and a validation checklist into your private
@@ -609,7 +598,6 @@ function StartupPage() {
       <Dialog open={claimConfirm} onOpenChange={(open) => { if (!claiming) setClaimConfirm(open); }}>
         <DialogContent className="max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-xl gap-0 overflow-y-auto rounded-[4px] p-0 sm:rounded-[4px]">
           <div className="border-b border-border bg-surface-sunken px-6 pb-5 pt-6 sm:px-8">
-            <StepKicker n={4}>Claim & build</StepKicker>
             <DialogTitle className="section-title mt-2 text-2xl">Claim {st.name}</DialogTitle>
             <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
               You get a private workspace for this idea. The idea stays public, so other founders can claim it too.
@@ -683,7 +671,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
       <div className="space-y-6">
         <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
-            <p className="eyebrow">The problem</p>
             <InferredTag label="AI synthesis of sources" />
           </div>
           <p className="mt-3 font-display text-xl leading-snug text-foreground">{st.problem.statement}</p>
@@ -726,7 +713,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
 
         <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
-            <p className="eyebrow">The proposed solution</p>
             <InferredTag />
           </div>
           <p className="mt-3 text-[15px] leading-relaxed text-foreground/90">{st.solution.summary}</p>
@@ -748,7 +734,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
       <div className="space-y-6">
         <section className="panel p-6">
           <div className="flex items-center justify-between gap-2">
-            <p className="eyebrow">Target customers</p>
             <InferredTag />
           </div>
           <ul className="mt-4 space-y-3">
@@ -773,7 +758,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
 
         <button onClick={() => onTab("assessment")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
           <div className="flex items-center justify-between">
-            <p className="eyebrow">Assessment at a glance</p>
             <span className="text-xs text-muted-foreground">Details →</span>
           </div>
           <div className="mt-4">
@@ -784,7 +768,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
 
         <button onClick={() => onTab("landscape")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
           <div className="flex items-center justify-between">
-            <p className="eyebrow">Existing solutions</p>
             <span className="text-xs text-muted-foreground">Landscape →</span>
           </div>
           {st.competitors.length === 0 ? (
@@ -804,7 +787,6 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
         {st.timeline.length > 0 && (
           <button onClick={() => onTab("updates")} className="panel block w-full p-6 text-left transition-colors hover:border-border-strong">
             <div className="flex items-center justify-between">
-              <p className="eyebrow">Latest market events</p>
               <span className="text-xs text-muted-foreground">Timeline →</span>
             </div>
             <ul className="mt-3 space-y-2.5">
@@ -853,7 +835,6 @@ function NextCheck({
     return (
       <div className="mt-10 flex flex-col gap-4 rounded-[4px] border-l-4 border-primary bg-surface-sunken p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
         <div className="min-w-0">
-          <p className="eyebrow">Next check · {done} of {total} done</p>
           <p className="mt-1 font-display text-lg font-bold text-foreground">{next.label}</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -905,7 +886,6 @@ function LatestScan({ slug, scans }: { slug: string; scans: StartupDetailDTO["sc
     <section className="panel p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <p className="eyebrow">Latest market scan</p>
           <p className="mt-1 font-display text-lg font-bold leading-snug text-foreground">{latest.headline ?? "Market scan completed"}</p>
         </div>
         <VerdictBadge verdict={latest.verdict} status={latest.status} />
@@ -945,7 +925,6 @@ function RelatedProblems({ industry, clusterId }: { industry: string | null; clu
   return (
     <section aria-labelledby="related-heading" className="space-y-3">
       <div>
-        <p className="eyebrow">Where this problem sits</p>
         <h2 id="related-heading" className="mt-1 font-display text-xl font-semibold text-foreground">
           Other problems we found{industry ? ` in ${industry}` : ""}
         </h2>

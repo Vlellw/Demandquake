@@ -46,7 +46,6 @@ export function CatalogView({
       <section id="startups" aria-labelledby="catalog-heading" className="mx-auto max-w-[1400px] scroll-mt-24 px-4 pt-10 sm:px-6 sm:pt-14">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
-            <p className="eyebrow">Step 2 of 4 · Full catalog</p>
             <h1 id="catalog-heading" className="section-title mt-2 text-[2rem] leading-tight sm:text-[2.6rem]">
               All startups waiting for a founder{" "}
               <InfoTip align="start">
@@ -113,7 +112,6 @@ function MarketOverview({ filters, panel }: { filters: CatalogFilters; panel: Ov
     <section id="market-overview" aria-labelledby="overview-heading" className="mx-auto max-w-[1400px] scroll-mt-24 px-4 pb-20 pt-20 sm:px-6">
       <SectionHeading
         id="overview-heading"
-        eyebrow="Market overview"
         title="Look at the whole market"
         description="For a wider view: every problem on one map, the latest market changes and past research. The map and market changes follow your filters."
       />

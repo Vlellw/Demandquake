@@ -3,12 +3,11 @@ import { InfoTip } from "@/components/common/InfoTip";
 import { cn } from "@/lib/utils";
 
 /**
- * Lindström-style section opener: small bold uppercase eyebrow, navy title and a pill
- * action underneath. Centered by default. The optional explanation lives in a round
- * info button next to the title, so no subheadline is rendered.
+ * Lindström-style section opener: navy title and a pill action underneath.
+ * Centered by default. The optional explanation lives in a round info button
+ * next to the title, so no subheadline is rendered.
  */
 export function SectionHeading({
-  eyebrow,
   title,
   description,
   action,
@@ -18,7 +17,6 @@ export function SectionHeading({
   tone = "default",
   className,
 }: {
-  eyebrow?: ReactNode;
   title: ReactNode;
   description?: ReactNode;
   action?: ReactNode;
@@ -31,11 +29,10 @@ export function SectionHeading({
   const inverse = tone === "inverse";
   return (
     <div className={cn(align === "center" ? "mx-auto max-w-3xl text-center" : "max-w-3xl", className)}>
-      {eyebrow && <p className={cn("eyebrow", inverse && "text-primary-foreground")}>{eyebrow}</p>}
       <Tag
         id={id}
         className={cn(
-          "section-title mt-2 text-[1.75rem] sm:text-[2rem]",
+          "section-title text-[1.75rem] sm:text-[2rem]",
           Tag === "h1" && "text-[2rem] sm:text-[2.75rem]",
           inverse && "text-primary-foreground",
         )}

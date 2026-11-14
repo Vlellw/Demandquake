@@ -128,7 +128,6 @@ function AuthPage() {
       <div className="mx-auto grid max-w-[1000px] overflow-hidden rounded-[4px] bg-surface shadow-[var(--shadow-panel)] lg:grid-cols-[1fr_1.1fr]">
         <aside className="hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
           <div>
-            <p className="eyebrow text-primary-foreground/80">Free account</p>
             <h2 className="mt-2 font-display text-[1.9rem] font-bold leading-tight">Turn an idea into your startup</h2>
             <p className="mt-3 text-sm leading-relaxed text-primary-foreground/85">Sign in to explore the shared research catalog. An account lets you:</p>
             <ul className="mt-8 space-y-5">

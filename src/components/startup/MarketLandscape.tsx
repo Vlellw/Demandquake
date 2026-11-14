@@ -142,7 +142,6 @@ export function MarketLandscape({
         <section className="panel p-5 xl:sticky xl:top-32">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="eyebrow">Positioning map</p>
               <h3 className="mt-1 font-display text-lg font-semibold text-foreground">Where existing solutions sit</h3>
             </div>
             <InferredTag label="AI-placed" />
@@ -243,7 +242,6 @@ export function MarketLandscape({
         <section className="panel overflow-x-auto p-5">
           <div className="flex items-center justify-between gap-2">
             <div>
-              <p className="eyebrow">Feature comparison</p>
               <h3 className="mt-1 font-display text-lg font-semibold text-foreground">What the proposed product covers that others don’t</h3>
             </div>
             <InferredTag label="AI comparison" />
@@ -369,7 +367,6 @@ function Differentiation({ items }: { items: Differentiator[] }) {
   return (
     <section className="panel p-5">
       <div className="flex items-center justify-between gap-2">
-        <p className="eyebrow">Differentiation hypotheses</p>
         <InferredTag />
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2">

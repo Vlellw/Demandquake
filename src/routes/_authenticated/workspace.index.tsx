@@ -38,7 +38,6 @@ function WorkspaceList() {
           <SectionHeading
             as="h1"
             align="left"
-            eyebrow="Your workspace"
             title="My startups"
             description="Startups you claimed or were invited to. Only you and your co-founders can see them."
           />

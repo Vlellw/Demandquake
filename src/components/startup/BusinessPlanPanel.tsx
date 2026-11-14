@@ -23,9 +23,6 @@ export function BusinessPlanPanel({
 
       <div className="grid gap-4 lg:grid-cols-3">
         <section className="panel p-5 lg:col-span-1">
-          <p className="eyebrow flex items-center gap-1.5">
-            <Coins className="size-3.5" /> Business model
-          </p>
           <p className="mt-3 font-display text-xl font-semibold text-foreground">{model.type}</p>
           <dl className="mt-4 space-y-3 text-sm">
             <div>
@@ -50,9 +47,6 @@ export function BusinessPlanPanel({
         </section>
 
         <section className="panel p-5 lg:col-span-2">
-          <p className="eyebrow flex items-center gap-1.5">
-            <Target className="size-3.5" /> Roadmap
-          </p>
           <div className="relative mt-5 grid gap-4 md:grid-cols-3">
             <div className="absolute left-0 right-0 top-[11px] hidden h-px bg-gradient-to-r from-transparent via-border-strong to-transparent md:block" />
             {plan.roadmap.map((p, i) => (
@@ -85,9 +79,6 @@ export function BusinessPlanPanel({
 
       <div className="grid gap-4 lg:grid-cols-2">
         <section className="panel p-5">
-          <p className="eyebrow flex items-center gap-1.5">
-            <Megaphone className="size-3.5" /> Go-to-market
-          </p>
           <ol className="mt-4 space-y-2.5">
             {plan.go_to_market.map((g, i) => (
               <li key={i} className="flex gap-3 text-sm text-foreground/90">
@@ -111,9 +102,6 @@ export function BusinessPlanPanel({
         </section>
 
         <section className="panel p-5">
-          <p className="eyebrow flex items-center gap-1.5">
-            <ShieldAlert className="size-3.5" /> Key risks
-          </p>
           <ul className="mt-4 space-y-3">
             {plan.key_risks.map((r, i) => (
               <li key={i} className="rounded-lg border border-border p-3">
@@ -128,7 +116,6 @@ export function BusinessPlanPanel({
       </div>
 
       <section className="panel p-5">
-        <p className="eyebrow">Validation plan · first experiments</p>
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {validation.map((v, i) => (
             <div key={i} className="rounded-xl border border-border bg-surface-sunken/60 p-4">

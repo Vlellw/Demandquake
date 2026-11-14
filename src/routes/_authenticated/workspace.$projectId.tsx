@@ -212,7 +212,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
       <div className="mx-auto grid max-w-[1300px] grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="min-w-0 space-y-6">
           <section className="panel p-5">
-            <p className="eyebrow">Your concept</p>
             <Textarea
               value={p.concept ?? ""}
               onChange={(e) => update({ concept: e.target.value.slice(0, 8000) })}
@@ -253,7 +252,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           <ActivityLog project={p} update={update} author={shared && user ? displayName(user) : null} />
           {p.is_owner && (
           <section className="panel border-negative/20 p-5">
-            <p className="eyebrow">Danger zone</p>
             <p className="mt-2 text-sm text-muted-foreground">
               Deleting removes this workspace{p.member_count > 0 ? " for every co-founder" : ""}. The public opportunity stays available.
             </p>
@@ -325,7 +323,6 @@ function WelcomePanel({ project: p }: { project: ProjectDTO }) {
       <div className="mx-auto max-w-[1300px] px-4 py-8 sm:px-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="eyebrow">Step 4 complete</p>
             <h2 id="welcome-heading" className="section-title mt-2 text-2xl sm:text-[1.75rem]">
               {p.name} is yours to build. Start here:
             </h2>
@@ -401,7 +398,6 @@ function ChecklistSection({ project: p, update }: { project: ProjectDTO; update:
   return (
     <section id="checklist" className="panel scroll-mt-24 p-5">
       <div className="flex items-center justify-between">
-        <p className="eyebrow">Validation checklist</p>
         <span className="font-mono text-[11px] text-muted-foreground">
           {p.checklist.filter((c) => c.done).length} of {p.checklist.length} done
         </span>
@@ -449,9 +445,6 @@ function AssumptionsBoard({ project: p, update }: { project: ProjectDTO; update:
   return (
     <section className="panel p-5">
       <div className="flex items-center justify-between">
-        <p className="eyebrow flex items-center gap-1.5">
-          <FlaskConical className="size-3.5" /> Assumptions board
-        </p>
         <span className="text-[11px] text-muted-foreground">Click a card to move it</span>
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -513,7 +506,6 @@ function RoadmapSection({ project: p, update }: { project: ProjectDTO; update: U
   }
   return (
     <section className="panel p-5">
-      <p className="eyebrow">Roadmap</p>
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         {p.roadmap.map((ph, idx) => (
           <div key={ph.id} className="flex flex-col rounded-xl border border-border p-4">
@@ -559,7 +551,6 @@ function ResearchSnapshot({ project: p }: { project: ProjectDTO }) {
   return (
     <section className="panel p-5">
       <div className="flex items-center justify-between">
-        <p className="eyebrow">Research snapshot</p>
         {r.research_at && <span className="font-mono text-[10px] text-faint">from {formatDate(r.research_at)}</span>}
       </div>
       {r.problem && <p className="mt-3 text-sm leading-relaxed text-foreground/90">{r.problem.statement}</p>}
@@ -678,7 +669,6 @@ function MarketWatch({ slug, project: p, update }: { slug: string; project: Proj
     <section className="panel p-5">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="eyebrow">Market watch</p>
           <p className="mt-1 text-sm text-muted-foreground">
             Re-searches live news for developments that strengthen or weaken this opportunity — automatically once a week when you visit.
           </p>
@@ -798,7 +788,6 @@ function ActivityLog({ project: p, update, author }: { project: ProjectDTO; upda
   }
   return (
     <section id="notes" className="panel scroll-mt-24 p-5">
-      <p className="eyebrow">Activity & notes</p>
       <form
         onSubmit={(e) => {
           e.preventDefault();

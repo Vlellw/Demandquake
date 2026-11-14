@@ -23,7 +23,7 @@ function HomePage() {
   return <div>
     <HeroCarousel />
     <section className="bg-surface-sunken px-4 py-16 sm:px-6 sm:py-20">
-      <SectionHeading eyebrow="Evidence, not guesses" title="Real problems. Ideas you can investigate."
+      <SectionHeading title="Real problems. Ideas you can investigate."
         description="Each idea starts from real web sources. Facts link to their evidence, and anything the AI suggests is clearly labelled as a hypothesis." />
       <div className="mx-auto mt-8 max-w-2xl text-center">
         <p className="text-muted-foreground">Sign in to browse startups, read the research and follow market changes. Your founder workspace stays private to you and invited co-founders.</p>

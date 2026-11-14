@@ -85,7 +85,6 @@ function MethodPage() {
           <SectionHeading
             as="h1"
             align="left"
-            eyebrow="How it works"
             title="Evidence first. Guesses labelled. No fake odds."
             description="Demandquake suggests startups that don’t exist yet by reading what the internet is already saying — and shows you which parts come from real sources and which are the AI’s suggestions."
             action={
@@ -108,12 +107,11 @@ function MethodPage() {
 
       {/* Steps by phase */}
       <section aria-labelledby="steps-heading" className="mx-auto max-w-[1200px] px-4 py-20 sm:px-6">
-        <SectionHeading id="steps-heading" eyebrow="Step by step" title="From a question to a startup you can test" description="Eight steps in three phases. Each step is labelled so you know whether it’s based on sources, on AI reasoning, or on you." />
+        <SectionHeading id="steps-heading" title="From a question to a startup you can test" description="Eight steps in three phases. Each step is labelled so you know whether it’s based on sources, on AI reasoning, or on you." />
         <div className="mt-12 space-y-12">
           {PHASES.map((phase, pi) => (
             <div key={phase.name} className="grid gap-6 lg:grid-cols-[220px_1fr]">
               <div className="stat-rule pt-4">
-                <p className="eyebrow">Phase {pi + 1}</p>
                 <h3 className="mt-1 font-display text-2xl font-bold text-primary">{phase.name}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{phase.summary}</p>
               </div>
@@ -145,7 +143,7 @@ function MethodPage() {
       {/* How to read labels: colored tiles */}
       <section aria-labelledby="labels-heading" className="bg-muted py-20">
         <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-          <SectionHeading id="labels-heading" eyebrow="Reading a startup page" title="Three kinds of information, always labelled" />
+          <SectionHeading id="labels-heading" title="Three kinds of information, always labelled" />
           <div className="mt-12 grid gap-px overflow-hidden rounded-[4px] bg-border md:grid-cols-3">
             <div className="flex flex-col bg-surface p-7">
               <ShieldCheck className="size-7 text-observed" aria-hidden="true" />
@@ -186,7 +184,7 @@ function MethodPage() {
 
       {/* Limits */}
       <section aria-labelledby="limits-heading" className="mx-auto max-w-[1200px] px-4 py-20 sm:px-6">
-        <SectionHeading id="limits-heading" eyebrow="Good to know" title="What Demandquake can’t tell you" />
+        <SectionHeading id="limits-heading" title="What Demandquake can’t tell you" />
         <ul className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-2">
           {LIMITS.map((l) => (
             <li key={l} className="flex gap-3 border-t-[3px] border-primary bg-surface p-5 text-sm leading-relaxed text-foreground shadow-[var(--shadow-panel)]">

@@ -34,7 +34,6 @@ export function AssessmentPanel({
       <section className="panel-raised p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="max-w-3xl">
-            <p className="eyebrow">Opportunity assessment</p>
             <p className="mt-2 text-[15px] leading-relaxed text-foreground/90">{assessment.summary}</p>
           </div>
           <div className="flex flex-col items-end gap-1.5">
@@ -95,7 +94,6 @@ export function AssessmentPanel({
       <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
         <section className="panel p-5">
           <div className="flex items-center justify-between">
-            <p className="eyebrow">Evidence composition</p>
             <ObservedTag count={evidence.length} />
           </div>
           <div className="mt-4 flex h-3 overflow-hidden rounded-full bg-foreground/5">
@@ -138,7 +136,6 @@ export function AssessmentPanel({
 
         <section className="panel p-5">
           <div className="flex items-center justify-between">
-            <p className="eyebrow">Key assumptions to test</p>
             <InferredTag />
           </div>
           <ul className="mt-4 space-y-3">

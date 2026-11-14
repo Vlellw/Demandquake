@@ -124,9 +124,6 @@ function QuakePage() {
             <div className="flex flex-wrap items-center gap-3">
               <StartupMark brand={st.brand} size="md" />
               <div>
-                <p className="eyebrow flex items-center gap-1.5 text-primary">
-                  <Radar className="size-3.5" /> Market scan
-                </p>
                 <p className="font-display text-lg font-semibold text-foreground">{st.name}</p>
               </div>
               <span className="ml-auto text-xs text-muted-foreground">
@@ -200,7 +197,6 @@ function QuakePage() {
               <section className="panel p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="eyebrow">Assessment before → after</p>
                     <h2 className="mt-1 font-display text-xl font-semibold text-foreground">How the opportunity moved</h2>
                   </div>
                   <span className="font-mono text-[11px] text-muted-foreground">Qualitative levels — no scores</span>
@@ -212,7 +208,6 @@ function QuakePage() {
             <section className="panel p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="eyebrow">Publications reviewed in this scan</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {relevantIds.size} of {scanSources.length} affected the assessment. Every publication was retrieved live from Context.dev.
                   </p>

@@ -23,7 +23,6 @@ function NotFoundComponent() {
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <p className="eyebrow">Page not found</p>
         <h1 className="section-title mt-3 text-5xl">404</h1>
         <p className="mt-3 text-base text-muted-foreground">
           This page doesn't exist. The link may be incomplete, or the startup was removed.
@@ -48,7 +47,6 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4">
       <div className="max-w-md text-center">
-        <p className="eyebrow">Something went wrong</p>
         <h1 className="section-title mt-3 text-3xl">This page didn't load</h1>
         <p className="mt-3 text-base text-muted-foreground">Something went wrong on our end. Try again, or go back to the start page.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">

@@ -41,7 +41,6 @@ export function JourneySteps({
                 {status === "done" ? <Check className="size-4" strokeWidth={3} /> : s.n}
               </span>
               <span className="min-w-0 text-left">
-                <span className="block text-[0.625rem] font-bold uppercase tracking-[0.08em] text-muted-foreground">Step {s.n}</span>
                 <span
                   className={cn(
                     "block truncate text-sm font-bold",
@@ -75,14 +74,3 @@ export function JourneySteps({
   );
 }
 
-/** Small "Step 2 of 3" kicker used above step headings. */
-export function StepKicker({ n, children }: { n: JourneyStepNumber; children?: ReactNode }) {
-  return (
-    <p className="eyebrow flex items-center gap-2">
-      <span className="grid size-5 place-items-center rounded-full bg-primary text-[0.625rem] text-primary-foreground" aria-hidden="true">
-        {n}
-      </span>
-      Step {n} of {JOURNEY_STEPS.length}{children ? <span className="font-semibold normal-case tracking-normal text-muted-foreground">· {children}</span> : null}
-    </p>
-  );
-}

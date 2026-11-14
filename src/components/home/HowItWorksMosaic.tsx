@@ -54,7 +54,6 @@ const TILES = [
 function TileBlock({ tile }: { tile: Tile }) {
   return (
     <div className={cn("flex min-h-[17rem] flex-col justify-end p-6 sm:p-7", tile.tone)}>
-      <p className="eyebrow text-current opacity-90">{tile.step}</p>
       <h3 className="mt-2 font-display text-[1.4rem] font-bold leading-tight">{tile.title}</h3>
       <p className="mt-2 text-sm leading-relaxed opacity-90">{tile.body}</p>
       <div className="mt-5">
@@ -88,7 +87,6 @@ export function HowItWorksMosaic() {
     <section id="how-it-works" aria-labelledby="how-heading" className="mx-auto max-w-[1400px] px-4 py-20 sm:px-6">
       <SectionHeading
         id="how-heading"
-        eyebrow="How it works"
         title="From a problem online to a startup you can build"
         description="Four simple steps. Browsing and reading the evidence need no account."
       />

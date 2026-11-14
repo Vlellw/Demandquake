@@ -86,7 +86,6 @@ export function SourceProvider({
                 </dl>
                 {(src.snippet || src.highlights.length > 0) && (
                   <div>
-                    <p className="eyebrow">What the source says</p>
                     <div className="mt-2 space-y-2">
                       {src.snippet && <p className="prov-observed rounded-lg p-3 text-sm leading-relaxed text-foreground/90">{src.snippet}</p>}
                       {src.highlights
@@ -102,7 +101,6 @@ export function SourceProvider({
                 )}
                 {cites.length > 0 && (
                   <div>
-                    <p className="eyebrow">Used to support</p>
                     <ul className="mt-2 space-y-2">
                       {cites.map((c, i) => (
                         <li key={i} className="rounded-lg border border-border p-3 text-sm">

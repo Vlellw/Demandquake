@@ -146,7 +146,7 @@ export function TeamPanel({ project, currentUserId, onLeft }: { project: Project
     <section className="panel p-5" aria-labelledby="team-heading">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p id="team-heading" className="eyebrow">
+          <p id="team-heading" className="font-display text-lg font-bold text-foreground">
             Co-founders
           </p>
           <p className="mt-1 text-sm text-muted-foreground">

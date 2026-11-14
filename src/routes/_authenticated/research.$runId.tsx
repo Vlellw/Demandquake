@@ -149,7 +149,6 @@ function ResearchPage() {
               </span>
               <span className="text-xs text-muted-foreground">started <TimeAgo iso={run.created_at} /></span>
             </div>
-            <p className="eyebrow mt-4">Research question</p>
             <h1 className="section-title mt-2 text-3xl sm:text-[2.5rem]">“{run.query}”</h1>
             {run.plan.interpretation && <p className="mt-4 text-base leading-relaxed text-foreground">{run.plan.interpretation}</p>}
             <div className="mt-3 flex flex-wrap gap-2">
@@ -188,7 +187,6 @@ function ResearchPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
           <aside className="panel h-fit p-5 lg:sticky lg:top-20">
-            <p className="eyebrow mb-4">Research steps</p>
             <StageRail detail={detail} />
             <div className="mt-6 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
               <p className="flex items-center gap-1.5">
@@ -206,7 +204,6 @@ function ResearchPage() {
               <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="panel-raised p-6">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <p className="eyebrow text-primary">Published</p>
                     <h2 className="mt-1 font-display text-2xl font-semibold text-foreground">
                       {detail.startups.length} unclaimed startup{detail.startups.length === 1 ? "" : "s"} discovered
                     </h2>
@@ -225,7 +222,6 @@ function ResearchPage() {
             {run.plan.searches && run.plan.searches.length > 0 && (
               <section className="panel p-5">
                 <div className="flex items-center justify-between">
-                  <p className="eyebrow">Research plan</p>
                   <InferredTag label="AI planned" />
                 </div>
                 <div className="mt-4 grid gap-2 md:grid-cols-2">
@@ -266,7 +262,6 @@ function ResearchPage() {
               <section className="panel p-5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <p className="eyebrow">From signals to startups</p>
                     <h2 className="mt-1 font-display text-lg font-semibold text-foreground">How separate sources combined into opportunities</h2>
                   </div>
                   <p className="text-xs text-muted-foreground">Hover a source or problem to trace its connections</p>
@@ -322,7 +317,6 @@ function ResearchPage() {
             <section className="panel p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="eyebrow">Live evidence</p>
                   <h2 className="mt-1 font-display text-lg font-semibold text-foreground">Sources retrieved by Context.dev</h2>
                 </div>
                 <ObservedTag label="Observed" count={evidence.length} />

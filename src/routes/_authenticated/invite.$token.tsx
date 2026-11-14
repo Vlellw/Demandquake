@@ -83,7 +83,6 @@ function InvitePage() {
           <StartupMark brand={invite.brand} size="xl" className="translate-y-1/2 ring-4 ring-surface" />
         </div>
         <div className="px-8 pb-8 pt-12">
-          <p className="eyebrow mt-6">{invite.status === "valid" ? "Co-founder invite" : "Your workspace"}</p>
           <h1 className="section-title mt-2 text-3xl">{invite.project_name}</h1>
           {invite.tagline && <p className="mt-2 text-muted-foreground">{invite.tagline}</p>}
           <p className="mt-6 text-sm text-foreground/85">

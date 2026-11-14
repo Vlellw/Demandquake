@@ -75,7 +75,6 @@ export function RecentRuns({ runs, embedded = false }: { runs: RunDTO[]; embedde
     <section id="latest-research" aria-labelledby="runs-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
       <SectionHeading
         id="runs-heading"
-        eyebrow="Stay up to date"
         title="The latest research"
         description="Every research run is shared with signed-in founders. Open one to replay what was searched, which sources were read and which startups came out of it."
       />

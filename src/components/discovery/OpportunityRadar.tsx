@@ -94,7 +94,6 @@ export function OpportunityRadar({
   return (
     <div className="panel relative overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
-        <p className="eyebrow">How to read the map</p>
         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <span className="size-2.5 rounded-full border-2 border-foreground/80" /> Strong evidence
@@ -260,7 +259,6 @@ export function OpportunityRadar({
               <RadarDetail key={selectedNode.id} node={selectedNode} onClose={() => setSelected(null)} />
             ) : (
               <motion.div key="legend" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="p-5">
-                <p className="eyebrow">Industries on the map</p>
                 <ul className="mt-3 space-y-2">
                   {industries.map((ind) => {
                     const count = nodes.filter((n) => (n.industry ?? "Other") === ind).length;
@@ -342,7 +340,6 @@ function RadarDetail({ node, onClose }: { node: RadarNodeDTO; onClose: () => voi
         )}
 
         <div>
-          <p className="eyebrow">What the sources say</p>
           {isLoading && (
             <p className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <Loader2 className="size-3 animate-spin" /> Loading sources…

@@ -9,7 +9,6 @@ import heroMarket from "@/assets/hero-market.jpg";
 import heroTeam from "@/assets/hero-team.jpg";
 
 type Slide = {
-  eyebrow: string;
   title: string;
   body: string;
   cta: string;
@@ -20,7 +19,6 @@ type Slide = {
 
 const SLIDES: Slide[] = [
   {
-    eyebrow: "Start here",
     title: "Find a startup worth building",
     body: "Browse startup ideas built from real problems people describe online. Every fact links to its source.",
     cta: "Browse startups",
@@ -29,7 +27,6 @@ const SLIDES: Slide[] = [
     link: { to: "/discover", search: {} },
   },
   {
-    eyebrow: "Live research",
     title: "Research any market in minutes",
     body: "Describe a market. Demandquake reads the live web, groups the problems it keeps finding and drafts startups for them.",
     cta: "Research a market",
@@ -38,7 +35,6 @@ const SLIDES: Slide[] = [
     link: { to: "/discover", search: { research: true } },
   },
   {
-    eyebrow: "Market watch",
     title: "See when the market moves",
     body: "Market scans read newly published articles and show whether each change strengthens or weakens an idea.",
     cta: "Latest market changes",
@@ -47,7 +43,6 @@ const SLIDES: Slide[] = [
     link: { to: "/discover", search: { view: "all", overview: "changes" } },
   },
   {
-    eyebrow: "For founders",
     title: "Claim an idea and build it with co-founders",
     body: "Claiming gives you a private workspace with a launch checklist, notes and invite links for your team.",
     cta: "Go to my startups",
@@ -118,7 +113,6 @@ export function HeroCarousel() {
             <div className="absolute inset-0 bg-ink/35 sm:hidden" />
             <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-ink/60 to-transparent" />
             <div className="relative mx-auto flex h-full max-w-[1400px] flex-col justify-center px-4 pb-16 sm:px-6">
-              <p className="eyebrow text-ink-foreground">{s.eyebrow}</p>
               <Title className="mt-3 max-w-3xl font-display text-[2.6rem] font-bold leading-[1.02] tracking-[-0.02em] text-ink-foreground sm:text-6xl lg:text-[4.75rem]">
                 {s.title}
               </Title>
