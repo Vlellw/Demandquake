@@ -41,7 +41,6 @@ import { SourceFavicon } from "@/components/common/SourceFavicon";
 import { LevelMeter } from "@/components/common/LevelMeter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -146,17 +145,6 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
 
   return (
     <div style={brandStyle(p.brand)}>
-      <Breadcrumbs
-        trail={[
-          <Link key="h" to="/">
-            Home
-          </Link>,
-          <Link key="w" to="/workspace">
-            My startups
-          </Link>,
-        ]}
-        current={p.name || initial.name}
-      />
       <WelcomePanel project={p} />
       <section className="border-b border-border bg-surface">
         <div className="mx-auto max-w-[1300px] px-4 pb-8 pt-8 sm:px-6">

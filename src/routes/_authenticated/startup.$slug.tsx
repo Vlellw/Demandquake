@@ -38,7 +38,6 @@ import { SourceStream } from "@/components/research/SourceStream";
 import { FreshnessBadge, AssessmentStrip } from "@/components/discovery/StartupCard";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { Button } from "@/components/ui/button";
-import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { StatRule } from "@/components/common/StatRule";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -236,21 +235,6 @@ function StartupPage() {
   return (
     <SourceProvider sources={orderedSources} citations={citations}>
       <div style={brandStyle(st.brand)}>
-        <Breadcrumbs
-          trail={[
-            <Link key="d" to="/discover">
-              Discover startups
-            </Link>,
-            ...(st.industry
-              ? [
-                  <Link key="i" to="/discover" search={{ industry: st.industry }}>
-                    {st.industry}
-                  </Link>,
-                ]
-              : []),
-          ]}
-          current={st.name}
-        />
         <JourneySteps
           current={claimed ? 4 : 3}
           complete={claimed}

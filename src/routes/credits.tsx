@@ -5,7 +5,6 @@ import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe
 import { useServerFn } from '@tanstack/react-start';
 import { Coins, ShieldCheck, ArrowRight, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { SectionHeading } from '@/components/common/SectionHeading';
 import { Button } from '@/components/ui/button';
 import { PaymentNotice } from '@/components/credits/PaymentNotice';
@@ -49,7 +48,6 @@ function CreditsPage() {
   }
   return <div>
     <PaymentNotice />
-    <Breadcrumbs trail={[]} current="Buy credits" />
     <section className="bg-surface-sunken py-12"><div className="mx-auto max-w-[1400px] px-4 sm:px-6">
       <SectionHeading title="Buy credits" description="Choose a package. Pay only for successful research." />
       {user && <div className="mt-6 flex flex-wrap justify-center gap-4 text-sm"><span className="inline-flex items-center gap-2 font-semibold"><Coins className="size-5 text-primary" />{account.data ? (account.data.wallet.balance - account.data.wallet.reserved).toLocaleString('en-US') : '…'} credits available</span><Button asChild variant="link"><Link to="/credits/history">Transaction history</Link></Button>{account.data?.isAdmin && <Button asChild variant="link"><Link to="/credits/admin">Manage credits</Link></Button>}</div>}

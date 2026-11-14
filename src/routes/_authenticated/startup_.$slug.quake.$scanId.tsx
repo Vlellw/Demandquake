@@ -17,7 +17,6 @@ import { InferredTag, ObservedTag } from "@/components/common/Provenance";
 import { SourceProvider, Cite } from "@/components/startup/SourceDrawer";
 import { SourceStream } from "@/components/research/SourceStream";
 import { Badge } from "@/components/ui/badge";
-import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { StatRule } from "@/components/common/StatRule";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime } from "@/lib/format";
@@ -106,17 +105,6 @@ function QuakePage() {
   return (
     <SourceProvider sources={allSources} citations={changeCitations}>
       <div style={brandStyle(st.brand)}>
-        <Breadcrumbs
-          trail={[
-            <Link key="d" to="/discover">
-              Discover startups
-            </Link>,
-            <Link key="s" to="/startup/$slug" params={{ slug }} search={{ tab: "updates" }}>
-              {st.name}
-            </Link>,
-          ]}
-          current={`Market scan · ${formatDate(scan.created_at)}`}
-        />
         <section className="relative overflow-hidden border-b border-border">
           <div className="bg-hero pointer-events-none absolute inset-0" />
           <SeismicField className="pointer-events-none absolute inset-x-0 bottom-0 h-40 w-full opacity-60" intensity={intensity} />

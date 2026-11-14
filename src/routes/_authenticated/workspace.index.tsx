@@ -6,7 +6,6 @@ import { ArrowRight, Briefcase, CheckCircle2, FlaskConical, Radar } from "lucide
 import { myProjectsQuery } from "@/lib/queries";
 import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { Button } from "@/components/ui/button";
-import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { SectionHeading } from "@/components/common/SectionHeading";
 
 import { projectProgress } from "@/lib/project-progress";
@@ -32,7 +31,6 @@ function WorkspaceList() {
 
   return (
     <div>
-      <Breadcrumbs trail={[<Link key="h" to="/">Home</Link>]} current="My startups" />
       <section className="bg-muted">
         <div className="mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-6 px-4 py-12 sm:px-6">
           <SectionHeading

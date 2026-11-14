@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useSuspenseQuery, useQueryClient } from '@tanstack/react-query';
 import { useServerFn } from '@tanstack/react-start';
 import { useState } from 'react';
@@ -8,7 +8,6 @@ import { creditAdminQuery } from '@/lib/credit-queries';
 import { adjustCredits, updateCreditSetting } from '@/lib/credits.functions';
 import { updateCreditPackage } from '@/lib/payments.functions';
 import { getStripeEnvironment } from '@/lib/stripe';
-import { Breadcrumbs } from '@/components/common/Breadcrumbs';
 import { Button } from '@/components/ui/button';
 import { CreditLedger } from './credits.history';
 
@@ -31,7 +30,7 @@ function CreditAdmin() {
     finally { setBusy(false); }
   }
   const field = 'h-10 min-w-0 rounded border border-border bg-background px-3 text-sm';
-  return <div><Breadcrumbs trail={[<Link key="c" to="/credits">Buy credits</Link>]} current="Credit administration" /><div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 sm:px-6"><header><h1 className="section-title mt-2">Credits & payments</h1></header>
+  return <div><div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 sm:px-6"><header><h1 className="section-title mt-2">Credits & payments</h1></header>
     <section><h2 className="mb-4 text-xl font-bold text-primary">Credit costs</h2><div className="grid gap-4 sm:grid-cols-2">{data.settings.filter(s => s.key === 'welcome' || s.key === 'discovery').map(s => <form key={s.key} className="flex flex-wrap items-end gap-3" onSubmit={e => { e.preventDefault(); const f = new FormData(e.currentTarget); const key = s.key; if (key !== 'welcome' && key !== 'discovery') return; action(() => setting({data:{key,value:Number(f.get('value'))}})); }}><label className="flex-1 text-sm font-semibold">{s.key === 'welcome' ? 'Welcome credits' : 'Discovery search'}<input aria-label={s.key} className={`${field} mt-2 block w-full`} name="value" type="number" min="0" max="1000000" defaultValue={s.value} required /></label><Button disabled={busy} type="submit" variant="outline"><Save />Save</Button></form>)}</div></section>
     <section><h2 className="mb-4 text-xl font-bold text-primary">Packages</h2><div className="divide-y divide-border">{data.packages.map(p => <form key={p.id} className="flex flex-wrap items-end gap-4 py-4" onSubmit={e => { e.preventDefault(); const f=new FormData(e.currentTarget); action(() => pkgUpdate({data:{id:p.id,credits:Number(f.get('credits')),amount:Math.round(Number(f.get('price'))*100),environment:getStripeEnvironment(),requestId:crypto.randomUUID()}})); }}><p className="w-24 pb-3 font-semibold">{p.name}</p><label className="text-sm">Credits<input className={`${field} mt-2 block w-32`} name="credits" type="number" min="1" defaultValue={p.credits} required /></label><label className="text-sm">Price (€)<input className={`${field} mt-2 block w-32`} name="price" type="number" min="0.5" step="0.01" defaultValue={p.amount/100} required /></label><Button disabled={busy} variant="outline" type="submit"><Save />Save</Button></form>)}</div></section>
     <section><h2 className="mb-4 text-xl font-bold text-primary">Adjust a balance</h2><form className="flex flex-wrap items-end gap-3" onSubmit={e => {e.preventDefault(); const f = new FormData(e.currentTarget); action(() => adjust({data:{userId:String(f.get('user')),delta:Number(f.get('delta')),reason:String(f.get('reason')),environment:getStripeEnvironment(),requestId:crypto.randomUUID()}}));}}><label className="min-w-0 flex-1 text-sm">Account<select className={`${field} mt-2 block w-full`} name="user" required>{data.wallets.map(w => <option key={w.user_id} value={w.user_id}>{w.user_id} · {w.balance} credits</option>)}</select></label><label className="text-sm">Adjustment<input className={`${field} mt-2 block w-32`} name="delta" type="number" min="-1000000" max="1000000" required /></label><label className="min-w-0 flex-1 text-sm">Reason<input className={`${field} mt-2 block w-full`} name="reason" minLength={5} maxLength={200} required /></label><Button disabled={busy} type="submit"><Plus />Apply adjustment</Button></form></section>

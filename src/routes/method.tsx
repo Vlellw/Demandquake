@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Boxes, Brain, CircleAlert, FileSearch, Flag, Globe2, Radar, Scale, ShieldCheck, Sparkles, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { LevelMeter } from "@/components/common/LevelMeter";
@@ -77,7 +76,6 @@ function MethodPage() {
   let n = 0;
   return (
     <div className="-mb-24">
-      <Breadcrumbs trail={[<Link key="h" to="/">Home</Link>]} current="How it works" />
 
       {/* Gray intro band */}
       <section className="bg-muted">
