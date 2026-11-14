@@ -27,7 +27,7 @@ export function JourneySteps({
   }, [inline]);
   const tracker = (
     <nav aria-label="Your progress" className={cn("min-w-0 bg-background py-1", className)}>
-      <ol className="mx-auto grid max-w-[1400px] grid-cols-4 gap-1 rounded-full bg-muted p-1 sm:gap-1.5">
+      <ol className="mx-auto grid max-w-[1400px] grid-cols-3 gap-1 rounded-full bg-muted p-1 sm:gap-1.5">
         {JOURNEY_STEPS.map((s, i) => {
           const status = statuses[i] ?? "upcoming";
           const content = (

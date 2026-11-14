@@ -232,21 +232,15 @@ function StartupPage() {
     <SourceProvider sources={orderedSources} citations={citations}>
       <div style={brandStyle(st.brand)}>
         <JourneySteps
-          current={3}
+          current={2}
           renderStep={(n, content, cls) => {
             if (n === 1)
               return (
-                <Link to="/discover" search={{ step: 1 }} className={cn(cls, "hover:opacity-80")}>
+                <Link to="/discover" search={{ industry: st.industry ?? "all" }} className={cn(cls, "hover:opacity-80")}>
                   {content}
                 </Link>
               );
             if (n === 2)
-              return (
-                <Link to="/discover" search={{ step: 2, industry: st.industry ?? "all" }} className={cn(cls, "hover:opacity-80")}>
-                  {content}
-                </Link>
-              );
-            if (n === 3)
               return (
                 <a href="#inspect" className={cn(cls, "hover:opacity-80")}>
                   {content}
@@ -259,9 +253,9 @@ function StartupPage() {
                 </Link>
               );
             return (
-              <button type="button" onClick={claim} disabled={!ready} className={cn(cls, "cursor-pointer hover:opacity-80")}>
+              <Button variant="ghost" type="button" onClick={claim} disabled={!ready} className={cn(cls, "cursor-pointer hover:opacity-80")}>
                 {content}
-              </button>
+              </Button>
             );
           }}
         />
@@ -680,7 +674,7 @@ function Overview({ detail, onTab }: { detail: StartupDetailDTO; onTab: (t: Tab)
 }
 
 
-/** Step 3 guidance under every tab: the next essential check, or the way to step 4 once all are done. */
+/** Inspection guidance under every tab: the next essential check, or the way to Claim & build. */
 function NextCheck({
   tab,
   visited,

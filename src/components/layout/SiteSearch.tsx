@@ -22,7 +22,7 @@ export function SiteSearch({ open, onOpenChange, onSignOut }: { open: boolean; o
             <CommandPrimitive.Group
               className="space-y-1"
             >
-              <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => navigate({ to: "/discover", search: { step: 2, view: "all" } }))} className={itemClass}>
+              <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => navigate({ to: "/discover", search: { view: "all" } }))} className={itemClass}>
                 <Compass className="size-4 text-primary" /> Browse all startups
               </CommandPrimitive.Item>
               <CommandPrimitive.Item value="research new market discovery start" onSelect={() => go(() => navigate({ to: "/discover", search: { research: true } }))} className={itemClass}>

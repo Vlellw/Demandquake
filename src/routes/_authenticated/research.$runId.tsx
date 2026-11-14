@@ -109,7 +109,7 @@ function ResearchPage() {
   const isDone = run.status === "complete";
   const isFailed = run.status === "failed" || Boolean(driverError);
 
-  // A finished search opens Step 2 (the market) on Discover.
+  // A finished search reveals ideas within Search & Discover.
   useEffect(() => {
     if (isDone) markSearchDone();
   }, [isDone]);
@@ -117,10 +117,10 @@ function ResearchPage() {
   return (
     <div className="relative">
       <JourneySteps
-        current={isDone ? 2 : 1}
+        current={1}
         renderStep={(n, content, cls) =>
-          n === 1 || (n === 2 && isDone) ? (
-            <Link to="/discover" search={{ step: n === 2 ? 2 : 1 }} className={cls + " hover:opacity-80"}>
+          n === 1 ? (
+            <Link to="/discover" className={cls + " hover:opacity-80"}>
               {content}
             </Link>
           ) : undefined

@@ -145,9 +145,9 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
 
   return (
     <div style={brandStyle(p.brand)}>
-      <JourneySteps current={4} renderStep={(n, content, cls) => n === 1 || n === 2 ? (
-        <Link to="/discover" search={{ step: n }} className={cls}>{content}</Link>
-      ) : n === 3 && r.startup_slug ? (
+      <JourneySteps current={3} renderStep={(n, content, cls) => n === 1 ? (
+        <Link to="/discover" className={cls}>{content}</Link>
+      ) : n === 2 && r.startup_slug ? (
         <Link to="/startup/$slug" params={{ slug: r.startup_slug }} className={cls}>{content}</Link>
       ) : undefined} />
       <WelcomePanel project={p} />

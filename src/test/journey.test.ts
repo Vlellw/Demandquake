@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DISCOVER_DEFAULTS,
   discoverSearchSchema,
-  discoverStep,
+  JOURNEY_STEPS,
   filterCards,
   industryChoices,
   inspectionProgress,
@@ -30,14 +30,17 @@ const card = (over: Partial<{ id: string; industry: string | null; geography: st
 });
 
 describe("journey steps", () => {
-  it("does not mark any of the four steps current on the initial home page", () => {
-    expect(journeyStatuses(null)).toEqual(["upcoming", "upcoming", "upcoming", "upcoming"]);
+  it("merges search and idea selection before inspection and claiming", () => {
+    expect(JOURNEY_STEPS.map(s => [s.n, s.key])).toEqual([[1, "search"], [2, "inspect"], [3, "claim"]]);
+  });
+  it("does not mark any step current on the initial home page", () => {
+    expect(journeyStatuses(null)).toEqual(["upcoming", "upcoming", "upcoming"]);
   });
   it("marks earlier steps done, the current one current and later ones upcoming", () => {
-    expect(journeyStatuses(2)).toEqual(["done", "current", "upcoming", "upcoming"]);
+    expect(journeyStatuses(2)).toEqual(["done", "current", "upcoming"]);
   });
   it("marks every step done once the founder has a workspace", () => {
-    expect(journeyStatuses(4, true)).toEqual(["done", "done", "done", "done"]);
+    expect(journeyStatuses(3, true)).toEqual(["done", "done", "done"]);
   });
 });
 
@@ -117,13 +120,9 @@ describe("step 2 inspection", () => {
 });
 
 describe("search gate", () => {
-  it("shows only the selected Search or Choose part", () => {
-    expect(discoverStep(1, true)).toBe(1);
-    expect(discoverStep(2, true)).toBe(2);
-    expect(discoverSearchSchema.parse({ step: "2" }).step).toBe(2);
-  });
-  it("keeps Choose inaccessible until search completion", () => {
-    expect(discoverStep(2, false)).toBe(1);
+  it("maps old Search and Choose links to the merged first step", () => {
+    expect(discoverSearchSchema.parse({ step: "1" }).step).toBe(1);
+    expect(discoverSearchSchema.parse({ step: "2" }).step).toBe(1);
   });
   it("opens the market only when the stored flag is exactly set", () => {
     expect(parseSearchDone("1")).toBe(true);

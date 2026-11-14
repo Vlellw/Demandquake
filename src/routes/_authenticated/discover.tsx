@@ -2,7 +2,7 @@ import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { radarQuery, recentQuakesQuery, recentRunsQuery, startupCardsQuery, statsQuery } from "@/lib/queries";
-import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, discoverStep, isSearchDone, normalizeOverview, normalizeView } from "@/lib/journey";
+import { DISCOVER_DEFAULTS, FOR_YOU, discoverSearchSchema, isSearchDone, normalizeOverview, normalizeView } from "@/lib/journey";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { GuidedDiscover } from "@/components/journey/GuidedDiscover";
 import { CatalogView } from "@/components/journey/CatalogView";
@@ -52,7 +52,7 @@ function DiscoverPage() {
   const navigate = useNavigate({ from: "/discover" });
   const { data: cards } = useSuspenseQuery(startupCardsQuery);
   const { data: stats } = useSuspenseQuery(statsQuery);
-  // Step 2 (the market) stays locked until a search has completed on this browser.
+  // Ideas remain hidden until a search has completed on this browser.
   const [marketOpen, setMarketOpen] = useState(false);
   useEffect(() => setMarketOpen(isSearchDone()), []);
 
@@ -71,33 +71,25 @@ function DiscoverPage() {
     navigate({ search: (p) => ({ ...p, step: 1, research: false }), replace: true, resetScroll: false });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.research]);
-  const skipToIdeas = () => navigate({ search: (p) => ({ ...p, step: 2 }), resetScroll: true });
-  const step = discoverStep(search.step, marketOpen);
-
   return (
     <div>
       <JourneySteps
-        current={step}
+        current={1}
         renderStep={(n, content, cls) =>
           n === 1 ? (
-            <Button variant="ghost" type="button" onClick={goToSearch} className={`${cls} cursor-pointer hover:opacity-80`}>
-              {content}
-            </Button>
-          ) : n === 2 && marketOpen ? (
-            <Button variant="ghost" type="button" onClick={skipToIdeas} className={`${cls} cursor-pointer hover:opacity-80`}>
+            <Button variant="ghost" type="button" onClick={goToSearch} className={`${cls} cursor-pointer hover:bg-transparent`}>
               {content}
             </Button>
           ) : undefined
         }
       />
-      {step === 1 ? <ResearchStep
+      <ResearchStep
         initialQuery={search.q}
         initialIndustry={search.industry}
         rerun={search.rerun}
         focusKey={focusKey}
-        locked={!marketOpen}
-        onSkip={skipToIdeas}
-      /> : effectiveView === "guided" ? (
+      />
+      {marketOpen && (effectiveView === "guided" ? (
         // The market section appears only after the first search completes.
         marketOpen ? (
           <GuidedDiscover cards={cards} stats={stats} industry={search.industry} onResearch={goToSearch} />
@@ -114,7 +106,7 @@ function DiscoverPage() {
           panel={normalizeOverview(search.overview)}
           onResearch={goToSearch}
         />
-      )}
+      ))}
     </div>
   );
 }

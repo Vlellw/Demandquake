@@ -45,12 +45,10 @@ export function AppHeader() {
 
           <div id="header-journey" className="order-last w-full min-w-0 [&:has(>nav)>div]:hidden md:order-none md:ml-auto md:w-auto md:flex-1">
             <div>
-              <JourneySteps inline current={pathname === "/" ? null : pathname.startsWith("/workspace") ? 4 : 1}
+              <JourneySteps inline current={pathname === "/" ? null : pathname.startsWith("/workspace") ? 3 : pathname.startsWith("/startup") ? 2 : 1}
                 renderStep={(n, content, cls) => n === 1 ? (
                   <Link to="/discover" search={{ research: true }} className={cls}>{content}</Link>
-                ) : n === 2 ? (
-                  <Link to="/discover" search={{ step: 2 }} className={cls}>{content}</Link>
-                ) : n === 4 ? (
+                ) : n === 3 ? (
                   <Link to="/workspace" className={cls}>{content}</Link>
                 ) : undefined}
               />

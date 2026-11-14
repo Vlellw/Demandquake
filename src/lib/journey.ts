@@ -1,4 +1,4 @@
-// Guided founder journey: Search a market → Choose an idea → Inspect the evidence → Claim & build.
+// Guided founder journey: Search & Discover → Inspect the evidence → Claim & build.
 // Pure rules only (no React, no storage access) so they stay testable.
 import { z } from "zod";
 import { fallback } from "@tanstack/zod-adapter";
@@ -6,10 +6,9 @@ import { INDUSTRIES } from "./taxonomy";
 import { matchesFreshness } from "./research-utils";
 
 export const JOURNEY_STEPS = [
-  { n: 1, key: "search", label: "Search a market", short: "Search" },
-  { n: 2, key: "choose", label: "Choose an idea", short: "Choose" },
-  { n: 3, key: "inspect", label: "Inspect the evidence", short: "Inspect" },
-  { n: 4, key: "claim", label: "Claim & build", short: "Claim" },
+  { n: 1, key: "search", label: "Search & Discover", short: "Search" },
+  { n: 2, key: "inspect", label: "Inspect the evidence", short: "Inspect" },
+  { n: 3, key: "claim", label: "Claim & build", short: "Claim" },
 ] as const;
 export type JourneyStepNumber = (typeof JOURNEY_STEPS)[number]["n"];
 export type JourneyStatus = "done" | "current" | "upcoming";
@@ -26,7 +25,7 @@ export function journeyStatuses(current: JourneyStepNumber | null, complete = fa
 export const FOR_YOU = "for-you";
 
 export const discoverSearchSchema = z.object({
-  step: fallback(z.coerce.number().int().min(1).max(2), 1).default(1),
+  step: fallback(z.coerce.number().int().min(1).max(2), 1).default(1).transform(() => 1 as const),
   view: fallback(z.string(), "guided").default("guided"),
   industry: fallback(z.string(), "all").default("all"),
   region: fallback(z.string(), "all").default("all"),
@@ -40,11 +39,6 @@ export const discoverSearchSchema = z.object({
 });
 export type DiscoverSearch = z.infer<typeof discoverSearchSchema>;
 export const DISCOVER_DEFAULTS: DiscoverSearch = discoverSearchSchema.parse({});
-
-/** Discover renders exactly one journey part; later parts have their own routes. */
-export function discoverStep(step: number, searchCompleted: boolean): 1 | 2 {
-  return searchCompleted && step === 2 ? 2 : 1;
-}
 
 export type DiscoverView = "guided" | "all";
 export type OverviewPanel = "map" | "changes" | "runs";

@@ -37,7 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
-- [ ] Separate journey steps 1–4 so only the selected step’s content appears; keep search-completion gating.
+- [x] Merge Search and Choose into Search & Discover, followed by Inspect and Claim; completed research, gated ideas, inspection navigation and phone layout verified.
 - [ ] Download the complete workspace pitch as a layout-preserving PDF; verify every exported slide and source links.
 - [x] Keep all journey steps neutral on the public home.
 - [x] Make the highlighted home-page invitation more noticeable.
