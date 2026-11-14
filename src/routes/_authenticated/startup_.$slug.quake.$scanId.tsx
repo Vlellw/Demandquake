@@ -3,7 +3,7 @@ import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { ArrowRight, Check, Loader2, Newspaper, Radar, RotateCcw, Search, TriangleAlert, Waves } from "lucide-react";
+import { ArrowRight, Check, Loader2, Radar, RotateCcw, Search, TriangleAlert, Waves } from "lucide-react";
 import { scanDetailQuery, startupDetailQuery } from "@/lib/queries";
 import { useScanDriver } from "@/hooks/use-scan-driver";
 import type { Assessment, AssessmentDimension, ScanChange } from "@/lib/types";
@@ -209,16 +209,6 @@ function QuakePage() {
                   <p className="text-sm text-muted-foreground">No new publications outside the existing evidence were found in this window.</p>
                 )}
               </div>
-              {scan.queries.length > 0 && (
-                <div className="mt-4 flex flex-wrap items-center gap-1.5 border-t border-border pt-4">
-                  <span className="data-label mr-1">Queries</span>
-                  {scan.queries.map((q) => (
-                    <span key={q} className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-xs text-muted-foreground">
-                      <Newspaper className="size-3" /> {q}
-                    </span>
-                  ))}
-                </div>
-              )}
             </section>
 
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border p-5">
