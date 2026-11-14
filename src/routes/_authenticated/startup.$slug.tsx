@@ -323,19 +323,6 @@ function StartupPage() {
                   })}
                 </TabsList>
               </div>
-              <div className="hidden shrink-0 items-center gap-3 lg:flex">
-                {user && existing ? (
-                  <Button asChild size="sm">
-                    <Link to="/workspace/$projectId" params={{ projectId: existing.id }}>
-                      <Flag /> Open workspace
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button size="sm" onClick={claim} disabled={claiming || !ready}>
-                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim · {claimCost} credits
-                  </Button>
-                )}
-              </div>
             </div>
           </div>
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-x-6 gap-y-2 px-4 pt-6 sm:px-6">
@@ -358,21 +345,6 @@ function StartupPage() {
                   <EvidenceMap cluster={detail.cluster} competitors={st.competitors} startup={{ name: st.name, tagline: st.tagline, brand: st.brand }} />
                 </div>
               </section>
-              {detail.cluster && detail.cluster.signals.length > 0 && (
-                <section className="panel p-5">
-                  <div className="flex items-center justify-between">
-                    <ObservedTag count={detail.cluster.signals.length} />
-                  </div>
-                  <ul className="mt-4 grid gap-2 md:grid-cols-2">
-                    {detail.cluster.signals.map((s, i) => (
-                      <li key={i} className="flex items-start gap-3 rounded-lg border border-border p-3">
-                        <p className="flex-1 text-sm text-foreground/90">{s.claim}</p>
-                        <Cite ids={[s.source_id]} />
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              )}
               <section className="panel p-5">
                 <SourceStream sources={evidence} limit={evidence.length} />
               </section>
