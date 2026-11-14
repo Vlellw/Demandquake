@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ArrowRight, Coins, Factory, Loader2, MapPin, Search } from "lucide-react";
 import { toast } from "sonner";
 import { startDiscovery } from "@/lib/research.functions";
-import { EXAMPLE_QUERIES, GEOGRAPHIES, INDUSTRIES } from "@/lib/taxonomy";
+import { EXAMPLE_QUERIES, INDUSTRIES } from "@/lib/taxonomy";
 import { useAuthUser } from "@/hooks/use-auth";
 import { creditAccountQuery, creditCatalogQuery } from "@/lib/credit-queries";
 import { canAfford } from "@/lib/credit-rules";
@@ -13,7 +13,6 @@ import { getStripeEnvironment } from "@/lib/stripe";
 import { InfoTip } from "@/components/common/InfoTip";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const NEXT_STEPS = [
   { n: "1", title: "We read the live web" },
@@ -139,7 +138,6 @@ export function ResearchStep({
     }
   }
 
-  const selectClass = "h-10 w-full gap-2 rounded-full border-ink/40 bg-background px-4 text-sm font-semibold text-foreground sm:w-auto [&>span]:flex-1 [&>span]:text-left";
   const priceLine =
     cost === undefined ? (catalog.isError ? "Credit price unavailable" : "Loading credit price…") : `${cost} credits per successful search · failed research is free`;
 
@@ -172,59 +170,28 @@ export function ResearchStep({
               review();
             }}
           >
-            <label htmlFor="research-query" className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">
+            <label htmlFor="research-query" className="block text-center text-sm font-bold uppercase tracking-[0.06em] text-foreground">
               Your question
             </label>
-            <div className="mt-2 flex items-center gap-3 rounded-[4px] border border-border bg-background px-3 shadow-panel transition-shadow focus-within:shadow-glow">
-              <Search className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <div className="mx-auto mt-3 flex max-w-5xl items-center gap-3 rounded-[4px] border border-border bg-background px-4 shadow-panel transition-shadow focus-within:shadow-glow">
+              <Search className="size-6 shrink-0 text-muted-foreground" aria-hidden="true" />
               <input
                 id="research-query"
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="e.g. Problems small clinics have with booking"
-                className="h-12 min-w-0 flex-1 bg-transparent text-base text-foreground placeholder:text-faint focus:outline-none"
+                className="h-16 min-w-0 flex-1 bg-transparent text-lg text-foreground placeholder:text-faint focus:outline-none sm:text-xl"
                 maxLength={300}
               />
             </div>
 
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-              <span className="text-sm text-muted-foreground">Optional focus:</span>
-              <Select value={industry} onValueChange={setIndustry}>
-                <SelectTrigger className={selectClass} aria-label="Industry focus">
-                  <Factory className="size-4" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any industry</SelectItem>
-                  {INDUSTRIES.map((i) => (
-                    <SelectItem key={i} value={i}>
-                      {i}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={geography} onValueChange={setGeography}>
-                <SelectTrigger className={selectClass} aria-label="Region focus">
-                  <MapPin className="size-4" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any region</SelectItem>
-                  {GEOGRAPHIES.map((g) => (
-                    <SelectItem key={g} value={g}>
-                      {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="mt-6">
-              <p className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">Or start from an example</p>
-              <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-8 text-center">
+              <p className="text-sm font-bold uppercase tracking-[0.06em] text-foreground">Or start from an example</p>
+              <div className="mx-auto mt-4 flex max-w-5xl flex-wrap justify-center gap-3">
                 {EXAMPLE_QUERIES.map((q) => (
-                  <button
+                  <Button
+                    variant="outline"
                     key={q}
                     type="button"
                     onClick={() => {
@@ -232,10 +199,10 @@ export function ResearchStep({
                       inputRef.current?.focus();
                     }}
                     aria-pressed={query === q}
-                    className="cursor-pointer rounded-full border border-ink/40 bg-background px-3.5 py-1.5 text-left text-sm text-foreground transition-colors hover:border-ink aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-primary"
+                    className="h-auto min-h-12 max-w-full whitespace-normal rounded-full border-ink/40 px-5 py-3 text-center text-base leading-snug aria-pressed:border-primary aria-pressed:bg-accent aria-pressed:text-primary sm:text-lg"
                   >
                     {q}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>

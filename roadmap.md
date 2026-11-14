@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Remove optional search-focus controls; center and enlarge the query and example choices; example selection and phone width verified.
 - [x] Compact evidence map with scroll pan and zoom controls; real startup and phone verified.
 - [x] Fix workspace pitch content overlapping its controls and add Recommended actions headline.
 - [ ] Verify workspace pitch visually: requested workspace stays on Loading signal in the available preview session.
