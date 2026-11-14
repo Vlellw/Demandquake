@@ -200,6 +200,233 @@ export type Database = {
           },
         ]
       }
+      credit_admin_bootstrap: {
+        Row: {
+          email: string
+        }
+        Insert: {
+          email: string
+        }
+        Update: {
+          email?: string
+        }
+        Relationships: []
+      }
+      credit_packages: {
+        Row: {
+          active: boolean
+          amount: number
+          credits: number
+          currency: string
+          id: string
+          name: string
+          price_key: string
+          product_key: string
+        }
+        Insert: {
+          active?: boolean
+          amount: number
+          credits: number
+          currency?: string
+          id: string
+          name: string
+          price_key: string
+          product_key: string
+        }
+        Update: {
+          active?: boolean
+          amount?: number
+          credits?: number
+          currency?: string
+          id?: string
+          name?: string
+          price_key?: string
+          product_key?: string
+        }
+        Relationships: []
+      }
+      credit_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          credits: number
+          currency: string
+          environment: string
+          id: string
+          package_id: string
+          payment_intent_id: string | null
+          refunded_amount: number
+          refunded_credits: number
+          session_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          credits: number
+          currency: string
+          environment: string
+          id?: string
+          package_id: string
+          payment_intent_id?: string | null
+          refunded_amount?: number
+          refunded_credits?: number
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          credits?: number
+          currency?: string
+          environment?: string
+          id?: string
+          package_id?: string
+          payment_intent_id?: string | null
+          refunded_amount?: number
+          refunded_credits?: number
+          session_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_reservations: {
+        Row: {
+          cost: number
+          created_at: string
+          environment: string
+          id: string
+          run_id: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          environment: string
+          id: string
+          run_id?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          environment?: string
+          id?: string
+          run_id?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_reservations_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "discovery_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_settings: {
+        Row: {
+          key: string
+          value: number
+        }
+        Insert: {
+          key: string
+          value: number
+        }
+        Update: {
+          key?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      credit_transactions: {
+        Row: {
+          balance_after: number
+          created_at: string
+          delta: number
+          description: string
+          environment: string
+          id: string
+          idempotency_key: string
+          kind: string
+          user_id: string
+        }
+        Insert: {
+          balance_after: number
+          created_at?: string
+          delta: number
+          description: string
+          environment: string
+          id?: string
+          idempotency_key: string
+          kind: string
+          user_id: string
+        }
+        Update: {
+          balance_after?: number
+          created_at?: string
+          delta?: number
+          description?: string
+          environment?: string
+          id?: string
+          idempotency_key?: string
+          kind?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_wallets: {
+        Row: {
+          balance: number
+          environment: string
+          reserved: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          environment: string
+          reserved?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          environment?: string
+          reserved?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_webhook_events: {
+        Row: {
+          created_at: string
+          environment: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          environment: string
+          id: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          id?: string
+        }
+        Relationships: []
+      }
       discovery_runs: {
         Row: {
           completed_at: string | null
@@ -650,6 +877,24 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -658,6 +903,43 @@ export type Database = {
       accept_project_invite: {
         Args: { _display_name: string; _token: string }
         Returns: string
+      }
+      adjust_credit_balance: {
+        Args: {
+          p_delta: number
+          p_env: string
+          p_key: string
+          p_reason: string
+          p_user: string
+        }
+        Returns: number
+      }
+      attach_credit_run: {
+        Args: { p_request: string; p_run: string }
+        Returns: undefined
+      }
+      ensure_credit_wallet: {
+        Args: { p_env: string; p_user: string }
+        Returns: undefined
+      }
+      fulfill_credit_payment: {
+        Args: {
+          p_amount: number
+          p_currency: string
+          p_env: string
+          p_event: string
+          p_intent: string
+          p_payment: string
+          p_session: string
+        }
+        Returns: undefined
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
       }
       is_project_member: {
         Args: { _project: string; _user: string }
@@ -678,13 +960,62 @@ export type Database = {
           tagline: string
         }[]
       }
+      refund_credit_payment: {
+        Args: {
+          p_env: string
+          p_event: string
+          p_intent: string
+          p_refunded: number
+        }
+        Returns: undefined
+      }
+      renew_discovery_reservation: {
+        Args: { p_env: string; p_run: string; p_user: string }
+        Returns: undefined
+      }
+      reserve_discovery_credits: {
+        Args: { p_env: string; p_request: string; p_user: string }
+        Returns: {
+          cost: number
+          created_at: string
+          environment: string
+          id: string
+          run_id: string | null
+          status: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "credit_reservations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reserve_rate_slot: {
         Args: { p_limit: number; p_provider: string; p_window_ms: number }
         Returns: number
       }
+      settle_credit_reservation: {
+        Args: { p_request: string; p_success: boolean }
+        Returns: undefined
+      }
+      start_paid_discovery: {
+        Args: {
+          p_env: string
+          p_expected_cost: number
+          p_force: boolean
+          p_geography: string
+          p_industry: string
+          p_key: string
+          p_query: string
+          p_request: string
+          p_user: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -811,6 +1142,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
