@@ -23,6 +23,8 @@ import { SourceStream } from "@/components/research/SourceStream";
 import { FreshnessBadge, AssessmentStrip } from "@/components/discovery/StartupCard";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { Button } from "@/components/ui/button";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { StatRule } from "@/components/common/StatRule";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthUser } from "@/hooks/use-auth";
@@ -183,26 +185,15 @@ function StartupPage() {
   return (
     <SourceProvider sources={orderedSources} citations={citations}>
       <div style={brandStyle(st.brand)}>
-        {/* BREADCRUMB */}
-        <nav aria-label="Breadcrumb" className="border-b border-border bg-background">
-          <ol className="mx-auto flex max-w-[1400px] items-center gap-2 overflow-x-auto whitespace-nowrap px-4 py-3 text-xs sm:px-6">
-            <li>
-              <Link to="/" hash="startups" className="font-semibold text-foreground underline-offset-4 hover:underline">
-                Discover startups
-              </Link>
-            </li>
-            {st.industry && (
-              <>
-                <li aria-hidden="true" className="text-faint">/</li>
-                <li className="text-muted-foreground">{st.industry}</li>
-              </>
-            )}
-            <li aria-hidden="true" className="text-faint">/</li>
-            <li aria-current="page" className="font-semibold text-primary">
-              {st.name}
-            </li>
-          </ol>
-        </nav>
+        <Breadcrumbs
+          trail={[
+            <Link key="d" to="/" hash="startups">
+              Discover startups
+            </Link>,
+            ...(st.industry ? [st.industry] : []),
+          ]}
+          current={st.name}
+        />
 
         {/* HERO: brand-colored block with the pitch on the right */}
         <section className="brand-banner relative overflow-hidden">
@@ -275,10 +266,10 @@ function StartupPage() {
         <section aria-label="Key numbers" className="bg-surface-sunken">
           <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
             <dl className="mx-auto grid max-w-4xl grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4 sm:gap-x-10">
-              <Stat label="Live sources" value={evidence.length} />
-              <Stat label="Competitors" value={st.competitors.length} />
-              <Stat label="Market scans" value={detail.scans.length} />
-              <Stat label="Founders building" value={st.claim_count} />
+              <StatRule label="Live sources" value={evidence.length} />
+              <StatRule label="Competitors" value={st.competitors.length} />
+              <StatRule label="Market scans" value={detail.scans.length} />
+              <StatRule label="Founders building" value={st.claim_count} />
             </dl>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-center">
               <FreshnessBadge iso={st.research_at} />
@@ -464,15 +455,6 @@ function StartupPage() {
         </section>
       </div>
     </SourceProvider>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="stat-rule flex flex-col-reverse items-center pt-3 text-center">
-      <dt className="mt-1 text-sm text-primary">{label}</dt>
-      <dd className="font-display text-[2rem] font-bold leading-tight text-primary">{value}</dd>
-    </div>
   );
 }
 

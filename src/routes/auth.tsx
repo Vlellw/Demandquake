@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { Loader2, MailCheck } from "lucide-react";
+import { Flag, ListChecks, Loader2, MailCheck, Radar, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { ProviderButtons } from "@/components/auth/ProviderButtons";
-import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
-import { SeismicField } from "@/components/common/SeismicField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -126,20 +124,40 @@ function AuthPage() {
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-3.5rem)] items-center justify-center overflow-hidden px-4 py-12">
-      <div className="bg-hero pointer-events-none absolute inset-0" />
-      <SeismicField className="pointer-events-none absolute inset-x-0 bottom-0 h-48 w-full opacity-40" intensity={0.4} />
-      <div className="panel-raised relative w-full max-w-md p-7">
-        <DemandquakeLogo />
-        <h1 className="mt-6 font-display text-2xl font-semibold text-foreground">
-          {resetMode ? "Reset your password" : search.redirect?.includes("claim=1") ? "Sign in to claim this startup" : "Welcome, founder"}
+    <div className="-mb-24 bg-muted px-4 py-12 sm:px-6 lg:py-16">
+      <div className="mx-auto grid max-w-[1000px] overflow-hidden rounded-[4px] bg-surface shadow-[var(--shadow-panel)] lg:grid-cols-[1fr_1.1fr]">
+        <aside className="hidden flex-col justify-between bg-primary p-10 text-primary-foreground lg:flex">
+          <div>
+            <p className="eyebrow text-primary-foreground/80">Free account</p>
+            <h2 className="mt-2 font-display text-[1.9rem] font-bold leading-tight">Turn an idea into your startup</h2>
+            <p className="mt-3 text-sm leading-relaxed text-primary-foreground/85">Browsing is open to everyone. An account lets you:</p>
+            <ul className="mt-8 space-y-5">
+              {BENEFITS.map((b) => (
+                <li key={b.title} className="flex gap-4">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full border-2 border-primary-foreground/80">
+                    <b.icon className="size-[18px]" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block font-bold">{b.title}</span>
+                    <span className="mt-0.5 block text-sm text-primary-foreground/80">{b.body}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <p className="mt-10 text-xs text-primary-foreground/70">Facts stay linked to their sources and AI suggestions stay labelled — in your workspace too.</p>
+        </aside>
+
+        <div className="p-7 sm:p-10">
+        <h1 className="section-title text-[1.75rem]">
+          {resetMode ? "Reset your password" : search.redirect?.includes("claim=1") ? "Sign in to claim this startup" : tab === "signup" ? "Create your account" : "Sign in"}
         </h1>
-        <p className="mt-1.5 text-sm text-muted-foreground">
-          {resetMode ? "We’ll email you a secure link." : "Claimed startups live in your private workspace with their evidence and validation checklist."}
+        <p className="mt-2 text-sm text-muted-foreground">
+          {resetMode ? "We’ll email you a secure link." : "Your claimed startups live in a private workspace with their sources and testing checklist."}
         </p>
 
         {sentTo ? (
-          <div className="mt-6 rounded-xl border border-observed/30 bg-observed/[0.07] p-5 text-center">
+          <div className="mt-6 rounded-[4px] border border-observed/40 bg-observed/[0.06] p-5 text-center">
             <MailCheck className="mx-auto size-8 text-observed" />
             <p className="mt-3 font-medium text-foreground">Confirm your email</p>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -167,13 +185,17 @@ function AuthPage() {
             <div className="mt-6">
               <ProviderButtons onSignedIn={finish} onBeforeRedirect={rememberTarget} />
             </div>
-            <div className="my-5 flex items-center gap-3 text-[11px] uppercase tracking-wider text-faint">
+            <div className="my-6 flex items-center gap-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               <span className="h-px flex-1 bg-border" /> or with email <span className="h-px flex-1 bg-border" />
             </div>
             <Tabs value={tab} onValueChange={(v) => setTab(v as "signin" | "signup")}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signin">Sign in</TabsTrigger>
-                <TabsTrigger value="signup">Create account</TabsTrigger>
+              <TabsList variant="line" className="w-full justify-start border-b border-border">
+                <TabsTrigger variant="line" value="signin">
+                  I have an account
+                </TabsTrigger>
+                <TabsTrigger variant="line" value="signup">
+                  I’m new here
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="signin">
                 <form onSubmit={onSignIn} className="mt-3 space-y-4">
@@ -184,7 +206,7 @@ function AuthPage() {
                   <div className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <Label htmlFor="password">Password</Label>
-                      <button type="button" onClick={() => setResetMode(true)} className="text-xs text-muted-foreground hover:text-foreground">
+                      <button type="button" onClick={() => setResetMode(true)} className="text-xs font-semibold text-primary underline-offset-4 hover:underline">
                         Forgot password?
                       </button>
                     </div>
@@ -218,10 +240,21 @@ function AuthPage() {
             </Tabs>
           </>
         )}
-        <p className="mt-6 text-center text-xs text-muted-foreground">
-          Browsing is open to everyone. <Link to="/" className="text-foreground underline-offset-4 hover:underline">Keep exploring</Link>
+        <p className="mt-8 border-t border-border pt-5 text-center text-xs text-muted-foreground">
+          Just looking? Browsing is open to everyone.{" "}
+          <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
+            Keep exploring
+          </Link>
         </p>
+        </div>
       </div>
     </div>
   );
 }
+
+const BENEFITS = [
+  { icon: Flag, title: "Claim a startup", body: "Copy its research into a private workspace that’s yours to edit." },
+  { icon: ListChecks, title: "Track what you test", body: "Tick off experiments, keep notes and record what customers say." },
+  { icon: Users, title: "Build with co-founders", body: "Invite people with a link and edit the workspace together." },
+  { icon: Radar, title: "Watch your market", body: "Run market scans to see what changed since the research." },
+];

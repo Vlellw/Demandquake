@@ -35,7 +35,7 @@ function StatusLine({ status }: { status: string }) {
 export function RecentRuns({ runs }: { runs: RunDTO[] }) {
   if (runs.length === 0) return null;
   return (
-    <section aria-labelledby="runs-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
+    <section id="latest-research" aria-labelledby="runs-heading" className="mx-auto max-w-[1400px] px-4 pt-20 sm:px-6">
       <SectionHeading
         id="runs-heading"
         eyebrow="Stay up to date"

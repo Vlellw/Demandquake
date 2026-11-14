@@ -6,7 +6,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 import {
-  ArrowLeft,
   ArrowRight,
   Check,
   CheckCircle2,
@@ -37,6 +36,7 @@ import { SourceFavicon } from "@/components/common/SourceFavicon";
 import { LevelMeter } from "@/components/common/LevelMeter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -134,57 +134,67 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
 
   return (
     <div style={brandStyle(p.brand)}>
-      <section className="relative overflow-hidden border-b border-border">
-        <div className="brand-surface pointer-events-none absolute inset-0 opacity-40" />
-        <div className="relative mx-auto max-w-[1300px] px-4 py-8 sm:px-6">
+      <Breadcrumbs
+        trail={[
+          <Link key="h" to="/">
+            Home
+          </Link>,
+          <Link key="w" to="/workspace">
+            My startups
+          </Link>,
+        ]}
+        current={p.name || initial.name}
+      />
+      <section className="border-b border-border bg-surface">
+        <div className="mx-auto max-w-[1300px] px-4 pb-8 pt-8 sm:px-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <Link to="/workspace" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="size-4" /> My startups
-            </Link>
+            <div className="flex flex-wrap items-center gap-2">
+              {p.is_owner ? <Badge variant="positive">Claimed by you</Badge> : <Badge variant="observed">Shared by {p.owner_name ?? "the founder"}</Badge>}
+              {r.startup_slug && (
+                <Link to="/startup/$slug" params={{ slug: r.startup_slug }} className="inline-flex items-center gap-1 text-xs font-semibold text-primary underline-offset-4 hover:underline">
+                  See the public research page <ExternalLink className="size-3" />
+                </Link>
+              )}
+            </div>
             <SaveIndicator state={state} savedAt={savedAt} onRetry={retry} />
           </div>
-          <div className="mt-6 flex flex-wrap items-start gap-5">
+          <div className="mt-5 flex flex-col items-start gap-5 sm:flex-row">
             <StartupMark brand={p.brand} size="xl" />
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                {p.is_owner ? (
-                  <Badge variant="positive">Claimed by you</Badge>
-                ) : (
-                  <Badge variant="observed">Shared by {p.owner_name ?? "the founder"}</Badge>
-                )}
-                {r.startup_slug && (
-                  <Link to="/startup/$slug" params={{ slug: r.startup_slug }} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-                    Public research profile <ExternalLink className="size-3" />
-                  </Link>
-                )}
-              </div>
+            <div className="w-full min-w-0 flex-1">
               <Input
                 aria-label="Startup name"
                 value={p.name}
                 onChange={(e) => update({ name: e.target.value.slice(0, 80) })}
                 onBlur={() => !p.name.trim() && update({ name: initial.name }, { immediate: true })}
-                className="mt-2 h-auto border-transparent bg-transparent px-0 font-display text-4xl font-semibold text-foreground shadow-none focus-visible:border-border focus-visible:px-2 md:text-4xl"
+                className="h-auto rounded-[4px] border-transparent bg-transparent px-0 font-display text-4xl font-bold text-primary shadow-none hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2 md:text-[2.6rem]"
               />
-              <Input
+              <Textarea
                 aria-label="Tagline"
+                rows={1}
                 value={p.tagline ?? ""}
-                onChange={(e) => update({ tagline: e.target.value.slice(0, 240) })}
+                onChange={(e) => update({ tagline: e.target.value.replace(/\s*\n\s*/g, " ").slice(0, 240) })}
+                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), e.currentTarget.blur())}
                 placeholder="One-line pitch"
-                className="mt-1 h-auto border-transparent bg-transparent px-0 text-lg text-foreground/85 shadow-none focus-visible:border-border focus-visible:px-2"
+                className="mt-1 min-h-0 resize-none rounded-[4px] border-transparent bg-transparent px-0 py-1 text-lg text-foreground shadow-none [field-sizing:content] hover:border-border hover:px-2 focus-visible:border-border focus-visible:px-2 md:text-lg"
               />
+              <p className="mt-2 text-sm text-muted-foreground">
+                Click the name or pitch to edit. Work through the checklist, test your assumptions and plan the roadmap below — everything saves automatically
+                {shared ? " and your co-founders see your changes." : "."}
+              </p>
             </div>
-          </div>
-
-          <div className="mt-7 grid gap-3 sm:grid-cols-3">
-            <Progress label="Validation checklist" done={pr.checksDone} total={pr.checks} />
-            <Progress label="Assumptions tested" done={pr.tested} total={pr.assumptions} detail={`${pr.validated} validated · ${pr.invalidated} invalidated`} />
-            <Progress label="Roadmap items" done={pr.itemsDone} total={pr.items} />
           </div>
         </div>
       </section>
+      <section aria-label="Progress" className="bg-muted">
+        <div className="mx-auto grid max-w-[1300px] gap-4 px-4 py-6 sm:grid-cols-3 sm:px-6">
+          <Progress label="Validation checklist" done={pr.checksDone} total={pr.checks} />
+          <Progress label="Assumptions tested" done={pr.tested} total={pr.assumptions} detail={`${pr.validated} validated · ${pr.invalidated} invalidated`} />
+          <Progress label="Roadmap items done" done={pr.itemsDone} total={pr.items} />
+        </div>
+      </section>
 
-      <div className="mx-auto grid max-w-[1300px] gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-6">
+      <div className="mx-auto grid max-w-[1300px] grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="min-w-0 space-y-6">
           <section className="panel p-5">
             <p className="eyebrow">Your concept</p>
             <Textarea
@@ -202,7 +212,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           <RoadmapSection project={p} update={update} />
         </div>
 
-        <aside className="space-y-6">
+        <aside className="min-w-0 space-y-6">
           {p.pitch.slides.length > 0 && (
             <PitchPlayer
               slides={p.pitch.slides}
@@ -282,16 +292,16 @@ function SaveIndicator({ state, savedAt, onRetry }: { state: SaveState; savedAt:
 
 function Progress({ label, done, total, detail }: { label: string; done: number; total: number; detail?: string }) {
   return (
-    <div className="rounded-xl border border-border bg-surface/70 p-4 backdrop-blur">
+    <div className="stat-rule bg-surface p-4 pt-3 shadow-[var(--shadow-panel)]">
       <div className="flex items-baseline justify-between">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className="font-display text-xl font-semibold text-foreground">
+        <p className="text-sm font-semibold text-foreground">{label}</p>
+        <p className="font-display text-2xl font-bold text-primary">
           {done}
-          <span className="text-sm text-muted-foreground">/{total}</span>
+          <span className="text-sm font-semibold text-muted-foreground"> of {total}</span>
         </p>
       </div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
-        <motion.div className="brand-fill h-full rounded-full" animate={{ width: total ? `${(done / total) * 100}%` : "0%" }} />
+      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+        <motion.div className="h-full rounded-full bg-primary" animate={{ width: total ? `${(done / total) * 100}%` : "0%" }} />
       </div>
       {detail && <p className="mt-1.5 text-[11px] text-muted-foreground">{detail}</p>}
     </div>
@@ -359,7 +369,7 @@ function AssumptionsBoard({ project: p, update }: { project: ProjectDTO; update:
         {ASSUMPTION_COLUMNS.map((col) => {
           const items = p.assumptions.filter((a) => a.status === col.status);
           return (
-            <div key={col.status} className="rounded-xl border border-border bg-surface-sunken/50 p-3">
+            <div key={col.status} className="rounded-[4px] border border-border bg-muted p-3">
               <p className={cn("flex items-center gap-1.5 text-xs font-medium", col.tone)}>
                 {col.icon} {col.label} <span className="ml-auto font-mono text-muted-foreground">{items.length}</span>
               </p>

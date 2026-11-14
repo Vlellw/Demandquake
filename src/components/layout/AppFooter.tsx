@@ -1,18 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUp, BookOpen, Compass } from "lucide-react";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
+import { useAuthUser } from "@/hooks/use-auth";
 
 const LINKS = [
   { to: "/", label: "Discover startups" },
   { to: "/method", label: "How it works" },
   { to: "/workspace", label: "My startups" },
-  { to: "/auth", label: "Sign in" },
 ] as const;
 
 const circle =
   "grid size-10 place-items-center rounded-full border border-ink text-foreground transition-colors hover:bg-ink hover:text-ink-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 export function AppFooter() {
+  const { user, ready } = useAuthUser();
   return (
     <footer className="mt-24 border-t border-border bg-background">
       <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
@@ -35,6 +36,13 @@ export function AppFooter() {
                   </Link>
                 </li>
               ))}
+              {ready && !user && (
+                <li>
+                  <Link to="/auth" className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground underline-offset-4 hover:underline">
+                    Sign in
+                  </Link>
+                </li>
+              )}
             </ul>
             <p className="mt-5 text-xs text-muted-foreground">
               © {new Date().getUTCFullYear()} Demandquake · Research powered by Context.dev

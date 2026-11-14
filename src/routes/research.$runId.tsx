@@ -4,7 +4,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
-import { ArrowLeft, Clock3, Hourglass, Loader2, RotateCcw, Search, Sparkles, TriangleAlert } from "lucide-react";
+import { Clock3, Hourglass, Loader2, RotateCcw, Search, Sparkles, TriangleAlert } from "lucide-react";
 import { runDetailQuery } from "@/lib/queries";
 import { retryDiscovery } from "@/lib/research.functions";
 import { useRunDriver } from "@/hooks/use-run-driver";
@@ -14,6 +14,8 @@ import { ResearchConstellation } from "@/components/research/ResearchConstellati
 import { StartupCard } from "@/components/discovery/StartupCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { StatRule } from "@/components/common/StatRule";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { SourceFavicon } from "@/components/common/SourceFavicon";
 import { industryColor } from "@/lib/taxonomy";
@@ -105,13 +107,19 @@ function ResearchPage() {
 
   return (
     <div className="relative">
-      <div className="bg-hero pointer-events-none absolute inset-x-0 top-0 h-[420px]" />
-      <div className="relative mx-auto max-w-[1400px] px-4 py-8 sm:px-6">
-        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="size-4" /> Discovery
-        </Link>
-
-        <header className="mt-5 flex flex-wrap items-start justify-between gap-6">
+      <Breadcrumbs
+        trail={[
+          <Link key="d" to="/" hash="startups">
+            Discover startups
+          </Link>,
+          <Link key="r" to="/" hash="latest-research">
+            Latest research
+          </Link>,
+        ]}
+        current={run.query}
+      />
+      <div className="relative mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
+        <header className="flex flex-wrap items-start justify-between gap-8">
           <div className="max-w-3xl">
             <div className="flex flex-wrap items-center gap-2">
               {isDone ? (
@@ -127,13 +135,14 @@ function ResearchPage() {
                   Researching the live web
                 </Badge>
               )}
-              <span className="inline-flex items-center gap-1 font-mono text-xs text-muted-foreground">
+              <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                 <Clock3 className="size-3.5" /> {elapsed}
               </span>
-              <span className="font-mono text-xs text-faint">started <TimeAgo iso={run.created_at} /></span>
+              <span className="text-xs text-muted-foreground">started <TimeAgo iso={run.created_at} /></span>
             </div>
-            <h1 className="mt-3 font-display text-3xl font-semibold leading-tight text-foreground sm:text-4xl">“{run.query}”</h1>
-            {run.plan.interpretation && <p className="mt-3 text-muted-foreground">{run.plan.interpretation}</p>}
+            <p className="eyebrow mt-4">Research question</p>
+            <h1 className="section-title mt-2 text-3xl sm:text-[2.5rem]">“{run.query}”</h1>
+            {run.plan.interpretation && <p className="mt-4 text-base leading-relaxed text-foreground">{run.plan.interpretation}</p>}
             <div className="mt-3 flex flex-wrap gap-2">
               {(run.plan.industry || run.industry) && (
                 <Badge variant="outline">
@@ -144,18 +153,11 @@ function ResearchPage() {
               {(run.plan.geography || run.geography) && <Badge variant="outline">{run.plan.geography ?? run.geography}</Badge>}
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-border bg-border text-center">
-            {[
-              { label: "Sources", value: evidence.length },
-              { label: "Problems", value: detail.clusters.length },
-              { label: "Startups", value: detail.startups.length },
-            ].map((s) => (
-              <div key={s.label} className="bg-surface px-5 py-3">
-                <p className="eyebrow">{s.label}</p>
-                <p className="mt-1 font-display text-2xl font-semibold text-foreground">{s.value}</p>
-              </div>
-            ))}
-          </div>
+          <dl className="grid w-full grid-cols-3 gap-6 sm:w-auto sm:min-w-[22rem]">
+            <StatRule label="Sources read" value={evidence.length} />
+            <StatRule label="Problems found" value={detail.clusters.length} />
+            <StatRule label="Startups" value={detail.startups.length} />
+          </dl>
         </header>
 
         {waitSecs > 0 && !isDone && !isFailed && (
@@ -166,7 +168,7 @@ function ResearchPage() {
         )}
 
         {isFailed && (
-          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-xl border border-negative/30 bg-negative/[0.07] px-4 py-3">
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-[4px] border border-negative/40 bg-negative/[0.06] px-4 py-3">
             <TriangleAlert className="size-4 text-negative" />
             <p className="flex-1 text-sm text-foreground/90">{driverError ?? run.error ?? "This research step failed."} No results were invented — completed steps are kept.</p>
             <Button variant="outline" size="sm" onClick={onRetry} disabled={retrying}>
@@ -177,7 +179,7 @@ function ResearchPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[280px_1fr]">
           <aside className="panel h-fit p-5 lg:sticky lg:top-20">
-            <p className="eyebrow mb-4">Pipeline</p>
+            <p className="eyebrow mb-4">Research steps</p>
             <StageRail detail={detail} />
             <div className="mt-6 space-y-1.5 border-t border-border pt-4 text-[11px] text-muted-foreground">
               <p className="flex items-center gap-1.5">
@@ -186,7 +188,7 @@ function ResearchPage() {
               <p className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full border border-dashed border-inferred" /> AI synthesis — to validate
               </p>
-              {run.stats.credits_used ? <p className="pt-1 font-mono text-faint">{run.stats.credits_used} research credits used</p> : null}
+              {run.stats.credits_used ? <p className="pt-1 text-muted-foreground">{run.stats.credits_used} research credits used</p> : null}
             </div>
           </aside>
 

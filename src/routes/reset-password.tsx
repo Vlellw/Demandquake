@@ -67,10 +67,10 @@ function ResetPasswordPage() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center px-4 py-12">
+    <div className="flex min-h-[calc(100vh-3.5rem)] items-start justify-center -mb-24 bg-muted px-4 py-16">
       <div className="panel-raised w-full max-w-md p-7">
-        <KeyRound className="size-6 text-primary" />
-        <h1 className="mt-4 font-display text-2xl font-semibold text-foreground">Choose a new password</h1>
+        <span className="flex size-11 items-center justify-center rounded-full border-2 border-primary text-primary"><KeyRound className="size-5" aria-hidden="true" /></span>
+        <h1 className="section-title mt-4 text-[1.75rem]">Choose a new password</h1>
         {!ready ? (
           <Loader2 className="mt-6 size-5 animate-spin text-muted-foreground" />
         ) : !valid ? (

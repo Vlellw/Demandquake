@@ -64,10 +64,10 @@ function InvitePage() {
           : "This invite link doesn’t exist.";
     return (
       <div className="mx-auto max-w-md px-4 py-24 text-center">
-        <span className="mx-auto grid size-12 place-items-center rounded-2xl border border-border bg-surface-raised">
-          <Link2Off className="size-5 text-muted-foreground" />
+        <span className="mx-auto grid size-12 place-items-center rounded-full border-2 border-primary text-primary">
+          <Link2Off className="size-5" aria-hidden="true" />
         </span>
-        <h1 className="mt-5 font-display text-2xl font-semibold text-foreground">Invite unavailable</h1>
+        <h1 className="section-title mt-5 text-2xl">Invite unavailable</h1>
         <p className="mt-2 text-sm text-muted-foreground">{copy} Ask the founder to send you a new one.</p>
         <Button asChild variant="outline" className="mt-6">
           <Link to="/">Explore opportunities</Link>
@@ -77,13 +77,14 @@ function InvitePage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-20" style={brandStyle(invite.brand)}>
-      <div className="panel relative overflow-hidden p-8 text-center">
-        <div className="brand-surface pointer-events-none absolute inset-x-0 top-0 h-28 opacity-50" />
-        <div className="relative">
-          <StartupMark brand={invite.brand} size="xl" className="mx-auto" />
+    <div className="-mb-24 bg-muted px-4 py-16" style={brandStyle(invite.brand)}>
+      <div className="mx-auto max-w-lg overflow-hidden rounded-[4px] bg-surface text-center shadow-[var(--shadow-panel)]">
+        <div className="brand-banner flex h-28 items-end justify-center">
+          <StartupMark brand={invite.brand} size="xl" className="translate-y-1/2 ring-4 ring-surface" />
+        </div>
+        <div className="px-8 pb-8 pt-12">
           <p className="eyebrow mt-6">{invite.status === "valid" ? "Co-founder invite" : "Your workspace"}</p>
-          <h1 className="mt-2 font-display text-3xl font-semibold text-foreground">{invite.project_name}</h1>
+          <h1 className="section-title mt-2 text-3xl">{invite.project_name}</h1>
           {invite.tagline && <p className="mt-2 text-muted-foreground">{invite.tagline}</p>}
           <p className="mt-6 text-sm text-foreground/85">
             {invite.status === "owner"

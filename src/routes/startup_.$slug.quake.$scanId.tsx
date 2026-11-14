@@ -3,7 +3,7 @@ import { TimeAgo } from "@/components/common/TimeAgo";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { ArrowLeft, ArrowRight, Check, Loader2, Newspaper, Radar, RotateCcw, Search, TriangleAlert, Waves } from "lucide-react";
+import { ArrowRight, Check, Loader2, Newspaper, Radar, RotateCcw, Search, TriangleAlert, Waves } from "lucide-react";
 import { scanDetailQuery, startupDetailQuery } from "@/lib/queries";
 import { useScanDriver } from "@/hooks/use-scan-driver";
 import type { Assessment, AssessmentDimension, ScanChange } from "@/lib/types";
@@ -17,6 +17,8 @@ import { InferredTag, ObservedTag } from "@/components/common/Provenance";
 import { SourceProvider, Cite } from "@/components/startup/SourceDrawer";
 import { SourceStream } from "@/components/research/SourceStream";
 import { Badge } from "@/components/ui/badge";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { StatRule } from "@/components/common/StatRule";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
@@ -31,7 +33,7 @@ export const Route = createFileRoute("/startup_/$slug/quake/$scanId")({
     return { name: startup.startup.name, headline: scan.scan.headline };
   },
   head: ({ loaderData }) => {
-    const title = loaderData ? `Opportunity Quake: ${loaderData.name} | Demandquake` : "Opportunity Quake | Demandquake";
+    const title = loaderData ? `Market scan: ${loaderData.name} | Demandquake` : "Market scan | Demandquake";
     const description = loaderData?.headline
       ? `${loaderData.headline} — a live market scan of ${loaderData.name}.`
       : "A live market scan comparing new web developments against a startup opportunity.";
@@ -104,29 +106,38 @@ function QuakePage() {
   return (
     <SourceProvider sources={allSources} citations={changeCitations}>
       <div style={brandStyle(st.brand)}>
+        <Breadcrumbs
+          trail={[
+            <Link key="d" to="/" hash="startups">
+              Discover startups
+            </Link>,
+            <Link key="s" to="/startup/$slug" params={{ slug }} search={{ tab: "updates" }}>
+              {st.name}
+            </Link>,
+          ]}
+          current={`Market scan · ${formatDate(scan.created_at)}`}
+        />
         <section className="relative overflow-hidden border-b border-border">
           <div className="bg-hero pointer-events-none absolute inset-0" />
           <SeismicField className="pointer-events-none absolute inset-x-0 bottom-0 h-40 w-full opacity-60" intensity={intensity} />
           <div className="relative mx-auto max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
-            <Link to="/startup/$slug" params={{ slug }} search={{ tab: "updates" }} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
-              <ArrowLeft className="size-4" /> {st.name}
-            </Link>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <StartupMark brand={st.brand} size="md" />
               <div>
                 <p className="eyebrow flex items-center gap-1.5 text-primary">
-                  <Radar className="size-3.5" /> Opportunity Quake
+                  <Radar className="size-3.5" /> Market scan
                 </p>
                 <p className="font-display text-lg font-semibold text-foreground">{st.name}</p>
               </div>
-              <span className="ml-auto font-mono text-[11px] text-muted-foreground">
-                Scan started {formatDateTime(scan.created_at)} · window {scan.window_days} days
+              <span className="ml-auto text-xs text-muted-foreground">
+                Started {formatDateTime(scan.created_at)} · looked back {scan.window_days} days
               </span>
             </div>
 
             {!done && !failed && (
               <div className="mt-10 max-w-2xl">
-                <h1 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">Listening for tremors in the market…</h1>
+                <h1 className="section-title text-3xl sm:text-4xl">Checking the market for news…</h1>
+                <p className="mt-3 text-base text-muted-foreground">This takes about 30 seconds. You can stay on this page — it updates by itself.</p>
                 <ol className="mt-6 space-y-3">
                   <ScanStep active={scan.status === "fetching"} done={scan.status !== "fetching"} icon={<Search className="size-4" />}>
                     Searching Context.dev news and web for developments in the last {scan.window_days} days
@@ -141,7 +152,7 @@ function QuakePage() {
             )}
 
             {failed && (
-              <div className="mt-10 max-w-2xl rounded-xl border border-negative/30 bg-negative/[0.07] p-5">
+              <div className="mt-10 max-w-2xl rounded-[4px] border border-negative/40 bg-negative/[0.06] p-5">
                 <p className="flex items-center gap-2 font-display text-xl font-semibold text-foreground">
                   <TriangleAlert className="size-5 text-negative" /> The scan couldn’t finish
                 </p>
@@ -157,13 +168,13 @@ function QuakePage() {
             {done && (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="mt-10 max-w-3xl">
                 <Badge variant={verdict.badge}>{verdict.label}</Badge>
-                <h1 className="mt-3 font-display text-3xl font-semibold leading-tight text-foreground sm:text-[2.6rem]">{scan.headline}</h1>
-                {scan.summary && <p className="mt-4 text-[15px] leading-relaxed text-foreground/85">{scan.summary}</p>}
-                <div className="mt-6 flex flex-wrap gap-3">
+                <h1 className="section-title mt-3 text-3xl sm:text-[2.6rem]">{scan.headline}</h1>
+                {scan.summary && <p className="mt-4 text-base leading-relaxed text-foreground">{scan.summary}</p>}
+                <dl className="mt-8 grid max-w-xl grid-cols-3 gap-6">
                   <Magnitude label="New publications reviewed" value={scan.candidates_count} />
                   <Magnitude label="Relevant changes" value={scan.changes.length} />
                   <Magnitude label="Dimensions affected" value={changedDimensions(scan.assessment_before, scan.assessment_after).length} />
-                </div>
+                </dl>
               </motion.div>
             )}
           </div>
@@ -244,8 +255,8 @@ function QuakePage() {
 
 function ScanStep({ active, done, icon, children }: { active: boolean; done: boolean; icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <li className={cn("flex items-center gap-3 rounded-xl border p-4 transition-colors", active ? "border-primary/40 bg-primary/[0.06]" : "border-border")}>
-      <span className={cn("flex size-8 items-center justify-center rounded-lg", done ? "bg-positive/15 text-positive" : active ? "bg-primary/15 text-primary" : "bg-foreground/5 text-muted-foreground")}>
+    <li className={cn("flex items-center gap-3 rounded-[4px] border bg-surface p-4 transition-colors", active ? "border-primary/50 shadow-[inset_3px_0_0_var(--primary)]" : "border-border")}>
+      <span className={cn("flex size-8 items-center justify-center rounded-full", done ? "bg-positive/15 text-positive" : active ? "bg-primary/15 text-primary" : "bg-foreground/5 text-muted-foreground")}>
         {done ? <Check className="size-4" /> : active ? <Loader2 className="size-4 animate-spin" /> : icon}
       </span>
       <span className={cn("text-sm", active || done ? "text-foreground" : "text-muted-foreground")}>{children}</span>
@@ -254,12 +265,7 @@ function ScanStep({ active, done, icon, children }: { active: boolean; done: boo
 }
 
 function Magnitude({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-xl border border-border bg-surface/70 px-4 py-3 backdrop-blur">
-      <p className="data-label">{label}</p>
-      <p className="mt-1 font-display text-2xl font-semibold text-foreground">{value}</p>
-    </div>
-  );
+  return <StatRule label={label} value={value} align="left" />;
 }
 
 function ChangeCard({ change, index }: { change: ScanChange; index: number }) {
