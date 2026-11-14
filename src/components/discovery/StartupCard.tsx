@@ -7,7 +7,7 @@ import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/St
 import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { Badge } from "@/components/ui/badge";
 import { DIMENSION_KEYS, type Level } from "@/lib/types";
-import { DIMENSION_META, LEVEL_META, industryColor } from "@/lib/taxonomy";
+import { DIMENSION_META, LEVEL_META } from "@/lib/taxonomy";
 import { freshnessOf } from "@/lib/research-utils";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
