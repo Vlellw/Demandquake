@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowUp, BookOpen, Compass } from "lucide-react";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
+import { InfoTip } from "@/components/common/InfoTip";
 import { useAuthUser } from "@/hooks/use-auth";
 
 const LINKS = [
@@ -17,12 +18,14 @@ export function AppFooter() {
   return (
     <footer className="mt-24 border-t border-border bg-background">
       <div className="mx-auto max-w-[1400px] px-4 py-10 sm:px-6">
-        <DemandquakeLogo />
-        <p className="mt-4 max-w-xl text-sm leading-relaxed text-foreground">
-          Demandquake reads the live web, finds problems businesses keep describing, and turns them into startup ideas
-          signed-in founders can explore and claim. It shows evidence, not guarantees: problems found online do not prove that
-          customers will pay, so validate before you build.
-        </p>
+        <div className="flex items-center gap-3">
+          <DemandquakeLogo />
+          <InfoTip label="About Demandquake" align="start">
+            Demandquake reads the live web, finds problems businesses keep describing, and turns them into startup ideas
+            signed-in founders can explore and claim. It shows evidence, not guarantees: problems found online do not prove that
+            customers will pay, so validate before you build.
+          </InfoTip>
+        </div>
         <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <ul className="flex flex-wrap gap-x-6 gap-y-2">

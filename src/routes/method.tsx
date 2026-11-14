@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Boxes, Brain, CircleAlert, FileSearch, Flag, Globe2, Radar, Scale, ShieldCheck, Sparkles, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/common/SectionHeading";
+import { InfoTip } from "@/components/common/InfoTip";
 import { ObservedTag, InferredTag } from "@/components/common/Provenance";
 import { LevelMeter } from "@/components/common/LevelMeter";
 import { cn } from "@/lib/utils";
@@ -197,8 +198,12 @@ function MethodPage() {
       <section className="bg-primary text-primary-foreground">
         <div className="mx-auto flex max-w-[1200px] flex-col items-start gap-6 px-4 py-14 sm:px-6 md:flex-row md:items-center md:justify-between">
           <div>
-            <h2 className="font-display text-2xl font-bold sm:text-3xl">Ready to look around?</h2>
-            <p className="mt-2 text-primary-foreground/85">Create a free account to browse every startup and its sources. Claiming one costs credits, and new accounts get welcome credits.</p>
+            <h2 className="font-display text-2xl font-bold sm:text-3xl">
+              Ready to look around?{" "}
+              <InfoTip label="About getting started" align="start" className="border-primary-foreground/60 text-primary-foreground hover:border-primary-foreground hover:bg-primary-foreground/10">
+                Create a free account to browse every startup and its sources. Claiming one costs credits, and new accounts get welcome credits.
+              </InfoTip>
+            </h2>
           </div>
           <Button asChild variant="glass" size="lg">
             <Link to="/discover">
