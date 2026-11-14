@@ -195,7 +195,6 @@ function ResearchPage() {
               <p className="flex items-center gap-1.5">
                 <span className="size-2 rounded-full border border-dashed border-inferred" /> AI synthesis — to validate
               </p>
-              {run.stats.credits_used ? <p className="pt-1 text-muted-foreground">{run.stats.credits_used} Context.dev provider credits used (not your account balance)</p> : null}
             </div>
           </aside>
 
