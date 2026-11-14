@@ -5,8 +5,7 @@ import { JOURNEY_STEPS, journeyStatuses, type JourneyStepNumber } from "@/lib/jo
 import { cn } from "@/lib/utils";
 
 /**
- * Founder journey tracker (Choose → Inspect → Claim), drawn like Lindström's segmented progress bars:
- * numbered circles, a bold label and a navy rule under every step that is done or current.
+ * Compact founder journey navigation with a filled current step and quiet completed states.
  * `renderStep` can wrap a step in a link or button; return undefined to keep it static.
  */
 export function JourneySteps({
@@ -24,28 +23,28 @@ export function JourneySteps({
   const [target, setTarget] = useState<HTMLElement | null>(null);
   useEffect(() => setTarget(document.getElementById("header-journey")), []);
   const tracker = (
-    <nav aria-label="Your progress" className={cn("border-b border-border bg-background", className)}>
-      <ol className="mx-auto grid max-w-[1400px] grid-cols-4 gap-1 px-0 sm:gap-3">
+    <nav aria-label="Your progress" className={cn("min-w-0 bg-background py-1", className)}>
+      <ol className="mx-auto grid max-w-[1400px] grid-cols-4 gap-1 rounded-full bg-muted p-1 sm:gap-1.5">
         {JOURNEY_STEPS.map((s, i) => {
           const status = statuses[i] ?? "upcoming";
           const content = (
             <>
               <span
                 className={cn(
-                  "grid size-8 shrink-0 place-items-center rounded-full border-2 text-sm font-bold transition-colors sm:size-9",
-                  status === "current" && "border-primary bg-primary text-primary-foreground",
-                  status === "done" && "border-primary bg-background text-primary",
-                  status === "upcoming" && "border-border-strong bg-background text-muted-foreground",
+                  "grid size-5 shrink-0 place-items-center rounded-full text-[0.625rem] font-semibold transition-colors motion-reduce:transition-none sm:size-6 sm:text-xs",
+                  status === "current" && "bg-primary-foreground/20 text-primary-foreground",
+                  status === "done" && "bg-primary/10 text-primary",
+                  status === "upcoming" && "bg-background text-muted-foreground",
                 )}
                 aria-hidden="true"
               >
-                {status === "done" ? <Check className="size-4" strokeWidth={3} /> : s.n}
+                {status === "done" ? <Check className="size-3 sm:size-3.5" strokeWidth={2.5} /> : s.n}
               </span>
-              <span className="min-w-0 text-left">
+              <span className="min-w-0 text-center sm:text-left">
                 <span
                   className={cn(
-                    "block truncate text-sm font-bold",
-                    status === "upcoming" ? "text-muted-foreground" : status === "current" ? "text-primary" : "text-foreground",
+                    "block text-[0.5625rem] font-semibold sm:text-xs xl:text-sm",
+                    status === "upcoming" ? "text-muted-foreground" : status === "current" ? "text-primary-foreground" : "text-primary",
                   )}
                 >
                   <span className="xl:hidden">{s.short}</span>
@@ -55,14 +54,14 @@ export function JourneySteps({
               <span className="sr-only">{status === "done" ? "(done)" : status === "current" ? "(you are here)" : "(next)"}</span>
             </>
           );
-          const cls = "group flex w-full min-w-0 items-center gap-1 py-3.5 sm:gap-2 sm:py-4";
+          const cls = "group flex h-11 w-full min-w-0 flex-col items-center justify-center gap-0.5 rounded-full px-0.5 transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:h-10 sm:flex-row sm:gap-2 sm:px-2";
           return (
             <li
               key={s.key}
               aria-current={status === "current" ? "step" : undefined}
               className={cn(
-                "relative min-w-0 after:absolute after:inset-x-0 after:bottom-0 after:h-[3px] after:rounded-full",
-                status === "upcoming" ? "after:bg-border" : "after:bg-primary",
+                "min-w-0 rounded-full transition-colors motion-reduce:transition-none",
+                status === "current" ? "bg-primary" : "has-[a:hover]:bg-background has-[button:hover]:bg-background",
               )}
             >
               {renderStep?.(s.n, content, cls) ?? <div className={cls}>{content}</div>}

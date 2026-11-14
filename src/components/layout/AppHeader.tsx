@@ -100,12 +100,12 @@ export function AppHeader() {
       </div>
 
       <header className="sticky top-0 z-40 border-b border-border bg-background">
-        <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-4 px-4 sm:px-6">
+        <div className="mx-auto flex min-h-16 max-w-[1400px] flex-wrap items-center gap-x-4 gap-y-0 px-4 py-2 sm:px-6 md:h-16 md:flex-nowrap md:py-0">
           <Link to="/" className="shrink-0" aria-label="Demandquake home">
             <DemandquakeLogo />
           </Link>
 
-          <div id="header-journey" className="ml-auto min-w-0 flex-1" />
+          <div id="header-journey" className="order-last w-full min-w-0 empty:hidden md:order-none md:ml-auto md:w-auto md:flex-1" />
           <div className="ml-auto flex items-center gap-1 md:ml-4">
             <button
               type="button"
