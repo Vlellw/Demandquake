@@ -345,6 +345,29 @@ function StartupPage() {
                   <EvidenceMap cluster={detail.cluster} competitors={st.competitors} startup={{ name: st.name, tagline: st.tagline, brand: st.brand }} />
                 </div>
               </section>
+              {st.problem.facts.length > 0 && (
+                <section className="panel p-5">
+                  <div className="flex items-center justify-between">
+                    <h2 className="font-display text-xl font-semibold text-foreground">What the sources say</h2>
+                    <ObservedTag count={st.problem.facts.length} label="Cited facts" />
+                  </div>
+                  <ul className="mt-4 space-y-2.5">
+                    {st.problem.facts.map((f, i) => (
+                      <motion.li
+                        key={i}
+                        initial={{ opacity: 0, x: -6 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.05 }}
+                        className="prov-observed flex items-start gap-3 rounded-lg p-3"
+                      >
+                        <p className="flex-1 text-sm leading-relaxed text-foreground/90">{f.claim}</p>
+                        <Cite ids={f.source_ids} />
+                      </motion.li>
+                    ))}
+                  </ul>
+                </section>
+              )}
               <section className="panel p-5">
                 <SourceStream sources={evidence} limit={evidence.length} />
               </section>
@@ -552,29 +575,6 @@ function Overview({ detail }: { detail: StartupDetailDTO }) {
               <dd className="mt-1 text-sm text-foreground/85">{st.problem.why_now}</dd>
             </div>
           </dl>
-          {st.problem.facts.length > 0 && (
-            <div className="mt-6 border-t border-border pt-5">
-              <div className="flex items-center justify-between">
-                <p className="data-label">What the sources say</p>
-                <ObservedTag count={st.problem.facts.length} label="Cited facts" />
-              </div>
-              <ul className="mt-3 space-y-2.5">
-                {st.problem.facts.map((f, i) => (
-                  <motion.li
-                    key={i}
-                    initial={{ opacity: 0, x: -6 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.05 }}
-                    className="prov-observed flex items-start gap-3 rounded-lg p-3"
-                  >
-                    <p className="flex-1 text-sm leading-relaxed text-foreground/90">{f.claim}</p>
-                    <Cite ids={f.source_ids} />
-                  </motion.li>
-                ))}
-              </ul>
-            </div>
-          )}
         </section>
 
       </div>
