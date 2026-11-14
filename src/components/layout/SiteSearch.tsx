@@ -1,14 +1,18 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Command as CommandPrimitive } from "cmdk";
-import { BookOpen, Briefcase, Compass, Telescope } from "lucide-react";
+import { BookOpen, Briefcase, CircleUserRound, Compass, LogOut, Telescope } from "lucide-react";
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { CreditBalance } from "@/components/credits/CreditBalance";
+import { displayName, useAuthUser } from "@/hooks/use-auth";
 
-export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+export function SiteSearch({ open, onOpenChange, onSignOut }: { open: boolean; onOpenChange: (open: boolean) => void; onSignOut: () => Promise<void> }) {
   const navigate = useNavigate();
+  const { user, ready } = useAuthUser();
   function go(fn: () => void) { onOpenChange(false); fn(); }
   const itemClass = "flex cursor-pointer items-center gap-3 rounded-md px-3 py-4 text-sm font-medium text-foreground aria-selected:bg-accent hover:bg-accent";
   return <Sheet open={open} onOpenChange={onOpenChange}>
-    <SheetContent side="right" className="w-[88vw] max-w-sm p-0 motion-reduce:animate-none motion-reduce:transition-none">
+    <SheetContent side="right" className="flex w-[88vw] max-w-sm flex-col gap-0 overflow-y-auto p-0 motion-reduce:animate-none motion-reduce:transition-none">
       <div className="flex h-16 items-center border-b border-border px-6">
         <SheetTitle>Go to</SheetTitle>
         <SheetDescription className="sr-only">Go to a page.</SheetDescription>
@@ -33,6 +37,19 @@ export function SiteSearch({ open, onOpenChange }: { open: boolean; onOpenChange
             </CommandPrimitive.Group>
       </CommandPrimitive.List></CommandPrimitive>
       </nav>
+      <section aria-label="Your account" className="mt-auto border-t border-border bg-muted/50 px-6 py-6">
+        {ready && user && <>
+          <div className="mb-6 flex items-center gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full border border-border bg-background text-primary"><CircleUserRound className="size-5" /></span>
+            <div className="min-w-0"><p className="break-words text-sm font-semibold text-foreground">{displayName(user)}</p><p className="break-all text-xs text-muted-foreground">{user.email}</p></div>
+          </div>
+          <CreditBalance userId={user.id} onNavigate={() => onOpenChange(false)} />
+          <div className="mt-6 border-t border-border pt-3">
+            <Button variant="ghost" className="-ml-3" onClick={() => { onOpenChange(false); void onSignOut(); }}><LogOut />Sign out</Button>
+          </div>
+        </>}
+        {ready && !user && <Button asChild className="w-full"><Link to="/auth" onClick={() => onOpenChange(false)}><CircleUserRound />Sign in</Link></Button>}
+      </section>
     </SheetContent>
   </Sheet>;
 }

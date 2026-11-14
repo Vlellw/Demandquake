@@ -56,4 +56,5 @@ use the editor.
 
 - Corrected existing startup artwork is selected centrally in bannerBackground so cards and profiles share the same replacement without exposing private storage.
 - JourneySteps mounts into the shared header slot after hydration; an inline header fallback shows steps on other pages and hides when page-owned progress mounts, preventing duplicate navigation.
+- AppHeader uses one shared SiteSearch drawer for navigation, identity and credit controls on all screen sizes so account actions have one consistent home.
 - Missing banner requests share their promise across mounted cards and profiles so every subscriber receives the generated image.
