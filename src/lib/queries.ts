@@ -12,7 +12,8 @@ import {
   getStartupScans,
   getRecentQuakes,
 } from "./research.functions";
-import { getProject, getProjectTeam, listMyProjects, previewInvite } from "./projects.functions";
+import { getProject, getProjectClaim, getProjectTeam, listMyProjects, previewInvite } from "./projects.functions";
+import { getStripeEnvironment } from "./stripe";
 import { getDemandEvidence } from "./demand.functions";
 
 export const startupCardsQuery = queryOptions({
@@ -84,6 +85,13 @@ export const projectQuery = (projectId: string) =>
     queryKey: ["project", projectId],
     queryFn: () => getProject({ data: { projectId } }),
     staleTime: 10_000,
+  });
+
+export const projectClaimQuery = (projectId: string) =>
+  queryOptions({
+    queryKey: ["project-claim", projectId],
+    queryFn: () => getProjectClaim({ data: { projectId, environment: getStripeEnvironment() } }),
+    staleTime: 15_000,
   });
 
 export const projectTeamQuery = (projectId: string) =>

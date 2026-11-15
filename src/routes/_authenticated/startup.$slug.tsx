@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { PageError } from "@/components/common/PageError";
 import { InfoTip } from "@/components/common/InfoTip";
@@ -636,7 +636,7 @@ function ClaimOptions({
 }) {
   const refs = useRef<Record<ClaimAccess, HTMLButtonElement | null>>({ public: null, private: null });
   const enabled = CLAIM_OPTIONS.filter((o) => o.value === "public" || privateAvailable).map((o) => o.value);
-  function onKeyDown(e: React.KeyboardEvent) {
+  function onKeyDown(e: KeyboardEvent) {
     if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(e.key) || enabled.length < 2) return;
     e.preventDefault();
     const next = enabled[(enabled.indexOf(value) + (e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : enabled.length - 1)) % enabled.length]!;

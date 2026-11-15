@@ -29,6 +29,7 @@ import { deleteProject } from "@/lib/projects.functions";
 import { TeamPanel } from "@/components/workspace/TeamPanel";
 import { AssumptionsBoard } from "@/components/workspace/AssumptionsBoard";
 import { WebWatch } from "@/components/workspace/WebWatch";
+import { ClaimAccess, useProjectClaim } from "@/components/workspace/ClaimAccess";
 import { displayName, useAuthUser } from "@/hooks/use-auth";
 import { useProjectSaver, type SaveState } from "@/hooks/use-project-saver";
 import { marketCheckDue, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
@@ -122,6 +123,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
   const [editing, setEditing] = useState(false);
   const pr = projectProgress(p);
   const r = p.research;
+  const isPrivate = useProjectClaim(p.id).data?.access === "private";
 
   async function onDelete() {
     setDeleting(true);
@@ -149,6 +151,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {p.is_owner ? <Badge variant="positive">Claimed by you</Badge> : <Badge variant="observed">Shared by {p.owner_name ?? "the founder"}</Badge>}
+              <ClaimAccess project={p} />
             </div>
             <SaveIndicator state={state} savedAt={savedAt} onRetry={retry} />
           </div>
@@ -252,7 +255,8 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
           {p.is_owner && (
           <section className="panel border-negative/20 p-5">
             <p className="mt-2 text-sm text-muted-foreground">
-              Deleting removes this workspace{p.member_count > 0 ? " for every co-founder" : ""}. The public opportunity stays available.
+              Deleting removes this workspace{p.member_count > 0 ? " for every co-founder" : ""}.{" "}
+              {isPrivate ? "The idea returns to the public catalog, where other founders can find and claim it." : "The public opportunity stays available."}
             </p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -263,7 +267,10 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete {p.name}?</AlertDialogTitle>
-                  <AlertDialogDescription>Your notes, checklist progress and roadmap edits will be permanently removed.</AlertDialogDescription>
+                  <AlertDialogDescription>
+                    Your notes, checklist progress and roadmap edits will be permanently removed.
+                    {isPrivate ? " The original idea becomes public again, so other founders can find and claim it." : ""}
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>

@@ -51,7 +51,7 @@ const PHASES: { name: string; summary: string; steps: Step[] }[] = [
     summary: "Claim the idea and keep an eye on the market.",
     steps: [
       { icon: Radar, title: "Watch for market changes", body: "A market scan searches the news again and explains whether each new development strengthens or weakens the idea. Claimed workspaces re-check on their own when their evidence is over a week old.", tag: "observed" },
-      { icon: Flag, title: "Claim and test it", body: "Founders claim a startup into a private workspace with the research, assumptions and an experiment checklist - and can invite co-founders to edit it with them.", tag: "you" },
+      { icon: Flag, title: "Claim and test it", body: "Founders claim a startup into a private workspace with the research, assumptions and an experiment checklist - publicly, so others can still claim it, or privately to take it out of everyone else’s search - and can invite co-founders to edit it with them.", tag: "you" },
     ],
   },
 ];
@@ -60,7 +60,7 @@ const LIMITS = [
   "People complaining online is not proof they’ll pay. Every startup starts as “Not validated with customers yet”.",
   "Search coverage is broad but not complete. An empty competitor list means none were named in sources, not that none exist.",
   "Publication dates come from the publisher. Undated pages are marked as undated rather than guessed.",
-  "Startup ideas are public and more than one founder can claim the same one - how you build it is what counts.",
+  "Startup ideas are public unless a founder claims one privately; publicly claimed ideas can be claimed by more than one founder - how you build it is what counts.",
 ];
 
 function StepTagLabel({ tag }: { tag: StepTag }) {

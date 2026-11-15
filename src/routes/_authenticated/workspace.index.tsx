@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
-import { ArrowRight, Briefcase, CheckCircle2, FlaskConical, Radar } from "lucide-react";
+import { ArrowRight, Briefcase, CheckCircle2, FlaskConical, Lock, Radar } from "lucide-react";
 import { myProjectsQuery } from "@/lib/queries";
 import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
 import { useStartupBanner } from "@/hooks/use-startup-banner";
@@ -87,8 +87,15 @@ function WorkspaceList() {
                   >
                     <WorkspaceBanner project={p}>
                       <StartupMark brand={p.brand} />
-                      <span className="rounded-[3px] bg-surface px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground">
-                        {p.is_owner ? (p.member_count > 0 ? `You + ${p.member_count} co-founder${p.member_count === 1 ? "" : "s"}` : "Owner") : `Shared by ${p.owner_name ?? "the founder"}`}
+                      <span className="flex flex-wrap justify-end gap-1.5">
+                        {p.access === "private" && (
+                          <span className="inline-flex items-center gap-1 rounded-[3px] bg-surface px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground">
+                            <Lock className="size-3" aria-hidden="true" /> Private
+                          </span>
+                        )}
+                        <span className="rounded-[3px] bg-surface px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-foreground">
+                          {p.is_owner ? (p.member_count > 0 ? `You + ${p.member_count} co-founder${p.member_count === 1 ? "" : "s"}` : "Owner") : `Shared by ${p.owner_name ?? "the founder"}`}
+                        </span>
                       </span>
                     </WorkspaceBanner>
                     <div className="flex flex-1 flex-col p-5">

@@ -65,9 +65,15 @@ function TermsPage() {
 
       <Section title="Claims and workspaces">
         <p>
-          Claiming a startup gives you a private workspace for that opportunity. A claim is a organisational tool inside
-          Demandquake - it is not a legal right, trademark, or exclusivity over an idea, a market, or a company name. Other
-          founders can research the same market.
+          Claiming a startup gives you a private workspace for that opportunity. A public claim keeps the startup visible, so
+          other founders can find and claim it too. A private claim removes that startup from other users' search and catalog
+          while your workspace exists; it is only available while nobody else is building it, and deleting the workspace makes
+          the startup public again.
+        </p>
+        <p>
+          Either way, a claim is an organisational tool inside Demandquake - it is not a legal right, trademark, or exclusivity
+          over an idea, a market, or a company name. Other founders can research the same market and may arrive at similar
+          ideas.
         </p>
         <p>
           Workspace owners can invite co-founders. Owners are responsible for the people they invite and can remove them at any

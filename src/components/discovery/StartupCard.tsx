@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { TimeAgo } from "@/components/common/TimeAgo";
 import { motion } from "motion/react";
-import { ArrowRight, FileSearch } from "lucide-react";
+import { ArrowRight, FileSearch, Lock } from "lucide-react";
 import type { StartupCardDTO } from "@/lib/dto";
 import { StartupMark, brandStyle, bannerBackground } from "@/components/brand/StartupMark";
 import { useStartupBanner } from "@/hooks/use-startup-banner";
@@ -81,8 +81,16 @@ export function StartupCard({ card, index = 0 }: { card: StartupCardDTO; index?:
       >
         <div className="brand-banner relative flex h-32 items-end justify-between p-4" style={bannerBackground(card.brand, banner)}>
           <StartupMark brand={card.brand} size="lg" className="border-transparent shadow-panel" />
-          <span className="rounded-[3px] bg-background px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.06em] text-foreground">
-            {claimed ? `${card.claim_count} building` : "Unclaimed"}
+          <span className="inline-flex items-center gap-1 rounded-[3px] bg-background px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.06em] text-foreground">
+            {card.is_private ? (
+              <>
+                <Lock className="size-3" aria-hidden="true" /> Private to you
+              </>
+            ) : claimed ? (
+              `${card.claim_count} building`
+            ) : (
+              "Unclaimed"
+            )}
           </span>
         </div>
         <div className="flex flex-1 flex-col p-5">

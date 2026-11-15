@@ -56,7 +56,7 @@ export const getCreditAdmin = createServerFn({ method: 'POST' }).middleware([req
     return { wallets: wallets.data, transactions: transactions.data, payments: payments.data, settings: settings.data, packages: packages.data };
   });
 
-const config = z.object({ key: z.enum(['welcome','discovery']), value: z.number().int().min(0).max(1000000) });
+const config = z.object({ key: z.enum(['welcome','discovery','claim','claim_private']), value: z.number().int().min(0).max(1000000) });
 export const updateCreditSetting = createServerFn({ method: 'POST' }).middleware([requireSupabaseAuth])
   .inputValidator((d: z.input<typeof config>) => config.parse(d))
   .handler(async ({ data, context }) => {

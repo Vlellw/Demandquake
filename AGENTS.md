@@ -37,7 +37,6 @@ use the editor.
 - Relative times render through `<TimeAgo>` and absolute dates format in fixed UTC (`src/lib/format.ts`) so server and browser text match during hydration.
 - Generated startup names must be unique: generation is told the taken names and `ensureUniqueName` renames the newer duplicate after insert, because clusters generate in parallel.
 - `Badge` renders a `<span>` so it can sit inside paragraphs without invalid nesting.
-- Competitor brand data is fetched lazily per startup (`brands.server.ts`) and cached per domain in `brand_profiles`; name-only competitors resolve through brand search, same-name filtering (`sameNameCandidates`) and an AI check against the source description, cached in `brand_name_lookups`, so each company costs credits once and lookalike brands are never shown.
 - Competitor cache tables are service-only with RLS enabled and no browser SELECT grants; public competitor details use the existing per-startup DTO functions so internal cache errors and lookup records stay private.
 - The shared research catalog requires verified sign-in: research pages live under the managed authenticated layout, catalog readers use the caller's client, and all research/scan/competitor entry points enforce auth; the public home reads no research rows.
 - Server stages keep at most 5 outbound requests in flight per invocation (the hosted runtime queues beyond 6, letting per-call timeouts expire).
@@ -45,7 +44,8 @@ use the editor.
 - Shared workspaces: membership lives in `project_members` (joined only through `accept_project_invite`), RLS lets members read/update but only owners delete or invite, and a trigger locks `user_id`/`startup_id`/`owner_name`. Saves are conditional on `updated_at` and conflicts three-way merge by item id (`project-merge.ts`), so co-founders never overwrite each other.
 - Inner pages build headings and key figures from `SectionHeading` / `StatRule` (`src/components/common`), so every page keeps the same Lindström-style structure.
 - Credit billing uses environment-scoped wallets, an append-only ledger and atomic reservation/settlement RPCs; database triggers settle discovery on terminal states, preventing duplicate charges across workers and refreshes.
-- Startup claims use a service-only atomic RPC that creates the workspace and appends the charge together; browser INSERT on projects is revoked so claims cannot bypass billing, and retries return existing workspaces without a charge.
+- Claims (public/private) and private upgrades are service-only atomic RPCs that lock the startup and write workspace and charge together; private needs no other builders, browser project INSERT is revoked, retries are free.
+- A startup is private iff `startups.private_project_id` is set (ON DELETE SET NULL reverts it); RLS hides it and its clusters, sources and scans from everyone outside that workspace.
 - Public credit reads allow only active packages and explicitly advertised cost keys; verified admins can read inactive packages and all settings so internal configuration is not public by default.
 - Payment functions use the shared gateway Stripe utility, authenticated user identity and server-snapshotted orders; only signature-verified webhooks allocate or reverse credits, keeping test purchases separate from live balances.
 - Admin bootstrap uses a service-only allowlist matched to a verified auth email; ordinary browser requests can never assign roles or edit balances.
