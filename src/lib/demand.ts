@@ -340,10 +340,17 @@ const nameTokens = (s: string) =>
     .split(" ")
     .filter((t) => t.length > 1 && !["inc", "llc", "ltd", "the", "app", "software", "corp", "co", "gmbh"].includes(t));
 
-/** G2 product pages are matched by name: every significant word of the competitor name must appear in the slug or title. */
-export function g2Matches(competitor: string, slug: string, title: string): boolean {
+/**
+ * G2 has no website field, so a product page is matched by name: the slug contains the competitor's
+ * domain name, or the competitor name has at least two significant words and all appear in the slug
+ * or title. A one-word name alone ("Polaris") is too ambiguous to attribute.
+ */
+export function g2Matches(competitor: string, domain: string | null, slug: string, title: string): boolean {
+  const compactSlug = slug.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const stem = hostOf(domain)?.split(".")[0]?.replace(/[^a-z0-9]/g, "") ?? "";
+  if (stem.length >= 4 && compactSlug.includes(stem)) return true;
   const tokens = nameTokens(competitor);
-  if (!tokens.length) return false;
+  if (tokens.length < 2) return false;
   const hay = `${slug.replace(/-/g, " ")} ${title}`.toLowerCase();
   return tokens.every((t) => hay.includes(t));
 }
@@ -411,9 +418,18 @@ export function keepSourced<T extends { source_url?: string | null }>(items: T[]
 export interface PriceRange {
   currency: string;
   period: "month" | "year";
+  /** Whether the compared prices are charged per user/seat or as a flat plan price. */
+  basis: "per_user" | "flat";
   min: number;
   max: number;
   plans: number;
+}
+
+const PER_USER = /(\bper\b|\/|\ba\b|\beach\b)\s*(active\s+)?(seat|user|member|student|learner|licen[cs]e|agent|employee|teacher|person|head|provider|clinician|staff)s?\b/i;
+
+/** Per-user/seat prices are never compared with flat plan prices. */
+export function priceBasis(unit: string | null | undefined, priceText: string | null | undefined): "per_user" | "flat" {
+  return PER_USER.test(`${unit ?? ""} ${priceText ?? ""}`) ? "per_user" : "flat";
 }
 
 export interface PriceSummary {
@@ -435,15 +451,16 @@ export function priceSummary(rows: CompetitorPricing[]): PriceSummary {
     for (const p of r.plans) {
       if (typeof p.price !== "number" || !Number.isFinite(p.price) || p.price <= 0) continue;
       if (!p.currency || (p.period !== "month" && p.period !== "year")) continue;
-      const key = `${p.currency.toUpperCase()}|${p.period}`;
+      const key = `${p.currency.toUpperCase()}|${p.period}|${priceBasis(p.unit, p.price_text)}`;
       groups.set(key, [...(groups.get(key) ?? []), p.price]);
     }
   }
   let best: PriceRange | null = null;
+  const rank = (r: PriceRange) => r.plans * 4 + (r.period === "month" ? 2 : 0) + (r.basis === "flat" ? 1 : 0);
   for (const [key, prices] of groups) {
-    const [currency, period] = key.split("|") as [string, "month" | "year"];
-    const cand: PriceRange = { currency, period, min: Math.min(...prices), max: Math.max(...prices), plans: prices.length };
-    if (!best || cand.plans > best.plans || (cand.plans === best.plans && cand.period === "month" && best.period !== "month")) best = cand;
+    const [currency, period, basis] = key.split("|") as [string, "month" | "year", "per_user" | "flat"];
+    const cand: PriceRange = { currency, period, basis, min: Math.min(...prices), max: Math.max(...prices), plans: prices.length };
+    if (!best || rank(cand) > rank(best)) best = cand;
   }
   return {
     checked: rows.length,

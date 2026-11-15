@@ -398,7 +398,7 @@ const runReviews: Runner<"reviews"> = async (ctx, _plan, credits) => {
     for (const r of search.results) {
       const l = classifyListingUrl(r.url);
       if (!l) continue;
-      if (l.platform === "g2" && !found.g2 && g2Matches(t.name, l.slug, r.title)) found.g2 = l;
+      if (l.platform === "g2" && !found.g2 && g2Matches(t.name, t.domain, l.slug, r.title)) found.g2 = l;
       if (l.platform === "google_play" && !found.play) found.play = l;
       if (l.platform === "app_store" && !found.app) found.app = l;
     }
@@ -593,7 +593,14 @@ const runPricing: Runner<"pricing"> = async (ctx, _plan, credits) => {
     const pricePage = own.find((u) => pricingUrlKind(u.url, u.title) === "price_page");
     const quotePage = own.find((u) => pricingUrlKind(u.url, u.title) === "quote_page");
     const blank: CompetitorPricing = { competitor: t.name, domain: t.domain, url: null, status: "not_found", has_free_plan: null, has_free_trial: null, plans: [] };
-    if (!pricePage) return quotePage ? { ...blank, url: quotePage.url, status: "quote_only" } : blank;
+    if (!pricePage) {
+      if (quotePage) return { ...blank, url: quotePage.url, status: "quote_only" };
+      // Sales-led companies often have no pricing page at all, only a demo or quote request.
+      const sales = await mapUrls(t.domain, "request a demo contact sales get a quote", { ...BG, maxLinks: 6 });
+      credits.add(sales.meta);
+      const salesPage = sales.urls.find((u) => listingBelongsTo(u.url, t.domain) && pricingUrlKind(u.url, u.title) === "quote_page");
+      return salesPage ? { ...blank, url: salesPage.url, status: "quote_only" } : blank;
+    }
     const r = await scrapeJson<PriceRaw>(pricePage.url, PRICE_SCHEMA, PRICE_INSTRUCTIONS, BG);
     credits.add(r.meta);
     if (!r.data) return quotePage ? { ...blank, url: quotePage.url, status: "quote_only" } : { ...blank, url: pricePage.url };
@@ -905,6 +912,9 @@ const RUNNERS: { [K in DemandSection]: Runner<K> } = {
 
 // ---------- orchestration ----------
 
+/** Cheapest checks first so visitors see results sooner under the shared per-minute request limit. */
+const RUN_ORDER: DemandSection[] = ["local", "voices", "funding", "videos", "reviews", "pricing", "market_size", "why_now"];
+
 function isClaimable(r: Row, now: number): boolean {
   if (r.status === "pending") return true;
   if (r.status === "running") return !r.started_at || now - Date.parse(r.started_at) > STALE_RUN_MS;
@@ -1039,7 +1049,7 @@ export async function advanceDemandEvidence(slug: string): Promise<{ evidence: D
   let candidates: DemandSection[] = [];
   if (planRow && isClaimable(planRow, now)) candidates = ["plan"];
   else if (planRow && (planRow.status === "done" || (planRow.data && planRow.status !== "error"))) {
-    candidates = DEMAND_SECTIONS.filter((k) => k !== "plan" && byKey.get(k) && isClaimable(byKey.get(k) as Row, now));
+    candidates = RUN_ORDER.filter((k) => byKey.get(k) && isClaimable(byKey.get(k) as Row, now));
   }
 
   for (const section of candidates) {

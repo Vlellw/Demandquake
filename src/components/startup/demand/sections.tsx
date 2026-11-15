@@ -31,7 +31,7 @@ function ShowMore({ total, shown, onClick }: { total: number; shown: number; onC
   if (total <= shown) return null;
   return (
     <Button variant="ghost" size="sm" className="mt-2 text-primary" onClick={onClick}>
-      Show all {total}
+      Show {total - shown} more
     </Button>
   );
 }
@@ -145,7 +145,7 @@ export function ReviewsBody({ data }: { data: ReviewsData }) {
                 <td className="py-2.5 pr-3">
                   <Stars rating={l.rating} />
                   <span className="block text-xs text-muted-foreground">
-                    {l.rating_count !== null ? `${formatCount(l.rating_count)} ratings` : l.platform === "g2" ? "recent reviews" : ""}
+                    {l.rating_count !== null ? `${formatCount(l.rating_count)} ratings` : l.platform === "g2" ? "average of reviews read" : ""}
                   </span>
                 </td>
                 <td className="py-2.5 pr-3 tabular-nums text-foreground/80">{l.reviews_read}</td>
@@ -222,7 +222,8 @@ export function ReviewsBody({ data }: { data: ReviewsData }) {
       )}
 
       <p className="text-xs text-muted-foreground">
-        Read {plural(data.reviews_read, "recent review")}, {data.complaints_read} of them critical.
+        Read {plural(data.reviews_read, "review")}; {data.listings.reduce((n, l) => n + l.low_ratings, 0)} rated 3 stars or lower. Complaint themes also use the "dislikes" part of
+        every G2 review.
         {data.not_listed.length > 0 && ` No review listings found for ${data.not_listed.join(", ")}.`}
       </p>
     </div>
@@ -233,7 +234,7 @@ export function ReviewsBody({ data }: { data: ReviewsData }) {
 
 function planPrice(p: PricePlan): string {
   if (p.price === 0) return "Free";
-  if (p.price === null) return p.price_text ?? "Not printed";
+  if (p.price === null) return p.price_text ?? "Price not shown";
   const base = formatPrice(p.price, p.currency);
   if (!p.period) return base;
   if (p.period === "one_time") return `${base} one-time`;
@@ -243,7 +244,7 @@ function planPrice(p: PricePlan): string {
 
 const STATUS_BADGE: Record<string, { label: string; variant: "positive" | "uncertain" | "outline" }> = {
   published: { label: "Public prices", variant: "positive" },
-  quote_only: { label: "Quote only", variant: "uncertain" },
+  quote_only: { label: "Prices on request", variant: "uncertain" },
   not_found: { label: "No pricing page found", variant: "outline" },
 };
 
@@ -253,9 +254,18 @@ export function PricingBody({ data }: { data: PricingData }) {
     <div className="space-y-5">
       {s.range ? (
         <p className="text-sm leading-relaxed text-foreground/90">
-          Printed paid plans run from <strong className="text-primary">{formatPrice(s.range.min, s.range.currency)}</strong> to{" "}
-          <strong className="text-primary">{formatPrice(s.range.max, s.range.currency)}</strong> per {PERIOD_LABEL[s.range.period]}, across {plural(s.range.plans, "plan")} in{" "}
-          {s.range.currency}.
+          {s.range.min === s.range.max ? (
+            <>
+              The printed paid {s.range.plans === 1 ? "plan costs" : "plans cost"} <strong className="text-primary">{formatPrice(s.range.min, s.range.currency)}</strong>
+            </>
+          ) : (
+            <>
+              Printed paid plans run from <strong className="text-primary">{formatPrice(s.range.min, s.range.currency)}</strong> to{" "}
+              <strong className="text-primary">{formatPrice(s.range.max, s.range.currency)}</strong>
+            </>
+          )}{" "}
+          {s.range.basis === "per_user" ? "per user " : ""}per {PERIOD_LABEL[s.range.period]}
+          {s.range.min !== s.range.max && `, across ${plural(s.range.plans, "plan")}`}.
         </p>
       ) : (
         <p className="text-sm text-foreground/90">No competitor prints a comparable monthly or yearly price.</p>
@@ -264,7 +274,7 @@ export function PricingBody({ data }: { data: PricingData }) {
         <Chip>
           {s.published} of {s.checked} publish prices
         </Chip>
-        {s.quote_only > 0 && <Chip>{s.quote_only} quote only</Chip>}
+        {s.quote_only > 0 && <Chip>{s.quote_only} on request only</Chip>}
         {s.free_plans > 0 && <Chip>{plural(s.free_plans, "free plan")}</Chip>}
         {s.free_trials > 0 && <Chip>{plural(s.free_trials, "free trial")}</Chip>}
       </div>
@@ -278,7 +288,7 @@ export function PricingBody({ data }: { data: PricingData }) {
                   <span className="font-semibold text-foreground">{c.competitor}</span>
                   <Badge variant={badge.variant}>{badge.label}</Badge>
                 </div>
-                {c.url ? <SourceLink href={c.url} label="Pricing page" /> : <span className="text-xs text-muted-foreground">{c.domain}</span>}
+                {c.url ? <SourceLink href={c.url} label={c.status === "published" ? "Pricing page" : "Sales page"} /> : <span className="text-xs text-muted-foreground">{c.domain}</span>}
               </div>
               {c.plans.length > 0 && (
                 <ul className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">

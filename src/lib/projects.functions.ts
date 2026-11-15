@@ -199,6 +199,13 @@ export const deleteProject = createServerFn({ method: "POST" })
       .eq("id", data.projectId)
       .eq("user_id", context.userId);
     if (error) throw error;
+    // Free weekly web watch slots no remaining workspace uses.
+    try {
+      const { cleanupOrphanWatches } = await import("./watch.server");
+      await cleanupOrphanWatches();
+    } catch (err) {
+      console.error("[watch] cleanup after delete failed", err);
+    }
     return { ok: true };
   });
 

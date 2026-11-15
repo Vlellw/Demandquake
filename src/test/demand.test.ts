@@ -51,9 +51,11 @@ describe("review listings", () => {
     expect(listingBelongsTo("https://acme-games.com", "acme.com")).toBe(false);
     expect(listingBelongsTo(null, "acme.com")).toBe(false);
   });
-  it("matches G2 products only when every word of the competitor name appears", () => {
-    expect(g2Matches("Simple Practice", "simplepractice", "SimplePractice Reviews")).toBe(true);
-    expect(g2Matches("Fresh Books", "freshdesk", "Freshdesk Reviews")).toBe(false);
+  it("matches G2 products by domain name or a full multi-word name, never by one ambiguous word", () => {
+    expect(g2Matches("Frontline Special Education Management", "frontlineeducation.com", "frontline-special-education-management-software", "Frontline Reviews")).toBe(true);
+    expect(g2Matches("Polaris", "everway.com", "polaris", "Polaris Reviews")).toBe(false);
+    expect(g2Matches("Linear", "linear.app", "linear", "Linear Reviews")).toBe(true);
+    expect(g2Matches("Fresh Books", "freshbooks.com", "freshdesk", "Freshdesk Reviews")).toBe(false);
   });
   it("canonicalises G2, Google Play and App Store URLs and ignores others", () => {
     expect(classifyListingUrl("https://www.g2.com/products/hubspot-crm/reviews?page=2")).toEqual({ platform: "g2", slug: "hubspot-crm", url: "https://www.g2.com/products/hubspot-crm/reviews" });
@@ -67,13 +69,23 @@ describe("competitor pricing", () => {
   const row = (over: Partial<CompetitorPricing>): CompetitorPricing => ({ competitor: "X", domain: "x.com", url: null, status: "published", has_free_plan: null, has_free_trial: null, plans: [], ...over });
   it("reports the lowest to highest printed paid price and never counts a free plan as a price", () => {
     const s = priceSummary([
-      row({ plans: [{ name: "Free", price: 0, currency: "USD", period: "month", unit: null, price_text: "$0" }, { name: "Pro", price: 29, currency: "USD", period: "month", unit: "per user", price_text: "$29" }] }),
+      row({ plans: [{ name: "Free", price: 0, currency: "USD", period: "month", unit: null, price_text: "$0" }, { name: "Pro", price: 29, currency: "USD", period: "month", unit: "flat", price_text: "$29" }] }),
       row({ domain: "y.com", has_free_trial: true, plans: [{ name: "Team", price: 99, currency: "usd", period: "month", unit: null, price_text: "$99" }] }),
       row({ domain: "z.com", status: "quote_only" }),
       row({ domain: "w.com", status: "not_found" }),
     ]);
-    expect(s.range).toEqual({ currency: "USD", period: "month", min: 29, max: 99, plans: 2 });
+    expect(s.range).toEqual({ currency: "USD", period: "month", basis: "flat", min: 29, max: 99, plans: 2 });
     expect(s).toMatchObject({ checked: 4, published: 2, quote_only: 1, not_found: 1, free_plans: 1, free_trials: 1 });
+  });
+  it("never mixes per-seat prices with flat plan prices in one range", () => {
+    const s = priceSummary([
+      row({ plans: [
+        { name: "District", price: 2.15, currency: "USD", period: "year", unit: "per seat", price_text: "$2.15 per seat" },
+        { name: "Group", price: 17.85, currency: "USD", period: "year", unit: "per seat", price_text: "$17.85 per seat" },
+        { name: "Individual", price: 179, currency: "USD", period: "year", unit: "per year", price_text: "$179 per year" },
+      ] }),
+    ]);
+    expect(s.range).toEqual({ currency: "USD", period: "year", basis: "per_user", min: 2.15, max: 17.85, plans: 2 });
   });
   it("shows no range when no competitor prints a monthly or yearly price", () => {
     expect(priceSummary([row({ plans: [{ name: "Usage", price: 0.02, currency: "USD", period: "usage", unit: "per call", price_text: "$0.02" }] })]).range).toBeNull();
@@ -129,5 +141,22 @@ describe("page parsing", () => {
     expect(formatLooseDate("2026-09-01")).toBe("1 Sep 2026");
     expect(formatLooseDate("2026-09")).toBe("Sep 2026");
     expect(formatLooseDate("2026")).toBe("2026");
+  });
+});
+
+describe("weekly web watch", () => {
+  const now = Date.parse("2026-11-15T12:00:00Z");
+  it("pulls new findings for an active watch that was never synced or synced over 6 hours ago", async () => {
+    const { watchNeedsSync } = await import("@/lib/watch");
+    expect(watchNeedsSync({ status: "active", last_checked_at: null }, now)).toBe(true);
+    expect(watchNeedsSync({ status: "active", last_checked_at: "2026-11-15T05:00:00Z" }, now)).toBe(true);
+    expect(watchNeedsSync({ status: "active", last_checked_at: "2026-11-15T07:00:00Z" }, now)).toBe(false);
+    expect(watchNeedsSync({ status: "error", last_checked_at: null }, now)).toBe(false);
+  });
+  it("links a finding to its own page, else the first matched page", async () => {
+    const { changeLink } = await import("@/lib/watch");
+    expect(changeLink({ url: "https://a.com/x", matched: [{ url: "https://b.com", title: null, snippet: null }] })).toBe("https://a.com/x");
+    expect(changeLink({ url: null, matched: [{ url: "https://b.com", title: null, snippet: null }] })).toBe("https://b.com");
+    expect(changeLink({ url: null, matched: [] })).toBeNull();
   });
 });

@@ -918,7 +918,9 @@ export type Database = {
           kind: string
           label: string | null
           last_checked_at: string | null
+          last_run_at: string | null
           monitor_id: string | null
+          next_run_at: string | null
           startup_id: string
           status: string
           target: string
@@ -932,7 +934,9 @@ export type Database = {
           kind: string
           label?: string | null
           last_checked_at?: string | null
+          last_run_at?: string | null
           monitor_id?: string | null
+          next_run_at?: string | null
           startup_id: string
           status?: string
           target: string
@@ -946,7 +950,9 @@ export type Database = {
           kind?: string
           label?: string | null
           last_checked_at?: string | null
+          last_run_at?: string | null
           monitor_id?: string | null
+          next_run_at?: string | null
           startup_id?: string
           status?: string
           target?: string

@@ -27,6 +27,7 @@ import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { deleteProject } from "@/lib/projects.functions";
 import { TeamPanel } from "@/components/workspace/TeamPanel";
 import { AssumptionsBoard } from "@/components/workspace/AssumptionsBoard";
+import { WebWatch } from "@/components/workspace/WebWatch";
 import { displayName, useAuthUser } from "@/hooks/use-auth";
 import { useProjectSaver, type SaveState } from "@/hooks/use-project-saver";
 import { marketCheckDue, projectProgress, scanUpdatesToLog } from "@/lib/project-progress";
@@ -240,6 +241,7 @@ function Workspace({ initial }: { initial: ProjectDTO }) {
             />
           )}
           {r.startup_slug && <MarketWatch slug={r.startup_slug} project={p} update={update} />}
+          {r.startup_slug && <WebWatch projectId={p.id} />}
           <ResearchSnapshot project={p} />
           <div id="team" className="scroll-mt-24">
             <TeamPanel project={p} currentUserId={user?.id ?? null} onLeft={onLeft} />
