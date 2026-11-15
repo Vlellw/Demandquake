@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Replace credit checkout with unlimited free package grants for signed-in users; two Starter grants verified 0 → 100 → 200, persisted after reload and logged as free adjustments. Server-owned amounts and authenticated identity tested; existing paid records unchanged.
 - [x] Reduce initial research to at most 20 sources: four focused web queries (3 each), one Reddit search (4), industry news (4); drop low-relevance/duplicate hits and apply essential intent selection to saved plans. Existing research and deeper checks unchanged.
 - [x] Sweep missing-payment balance behavior across menu, search, claims/upgrades, history, administration, research drivers and database settlement; all use the shared fix or have no payment-configuration dependency. Signed-in confirmations show 10 credits; 28 credit tests pass. No settled records or configuration changed.
 - [x] Fix balance reads when payment configuration is missing; signed-in missing-token check shows the actual 10-credit wallet and existing history, phone layout passes, 26 credit tests pass. Payment setup and balances unchanged.
@@ -45,7 +46,7 @@
 - [x] Sweep connection recovery across loaders, auth guards, watch sync, demand retries and saved-action flows; add local recovery boundaries, check ignored database errors and guard terminal stage writes. Signed-in workspace/auth fault injection verified; 39 focused tests pass. Hanging generated transports remain outside verified coverage.
 - [x] Recover interrupted startup reads with two delayed network-only retries and a working page retry screen. Simulated three failed reads, then Try again restored RemitLoom; nine regression tests pass, preview healthy.
 - [ ] Email weekly web watch results to the requesting founder (blocked: sender domain setup required).
-- [ ] Complete existing Stripe payment setup (blocked: checkout reports configuration missing; four credit packages exist, no payment taken).
+- [x] Credit payment setup superseded by requested free package grants; no payment setup is required to add credits.
 - [x] Remove page Back buttons across all pages; retain browser history and Back to top.
 - [x] Group detailed evidence behind Show more evidence; inspection owns its driver so loading starts immediately on any tab. Expansion/collapse, signed-in startup and phone width verified; 51 evidence/navigation tests pass.
 - [x] Demand checks on the Evidence tab (customer posts, competitor reviews and complaint themes, competitor prices, funded companies and announcements, competitor apps, how-to video views, dated rule changes, verified market-size figures, local businesses when relevant), cached per startup with a counts strip, loading/failure/retry states and 20 rule tests; two real startups verified signed in, desktop and phone.

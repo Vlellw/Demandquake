@@ -1,6 +1,20 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod';
 import { requireSupabaseAuth } from '@/integrations/supabase/auth-middleware';
+import { freeCreditGrantInput, grantFreePackage } from './free-credit-grant';
+
+export const addFreeCredits = createServerFn({ method: 'POST' })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.input<typeof freeCreditGrantInput>) => freeCreditGrantInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
+    const result = await grantFreePackage(context.userId, data, async args => {
+      const response = await supabaseAdmin.rpc('grant_free_credit_package', args);
+      if (response.error) throw new Error(response.error.message);
+      return response.data;
+    });
+    return z.object({ credits: z.number().int(), balance: z.number().int(), added: z.boolean() }).parse(result);
+  });
 
 const environment = z.enum(['sandbox', 'live']);
 const envSchema = z.object({ environment });

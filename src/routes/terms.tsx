@@ -57,7 +57,7 @@ function TermsPage() {
         <ul className="list-disc space-y-2 pl-5">
           <li>Some actions cost credits - for example, a successful market search or claiming a startup. The price in credits is always shown before you confirm.</li>
           <li>You are never charged for an action that fails.</li>
-          <li>Credits are bought in packages through Stripe and are added to your balance after the payment is confirmed.</li>
+          <li>Credit packages are currently free for signed-in users. You can add packages repeatedly without payment; each grant is recorded in your credit history.</li>
           <li>Credits are not money, cannot be exchanged for cash, and are not transferable between accounts.</li>
           <li>Refund requests are handled case by case; contact us with your order details.</li>
         </ul>

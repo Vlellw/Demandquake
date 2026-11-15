@@ -22,7 +22,7 @@ export function CreditBalance({ userId, onNavigate }: { userId: string; onNaviga
   useEffect(() => {
     if (!w) return;
     const available = w.balance-w.reserved;
-    if (available < 10 && !low.current) toast.warning(available <= 0 ? 'No credits available. Buy credits to continue.' : 'Your credit balance is running low.');
+    if (available < 10 && !low.current) toast.warning(available <= 0 ? 'No credits available. Add free credits to continue.' : 'Your credit balance is running low.');
     low.current = available < 10;
   }, [w]);
   return <div className="space-y-4">
@@ -35,7 +35,7 @@ export function CreditBalance({ userId, onNavigate }: { userId: string; onNaviga
       <Button variant="ghost" size="sm" disabled={account.isFetching} onClick={() => void account.refetch()}><RefreshCw className={account.isFetching ? 'animate-spin' : ''} />Retry</Button>
     </div>}
     <div className="flex flex-wrap items-center gap-3">
-      <Button asChild size="sm"><Link to="/credits" onClick={onNavigate}>Buy Credits</Link></Button>
+      <Button asChild size="sm"><Link to="/credits" onClick={onNavigate}>Add credits</Link></Button>
       <Button asChild variant="link" size="sm"><Link to="/credits/history" onClick={onNavigate}>Credit history</Link></Button>
     </div>
   </div>;

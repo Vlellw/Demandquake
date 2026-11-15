@@ -1163,6 +1163,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      grant_free_credit_package: {
+        Args: {
+          p_env: string
+          p_package: string
+          p_request: string
+          p_user: string
+        }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

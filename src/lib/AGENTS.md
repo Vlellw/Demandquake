@@ -1,5 +1,7 @@
 # src/lib rules
 
+- Free package grants use an authenticated function and service-only atomic RPC that reads package amounts server-side and logs adjustments; request keys deduplicate retries without imposing a per-account grant cap.
+
 - Initial research request and retention budgets live in `research-search.ts`; select one query per essential intent and reject low-relevance/duplicate hits so smaller pools remain demand-focused.
 
 - Query recovery retries only browser network TypeErrors twice with delayed backoff; application/provider failures and mutations are never automatically replayed. Page error recovery invalidates failed reads before resetting the route.
