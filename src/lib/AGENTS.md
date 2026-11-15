@@ -1,4 +1,5 @@
 # src/lib rules
+- The first-visit demo is client-only presentation state, never an authenticated identity; static labelled samples read no catalog rows and leaving it persists locally without changing personal sessions or access rules.
 
 - Free package grants use an authenticated function and service-only atomic RPC that reads package amounts server-side and logs adjustments; request keys deduplicate retries without imposing a per-account grant cap.
 

@@ -5,6 +5,8 @@ import { HowItWorksMosaic } from "@/components/home/HowItWorksMosaic";
 import { SectionHeading } from "@/components/common/SectionHeading";
 import { Button } from "@/components/ui/button";
 import { useAuthUser } from "@/hooks/use-auth";
+import { useDemoSession } from '@/components/demo/DemoSession';
+import { DemoExperience } from '@/components/demo/DemoExperience';
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -20,6 +22,8 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const { user } = useAuthUser();
+  const demo = useDemoSession();
+  if (demo.active) return <DemoExperience />;
   return <div>
     <HeroCarousel />
     <section className="border-y-4 border-primary bg-primary/10 px-4 py-16 sm:px-6 sm:py-20">

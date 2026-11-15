@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] First-visit read-only Test user demo with labelled sample search/evidence/workspace and persistent exit to personal sign-in. Browser verifies sample journey, publication link, exit and phone fit; three tests cover automatic entry, personal-session precedence and persistent exit. Existing authentication and protected data unchanged; injected personal-session browser check did not restore successfully.
 - [x] Bring initial research closer to two minutes: artwork loads separately, concise low-effort analysis and generation, parallel profile reads, single serial-stage driver without display-refresh waits. Fresh signed-in search completed in 118 seconds with 20 sources and two source-backed ideas; completion persists on reopening, 51 focused tests pass. Provider congestion can still extend times.
 - [x] Replace credit checkout with unlimited free package grants for signed-in users; two Starter grants verified 0 → 100 → 200, persisted after reload and logged as free adjustments. Server-owned amounts and authenticated identity tested; existing paid records unchanged.
 - [x] Reduce initial research to at most 20 sources: four focused web queries (3 each), one Reddit search (4), industry news (4); drop low-relevance/duplicate hits and apply essential intent selection to saved plans. Existing research and deeper checks unchanged.

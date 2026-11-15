@@ -5,10 +5,12 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from "@/components/
 import { Button } from "@/components/ui/button";
 import { CreditBalance } from "@/components/credits/CreditBalance";
 import { displayName, useAuthUser } from "@/hooks/use-auth";
+import { useDemoSession } from '@/components/demo/DemoSession';
 
 export function SiteSearch({ open, onOpenChange, onSignOut }: { open: boolean; onOpenChange: (open: boolean) => void; onSignOut: () => Promise<void> }) {
   const navigate = useNavigate();
   const { user, ready } = useAuthUser();
+  const demo = useDemoSession();
   function go(fn: () => void) { onOpenChange(false); fn(); }
   const itemClass = "flex cursor-pointer items-center gap-3 rounded-md px-3 py-4 text-sm font-medium text-foreground aria-selected:bg-accent hover:bg-accent";
   return <Sheet open={open} onOpenChange={onOpenChange}>
@@ -22,13 +24,13 @@ export function SiteSearch({ open, onOpenChange, onSignOut }: { open: boolean; o
             <CommandPrimitive.Group
               className="space-y-1"
             >
-              <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => navigate({ to: "/discover", search: { view: "all" } }))} className={itemClass}>
+              <CommandPrimitive.Item value="discover startups browse all" onSelect={() => go(() => demo.active ? navigate({ to: '/demo' }) : navigate({ to: "/discover", search: { view: "all" } }))} className={itemClass}>
                 <Compass className="size-4 text-primary" /> Search startups
               </CommandPrimitive.Item>
               <CommandPrimitive.Item value="how it works method sources" onSelect={() => go(() => navigate({ to: "/method" }))} className={itemClass}>
                 <BookOpen className="size-4 text-primary" /> How it works
               </CommandPrimitive.Item>
-              <CommandPrimitive.Item value="my startups workspace claimed" onSelect={() => go(() => navigate({ to: "/workspace" }))} className={itemClass}>
+              <CommandPrimitive.Item value="my startups workspace claimed" onSelect={() => go(() => demo.active ? navigate({ to: '/demo' }) : navigate({ to: "/workspace" }))} className={itemClass}>
                 <Briefcase className="size-4 text-primary" /> My startups
               </CommandPrimitive.Item>
             </CommandPrimitive.Group>
@@ -46,7 +48,8 @@ export function SiteSearch({ open, onOpenChange, onSignOut }: { open: boolean; o
             <Button variant="ghost" className="-ml-3" onClick={() => { onOpenChange(false); void onSignOut(); }}><LogOut />Sign out</Button>
           </div>
         </>}
-        {ready && !user && <Button asChild className="w-full"><Link to="/auth" onClick={() => onOpenChange(false)}><CircleUserRound />Sign in</Link></Button>}
+        {demo.active && <><div className="mb-5 flex items-center gap-3"><CircleUserRound className="size-8 text-primary" /><div><p className="font-semibold">Test user</p><p className="text-xs text-muted-foreground">Read-only demo · no account session</p></div></div><Button asChild variant="outline" className="w-full"><Link to="/auth" search={{ redirect: '/discover' }} onClick={() => { demo.leave(); onOpenChange(false); }}><LogOut />Leave demo and sign in</Link></Button></>}
+        {ready && !user && !demo.active && <Button asChild className="w-full"><Link to="/auth" onClick={() => onOpenChange(false)}><CircleUserRound />Sign in</Link></Button>}
       </section>
     </SheetContent>
   </Sheet>;

@@ -8,6 +8,7 @@ import { SiteSearch } from "@/components/layout/SiteSearch";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { journeyStepForPath } from "@/lib/journey";
 import { supabase } from "@/integrations/supabase/client";
+import { useDemoSession } from '@/components/demo/DemoSession';
 
 /**
  * Shared header with journey navigation and a single account/navigation drawer.
@@ -17,6 +18,7 @@ export function AppHeader() {
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [searchOpen, setSearchOpen] = useState(false);
+  const demo = useDemoSession();
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -48,7 +50,7 @@ export function AppHeader() {
             <div>
               <JourneySteps inline current={journeyStepForPath(pathname)}
                 renderStep={(n, content, cls) => n === 1 ? (
-                  <Link to="/discover" search={{ research: true }} className={cls}>{content}</Link>
+                  demo.active ? <Link to="/demo" className={cls}>{content}</Link> : <Link to="/discover" search={{ research: true }} className={cls}>{content}</Link>
                 ) : undefined}
               />
             </div>

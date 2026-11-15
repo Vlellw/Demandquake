@@ -17,6 +17,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { PageError } from "@/components/common/PageError";
 import { supabase } from "@/integrations/supabase/client";
+import { DemoSessionProvider } from '@/components/demo/DemoSession';
 
 function NotFoundComponent() {
   return (
@@ -108,6 +109,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <DemoSessionProvider>
       <TooltipProvider delayDuration={150}>
         <div className="relative min-h-screen">
           <AppHeader />
@@ -118,6 +120,7 @@ function RootComponent() {
         </div>
         <Toaster theme="light" position="bottom-right" />
       </TooltipProvider>
+      </DemoSessionProvider>
     </QueryClientProvider>
   );
 }
