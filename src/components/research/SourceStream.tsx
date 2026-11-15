@@ -11,6 +11,8 @@ const INTENT_LABEL: Record<string, string> = {
   market_news: "Market",
   technology: "Technology",
   requests: "Requests",
+  forums: "Forums",
+  reddit: "Reddit",
   news: "News",
   competitors: "Competitors",
 };

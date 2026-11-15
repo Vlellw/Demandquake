@@ -3,7 +3,7 @@
 // → competitors (Context.dev) → generate startups (one per top cluster) → complete
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Json } from "@/integrations/supabase/types";
-import { webSearch, newsSearch, domainOf, ContextDevError, type WaitReporter } from "./contextdev.server";
+import { webSearch, newsSearch, scrapeParsed, domainOf, ContextDevError, type WaitReporter } from "./contextdev.server";
 import { generateJSON, AIError, s } from "./ai.server";
 import { INDUSTRIES, GEOGRAPHIES, BUSINESS_MODELS } from "./taxonomy";
 import {
@@ -272,7 +272,11 @@ async function maybeFinalize(runId: string): Promise<boolean> {
 // ---------------------------------------------------------------------------
 // Stage 1: research plan
 // ---------------------------------------------------------------------------
-const SEARCH_INTENTS = ["complaints", "regulation", "market_news", "technology"] as const;
+const SEARCH_INTENTS = ["complaints", "requests", "forums", "regulation", "market_news", "technology"] as const;
+/** Web queries per run plus Reddit post searches; together with news this yields roughly 40-50 sources. */
+const WEB_QUERIES = SEARCH_INTENTS.length;
+const REDDIT_QUERIES = 2;
+const MAX_RUN_SOURCES = 50;
 
 async function stagePlan(run: RunRow) {
   const constraints = [
@@ -286,8 +290,9 @@ async function stagePlan(run: RunRow) {
     name: "research_plan",
     instructions: `You are the research planner for Demandquake, a platform that discovers startup opportunities from live web evidence.
 Turn the user's request into a web research plan that surfaces REAL, CURRENT business problems - not solutions.
-Write exactly 4 web search queries, one per intent: complaints (pain points, frustrations, reviews, forum threads, people asking for a tool that does not exist yet), regulation (new or upcoming rules and policy changes), market_news (industry developments, shortages, cost pressures), technology (shifts that create new needs or break old workflows).
+Write exactly 6 web search queries, one per intent: complaints (pain points, frustrations, bad reviews of existing tools), requests (people asking for a tool, service or workaround that does not exist yet, or saying they would pay for one), forums (practitioner discussions in industry forums, communities and Q&A sites where the affected people talk shop), regulation (new or upcoming rules and policy changes), market_news (industry developments, shortages, cost pressures), technology (shifts that create new needs or break old workflows).
 Each query must be a natural-language query a search engine answers well: concrete nouns, the target customer, and the geography if one is implied. No boolean operators, no quotes, no site: filters. Today is ${new Date().toISOString().slice(0, 10)}; prefer recent framing.
+Also write exactly 2 reddit_queries: short Reddit searches (2-6 words) in the words affected people would use when complaining or asking for help. No brand names, no quotes or operators.
 Also write one news_query describing the developments to look for in news coverage.
 Pick the single best-fitting industry and geography from the allowed lists.`,
     input: `User request: ${run.query}\n${constraints}`,
@@ -296,11 +301,18 @@ Pick the single best-fitting industry and geography from the allowed lists.`,
       industry: s.enm(INDUSTRIES),
       geography: s.enm(GEOGRAPHIES),
       searches: s.arr(s.obj({ intent: s.enm(SEARCH_INTENTS), query: s.str() })),
+      reddit_queries: s.arr(s.str()),
       news_query: s.str(),
     }),
   });
 
-  const searches = (plan.searches ?? []).filter((q) => q.query?.trim()).slice(0, 4);
+  const reddit = ((plan as { reddit_queries?: string[] }).reddit_queries ?? [])
+    .map((q) => q.replace(/["']/g, "").trim().slice(0, 80))
+    .filter((q) => q.length >= 4)
+    .slice(0, REDDIT_QUERIES)
+    .map((query) => ({ intent: "reddit", query }));
+  const web = (plan.searches ?? []).filter((q) => q.query?.trim()).slice(0, WEB_QUERIES);
+  const searches = [...web, ...reddit];
   if (searches.length === 0) throw new PipelineError("The AI could not build a research plan for this topic. Try rephrasing.");
   const cleanPlan: ResearchPlan = {
     interpretation: plan.interpretation,
@@ -338,23 +350,37 @@ const EXCLUDE_DOMAINS = ["pinterest.com", "facebook.com", "instagram.com", "tikt
 async function stageSearch(run: RunRow) {
   const fresh = await loadRun(run.id);
   const plan = (fresh.plan as ResearchPlan) ?? {};
-  const searches = (plan.searches ?? []).slice(0, 4);
+  const all = plan.searches ?? [];
+  const searches = all.filter((q) => q.intent !== "reddit").slice(0, WEB_QUERIES);
+  const redditSearches = all.filter((q) => q.intent === "reddit").slice(0, REDDIT_QUERIES);
   const yearAgo = Date.now() - 365 * 24 * 3600_000;
   const onWait = waitReporter(run.id);
 
+  // At most 5 outbound requests in flight (hosted runtime queues beyond 6).
+  const gate = limiter(5);
   const webTasks = searches.map((sq) =>
-    webSearch({
+    gate(() => webSearch({
       query: sq.query,
-      numResults: 8,
+      numResults: 10,
       highlightChars: 1000,
       excludeDomains: EXCLUDE_DOMAINS,
       freshness: sq.intent === "complaints" || sq.intent === "requests" ? undefined : "last_year",
       onWait,
-    }).then((r) => ({ sq, ...r })),
+    })).then((r) => ({ sq, ...r })),
   );
-  const newsTask = newsSearch({ query: plan.news_query || run.query, limit: 12, fromMs: yearAgo, onWait });
+  const newsTask = gate(() => newsSearch({ query: plan.news_query || run.query, limit: 12, fromMs: yearAgo, onWait }));
+  const redditTasks = redditSearches.map((sq) =>
+    gate(() =>
+      scrapeParsed<{ posts?: RedditPost[] }>(
+        `https://www.reddit.com/search/?q=${encodeURIComponent(sq.query)}&type=posts&sort=relevance&t=year`,
+        "reddit-search",
+        { limit: 20 },
+      ),
+    ).then((r) => ({ sq, ...r })),
+  );
 
   const settled = await Promise.allSettled([...webTasks, newsTask]);
+  const redditSettled = await Promise.allSettled(redditTasks);
   const rows: SourceInsert[] = [];
   const seen = new Set<string>();
   let credits = 0;
@@ -372,7 +398,7 @@ async function stageSearch(run: RunRow) {
       const ranked = [...value.results].sort((a, b) => rel(b.relevance) - rel(a.relevance));
       let kept = 0;
       for (const r of ranked) {
-        if (kept >= 7) break;
+        if (kept >= 6) break;
         const key = normalizeUrl(r.url);
         if (seen.has(key)) continue;
         if (r.relevance === "low" && kept >= 3) continue;
@@ -400,7 +426,7 @@ async function stageSearch(run: RunRow) {
       credits += value.meta.creditsUsed;
       let kept = 0;
       for (const a of value.articles) {
-        if (kept >= 10) break;
+        if (kept >= 8) break;
         const key = normalizeUrl(a.url);
         if (seen.has(key)) continue;
         seen.add(key);
@@ -424,6 +450,49 @@ async function stageSearch(run: RunRow) {
       }
     }
   });
+
+  // Reddit: real posts from the last year where people describe the problem in their own words.
+  for (const res of redditSettled) {
+    if (res.status === "rejected") continue; // optional channel; never fail the run over it
+    credits += res.value.meta.creditsUsed;
+    const posts = (res.value.data?.posts ?? [])
+      .filter((p) => p.id && p.title && p.url && !p.is_nsfw && !p.removed_by && !p.is_stickied)
+      .filter((p) => {
+        const t = p.posted_at ? Date.parse(p.posted_at) : NaN;
+        return Number.isNaN(t) || t >= yearAgo;
+      })
+      .filter((p) => (p.body ?? "").trim().length >= 40 || (p.comment_count ?? 0) >= 3)
+      .sort((a, b) => (b.score ?? 0) + (b.comment_count ?? 0) - ((a.score ?? 0) + (a.comment_count ?? 0)));
+    let kept = 0;
+    for (const p of posts) {
+      if (kept >= 7) break;
+      const key = normalizeUrl(p.url!);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      kept++;
+      byIntent["reddit"] = (byIntent["reddit"] ?? 0) + 1;
+      rows.push({
+        run_id: run.id,
+        url: p.url!,
+        domain: "reddit.com",
+        title: p.title!.slice(0, 300),
+        snippet: (p.body ?? "").replace(/\s+/g, " ").trim().slice(0, 1500) || null,
+        highlights: [],
+        publisher: p.subreddit ? `r/${p.subreddit}` : "Reddit",
+        published_at: p.posted_at ?? null,
+        origin: "web",
+        article_type: "discussion",
+        search_query: res.value.sq.query,
+        search_intent: "reddit",
+        relevance: null,
+      });
+    }
+  }
+  // Keep the pool at ~50: drop low-relevance web hits first so Reddit and news voices survive.
+  for (let i = rows.length - 1; i >= 0 && rows.length > MAX_RUN_SOURCES; i--) {
+    if (rows[i]!.relevance === "low") rows.splice(i, 1);
+  }
+  if (rows.length > MAX_RUN_SOURCES) rows.splice(MAX_RUN_SOURCES);
 
   if (firstError) await mergeStats(run.id, { billing_api_failed: true });
   if (rows.length === 0 && firstError) throw firstError;
@@ -449,6 +518,38 @@ async function stageSearch(run: RunRow) {
     credits_used: credits,
     rate_wait_until: null,
   });
+}
+
+interface RedditPost {
+  id?: string;
+  title?: string;
+  body?: string | null;
+  url?: string;
+  subreddit?: string | null;
+  posted_at?: string | null;
+  score?: number | null;
+  comment_count?: number | null;
+  is_nsfw?: boolean;
+  removed_by?: string | null;
+  is_stickied?: boolean;
+}
+
+/** Tiny concurrency gate so one stage never has more than `max` requests in flight. */
+function limiter(max: number) {
+  let active = 0;
+  const queue: (() => void)[] = [];
+  return <T>(fn: () => Promise<T>): Promise<T> =>
+    new Promise<T>((resolve, reject) => {
+      const run = () => {
+        active++;
+        fn().then(resolve, reject).finally(() => {
+          active--;
+          queue.shift()?.();
+        });
+      };
+      if (active < max) run();
+      else queue.push(run);
+    });
 }
 
 function rel(r: string | null): number {
