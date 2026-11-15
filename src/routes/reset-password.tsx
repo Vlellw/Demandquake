@@ -56,6 +56,7 @@ function ResetPasswordPage() {
       return;
     }
     setBusy(true);
+    try {
     const { error } = await supabase.auth.updateUser({ password });
     setBusy(false);
     if (error) {
@@ -64,6 +65,7 @@ function ResetPasswordPage() {
     }
     toast.success("Password updated");
     navigate({ to: "/workspace" });
+    } catch { toast.error("Connection interrupted. Please try again."); } finally { setBusy(false); }
   }
 
   return (

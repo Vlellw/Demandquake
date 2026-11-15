@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { PageError } from "@/components/common/PageError";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "motion/react";
@@ -48,6 +49,7 @@ export const Route = createFileRoute("/_authenticated/startup_/$slug/quake/$scan
     };
   },
   component: QuakePage,
+  errorComponent: PageError,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <p className="font-display text-2xl text-foreground">Scan not found</p>

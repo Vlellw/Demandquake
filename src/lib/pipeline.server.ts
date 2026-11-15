@@ -161,17 +161,19 @@ export async function advanceRun(runId: string): Promise<AdvanceResult> {
   const stage = STAGES.find((st) => st.from === run.status || st.running === run.status);
   if (stage) {
     const staleIso = new Date(Date.now() - STALE_MS).toISOString();
-    const { data: claimed } = await db
+    const { data: claimed, error: claimError } = await db
       .from("discovery_runs")
       .update({ status: stage.running, stage_started_at: new Date().toISOString(), error: null })
       .eq("id", runId)
       .or(`status.eq.${stage.from},and(status.eq.${stage.running},stage_started_at.lt.${staleIso})`)
       .select("id");
+    if (claimError) throw claimError;
     if (!claimed || claimed.length === 0) return { progressed: false, busy: true, status: run.status };
 
     try {
       await stage.run(run);
-      await db.from("discovery_runs").update({ status: stage.to, stage_started_at: null }).eq("id", runId);
+      const { error } = await db.from("discovery_runs").update({ status: stage.to, stage_started_at: null }).eq("id", runId).eq("status", stage.running);
+      if (error) throw error;
       return { progressed: true, busy: false, status: stage.to };
     } catch (err) {
       console.error(`[pipeline] stage ${stage.running} failed for ${runId}`, err);
@@ -194,7 +196,8 @@ export async function advanceRun(runId: string): Promise<AdvanceResult> {
       await db
         .from("clusters")
         .update({ generation_status: "failed", generation_error: userMessageOf(err) })
-        .eq("id", cluster.id);
+        .eq("id", cluster.id)
+        .eq("generation_status", "running");
     }
     await maybeFinalize(runId);
     return { progressed: true, busy: false, status: "generating" };
@@ -205,11 +208,14 @@ export async function advanceRun(runId: string): Promise<AdvanceResult> {
 
 async function failRun(runId: string, failedStage: string, message: string) {
   const run = await loadRun(runId);
+  if (run.status === "complete" || run.status === "failed") return;
   const stats = { ...((run.stats as RunStats) ?? {}), failed_stage: failedStage, billing_api_failed: true };
-  await db
+  const { error } = await db
     .from("discovery_runs")
     .update({ status: "failed", error: message, stage_started_at: null, stats: stats as Json })
-    .eq("id", runId);
+    .eq("id", runId)
+    .eq("status", run.status);
+  if (error) throw error;
 }
 
 export async function retryRun(runId: string): Promise<void> {
@@ -223,36 +229,40 @@ export async function retryRun(runId: string): Promise<void> {
       .eq("run_id", runId)
       .eq("generation_status", "failed");
   }
-  await db.from("discovery_runs").update({ status: failed, error: null, stage_started_at: null }).eq("id", runId);
+  const { error } = await db.from("discovery_runs").update({ status: failed, error: null, stage_started_at: null }).eq("id", runId).eq("status", "failed");
+  if (error) throw error;
 }
 
 async function claimCluster(runId: string): Promise<{ id: string } | null> {
   const staleIso = new Date(Date.now() - STALE_MS * 1.5).toISOString();
-  const { data: candidates } = await db
+  const { data: candidates, error: candidatesError } = await db
     .from("clusters")
     .select("id, generation_status, generation_started_at")
     .eq("run_id", runId)
     .in("generation_status", ["pending", "running"])
     .order("rank", { ascending: true });
+  if (candidatesError) throw candidatesError;
   for (const c of candidates ?? []) {
     if (c.generation_status === "running" && c.generation_started_at && c.generation_started_at > staleIso) continue;
-    const { data: claimed } = await db
+    const { data: claimed, error: claimError } = await db
       .from("clusters")
       .update({ generation_status: "running", generation_started_at: new Date().toISOString() })
       .eq("id", c.id)
       .eq("generation_status", c.generation_status)
       .select("id");
+    if (claimError) throw claimError;
     if (claimed && claimed.length > 0) return { id: c.id };
   }
   return null;
 }
 
 async function maybeFinalize(runId: string): Promise<boolean> {
-  const { data: clusters } = await db
+  const { data: clusters, error: clustersError } = await db
     .from("clusters")
     .select("generation_status")
     .eq("run_id", runId)
     .in("generation_status", ["pending", "running", "done", "failed"]);
+  if (clustersError) throw clustersError;
   const list = clusters ?? [];
   if (list.some((c) => c.generation_status === "pending" || c.generation_status === "running")) return false;
   const done = list.filter((c) => c.generation_status === "done").length;

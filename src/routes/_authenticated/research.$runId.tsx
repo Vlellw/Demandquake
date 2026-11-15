@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { PageError } from "@/components/common/PageError";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -40,6 +41,7 @@ export const Route = createFileRoute("/_authenticated/research/$runId")({
     ],
   }),
   component: ResearchPage,
+  errorComponent: PageError,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <p className="font-display text-2xl text-foreground">Research run not found</p>

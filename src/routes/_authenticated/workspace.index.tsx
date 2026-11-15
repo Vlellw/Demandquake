@@ -9,6 +9,7 @@ import { useStartupBanner } from "@/hooks/use-startup-banner";
 import type { ProjectSummaryDTO } from "@/lib/dto";
 import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/common/SectionHeading";
+import { PageError } from "@/components/common/PageError";
 
 
 export const Route = createFileRoute("/_authenticated/workspace/")({
@@ -25,6 +26,8 @@ export const Route = createFileRoute("/_authenticated/workspace/")({
     ],
   }),
   component: WorkspaceList,
+  errorComponent: PageError,
+  notFoundComponent: () => <p className="p-6 text-muted-foreground">Workspace list unavailable.</p>,
 });
 
 function WorkspaceList() {

@@ -8,6 +8,7 @@ import { invitePreviewQuery } from "@/lib/queries";
 import { acceptInvite } from "@/lib/projects.functions";
 import { StartupMark, brandStyle } from "@/components/brand/StartupMark";
 import { Button } from "@/components/ui/button";
+import { PageError } from "@/components/common/PageError";
 
 export const Route = createFileRoute("/_authenticated/invite/$token")({
   loader: ({ context, params }) => context.queryClient.ensureQueryData(invitePreviewQuery(params.token)),
@@ -23,6 +24,8 @@ export const Route = createFileRoute("/_authenticated/invite/$token")({
     ],
   }),
   component: InvitePage,
+  errorComponent: PageError,
+  notFoundComponent: () => <p className="p-6 text-muted-foreground">Invite unavailable.</p>,
 });
 
 function InvitePage() {

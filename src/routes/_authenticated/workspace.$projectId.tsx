@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { PageError } from "@/components/common/PageError";
 import { InfoTip } from "@/components/common/InfoTip";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -75,6 +76,7 @@ export const Route = createFileRoute("/_authenticated/workspace/$projectId")({
     ],
   }),
   component: WorkspacePage,
+  errorComponent: PageError,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <p className="font-display text-2xl text-foreground">Workspace not found</p>

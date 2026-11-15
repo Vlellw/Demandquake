@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  createRootRouteWithContext,
   useRouter,
+  createRootRouteWithContext,
   HeadContent,
   Scripts,
   type ErrorComponentProps,
@@ -15,7 +15,7 @@ import { AppHeader } from "@/components/layout/AppHeader";
 import { AppFooter } from "@/components/layout/AppFooter";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Button } from "@/components/ui/button";
+import { PageError } from "@/components/common/PageError";
 import { supabase } from "@/integrations/supabase/client";
 
 function NotFoundComponent() {
@@ -33,33 +33,11 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
-  const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
-  return (
-    <div className="flex min-h-[70vh] items-center justify-center px-4">
-      <div className="max-w-md text-center">
-        <h1 className="section-title mt-3 text-3xl">This page didn't load</h1>
-        <p className="mt-3 text-base text-muted-foreground">Something went wrong on our end. Try again, or go back to the start page.</p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <Button
-            variant="hero"
-            onClick={() => {
-              router.invalidate();
-              reset();
-            }}
-          >
-            Try again
-          </Button>
-          <Button asChild variant="outline">
-            <a href="/">Go home</a>
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+  return <PageError error={error} reset={reset} />;
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({

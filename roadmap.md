@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Sweep connection recovery across loaders, auth guards, watch sync, demand retries and saved-action flows; add local recovery boundaries, check ignored database errors and guard terminal stage writes. Signed-in workspace/auth fault injection verified; 39 focused tests pass. Hanging generated transports remain outside verified coverage.
 - [x] Recover interrupted startup reads with two delayed network-only retries and a working page retry screen. Simulated three failed reads, then Try again restored RemitLoom; nine regression tests pass, preview healthy.
 - [ ] Email weekly web watch results to the requesting founder (blocked: sender domain setup required).
 - [ ] Complete existing Stripe payment setup (blocked: checkout reports configuration missing; four credit packages exist, no payment taken).

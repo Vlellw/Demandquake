@@ -30,17 +30,28 @@ export function WebWatch({ projectId }: { projectId: string }) {
   const stopFn = useServerFn(stopWebWatch);
   const [busy, setBusy] = useState<"start" | "stop" | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [syncError, setSyncError] = useState<string | null>(null);
   const synced = useRef(false);
   const set = (w: WebWatchDTO) => qc.setQueryData(key, w);
+
+  async function sync() {
+    setSyncing(true);
+    setSyncError(null);
+    try {
+      const res = await syncFn({ data: { projectId } });
+      if (res.ok) set(res.watch);
+      else setSyncError(res.error);
+    } catch {
+      setSyncError("Couldn't check for new findings. Your saved findings are unchanged.");
+    } finally {
+      setSyncing(false);
+    }
+  }
 
   useEffect(() => {
     if (!data?.stale || synced.current) return;
     synced.current = true;
-    setSyncing(true);
-    syncFn({ data: { projectId } })
-      .then((res) => res.ok && set(res.watch))
-      .catch((err) => console.error("[watch] sync failed", err))
-      .finally(() => setSyncing(false));
+    void sync();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data?.stale, projectId]);
 
@@ -106,6 +117,14 @@ export function WebWatch({ projectId }: { projectId: string }) {
             Retry
           </button>
         </p>
+      )}
+      {syncError && (
+        <div role="alert" className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-negative">
+          <p>{syncError}</p>
+          <Button variant="outline" size="sm" onClick={sync} disabled={syncing}>
+            <RotateCw className={cn("size-4", syncing && "animate-spin")} /> Try again
+          </Button>
+        </div>
       )}
 
       {data && !data.subscribed && (

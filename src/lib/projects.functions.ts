@@ -250,21 +250,24 @@ export const createProjectInvite = createServerFn({ method: "POST" })
   .inputValidator((d: { projectId: string }) => ({ projectId: uuid.parse(d.projectId) }))
   .handler(async ({ data, context }) => {
     const { supabase, userId, claims } = context;
-    const { data: project } = await supabase
+    const { data: project, error: projectError } = await supabase
       .from("projects")
       .select("user_id, owner_name")
       .eq("id", data.projectId)
       .maybeSingle();
+    if (projectError) throw projectError;
     if (!project || project.user_id !== userId) throw new Error("Only the founder who claimed this startup can invite co-founders.");
     if (!project.owner_name) {
-      await supabase.from("projects").update({ owner_name: nameFromClaims(claims as Record<string, unknown>) }).eq("id", data.projectId);
+      const { error } = await supabase.from("projects").update({ owner_name: nameFromClaims(claims as Record<string, unknown>) }).eq("id", data.projectId);
+      if (error) throw error;
     }
-    const { count } = await supabase
+    const { count, error: countError } = await supabase
       .from("project_invites")
       .select("id", { count: "exact", head: true })
       .eq("project_id", data.projectId)
       .is("revoked_at", null)
       .gt("expires_at", new Date().toISOString());
+    if (countError) throw countError;
     if ((count ?? 0) >= 5) throw new Error("You already have 5 active invite links. Revoke one before creating another.");
     const { data: invite, error } = await supabase
       .from("project_invites")
@@ -296,15 +299,17 @@ export const removeProjectMember = createServerFn({ method: "POST" })
   .inputValidator((d: { projectId: string; userId: string }) => ({ projectId: uuid.parse(d.projectId), userId: uuid.parse(d.userId) }))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: member } = await supabase
+    const { data: member, error: memberError } = await supabase
       .from("project_members")
       .select("display_name")
       .eq("project_id", data.projectId)
       .eq("user_id", data.userId)
       .maybeSingle();
+    if (memberError) throw memberError;
     if (!member) throw new Error("This co-founder is no longer on the project.");
     const leaving = data.userId === userId;
-    const { data: project } = await supabase.from("projects").select("updates").eq("id", data.projectId).maybeSingle();
+    const { data: project, error: projectError } = await supabase.from("projects").select("updates").eq("id", data.projectId).maybeSingle();
+    if (projectError) throw projectError;
     if (project) {
       const entry = {
         id: `m-${crypto.randomUUID().replace(/-/g, "")}`,
@@ -315,7 +320,8 @@ export const removeProjectMember = createServerFn({ method: "POST" })
         author: member.display_name,
       };
       const updates = [...((project.updates as unknown[]) ?? []), entry];
-      await supabase.from("projects").update({ updates } as never).eq("id", data.projectId);
+      const { error } = await supabase.from("projects").update({ updates } as never).eq("id", data.projectId);
+      if (error) throw error;
     }
     const { error } = await supabase.from("project_members").delete().eq("project_id", data.projectId).eq("user_id", data.userId);
     if (error) throw error;

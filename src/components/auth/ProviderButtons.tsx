@@ -19,6 +19,7 @@ export function ProviderButtons({ onSignedIn, onBeforeRedirect }: { onSignedIn: 
 
   async function signIn(provider: "google") {
     setBusy(provider);
+    try {
     onBeforeRedirect();
     const result = await lovable.auth.signInWithOAuth(provider, { redirect_uri: `${window.location.origin}/auth` });
     if (result.error) {
@@ -28,6 +29,7 @@ export function ProviderButtons({ onSignedIn, onBeforeRedirect }: { onSignedIn: 
     }
     if (result.redirected) return;
     onSignedIn();
+    } catch { toast.error("Connection interrupted. Please try signing in again."); } finally { setBusy(null); }
   }
 
   return (

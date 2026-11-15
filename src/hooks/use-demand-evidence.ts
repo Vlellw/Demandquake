@@ -61,6 +61,7 @@ export function useDemandEvidence(slug: string) {
 
   const retry = useMutation({
     mutationFn: () => retryFn({ data: { slug } }),
+    onError: () => setDriverError("Couldn't restart the demand checks. Your saved evidence is unchanged - try again."),
     onSuccess: (evidence) => {
       qc.setQueryData(demandEvidenceQuery(slug).queryKey, evidence);
       setDriverError(null);

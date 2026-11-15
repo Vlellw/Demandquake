@@ -6,6 +6,7 @@ import { useServerFn } from '@tanstack/react-start';
 import { Coins, ShieldCheck, ArrowRight, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { SectionHeading } from '@/components/common/SectionHeading';
+import { PageError } from '@/components/common/PageError';
 import { Button } from '@/components/ui/button';
 import { PaymentNotice } from '@/components/credits/PaymentNotice';
 import { useAuthUser } from '@/hooks/use-auth';
@@ -18,6 +19,8 @@ export const Route = createFileRoute('/credits')({
   validateSearch: (s: Record<string, unknown>): { session_id?: string } => typeof s['session_id'] === 'string' && /^cs_[a-zA-Z0-9_]{1,250}$/.test(s['session_id']) ? { session_id: s['session_id'] } : {},
   head: () => ({ meta: [{ title: 'Buy research credits - Demandquake' }, { name: 'description', content: 'Purchase Demandquake credits for evidence-first startup discovery.' }, { property: 'og:title', content: 'Buy research credits - Demandquake' }, { property: 'og:description', content: 'Flexible credit packages for real startup research.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary_large_image' }] }),
   component: CreditsPage,
+  errorComponent: PageError,
+  notFoundComponent: () => <p className="p-6 text-muted-foreground">Credit packages unavailable.</p>,
 });
 function CreditsPage() {
   const catalog = useSuspenseQuery(creditCatalogQuery()).data;

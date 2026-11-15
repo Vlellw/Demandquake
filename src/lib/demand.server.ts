@@ -972,7 +972,8 @@ async function ensureRows(startupId: string): Promise<void> {
 async function claim(startupId: string, section: DemandSection): Promise<Row | null> {
   const nowIso = new Date().toISOString();
   const staleIso = new Date(Date.now() - STALE_RUN_MS).toISOString();
-  const { data: before } = await db.from("demand_evidence").select("*").eq("startup_id", startupId).eq("section", section).maybeSingle();
+  const { data: before, error: beforeError } = await db.from("demand_evidence").select("*").eq("startup_id", startupId).eq("section", section).maybeSingle();
+  if (beforeError) throw beforeError;
   if (!before) return null;
   const { data, error } = await db
     .from("demand_evidence")
@@ -991,7 +992,7 @@ async function runSection(ctx: Ctx, section: DemandSection, before: Row, plan: D
   try {
     const out = await (RUNNERS[section] as Runner<DemandSection>)(ctx, plan, credits);
     const now = new Date().toISOString();
-    await db
+    const { error: saveError } = await db
       .from("demand_evidence")
       .update({
         status: out.status,
@@ -1005,6 +1006,7 @@ async function runSection(ctx: Ctx, section: DemandSection, before: Row, plan: D
       })
       .eq("startup_id", ctx.id)
       .eq("section", section);
+    if (saveError) throw saveError;
     return "done";
   } catch (err) {
     const hasData = before.data !== null && before.status !== "error";

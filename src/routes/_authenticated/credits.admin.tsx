@@ -10,11 +10,14 @@ import { updateCreditPackage } from '@/lib/payments.functions';
 import { getStripeEnvironment } from '@/lib/stripe';
 import { Button } from '@/components/ui/button';
 import { CreditLedger } from './credits.history';
+import { PageError } from '@/components/common/PageError';
 
 export const Route = createFileRoute('/_authenticated/credits/admin')({
   loader: ({ context }) => context.queryClient.ensureQueryData(creditAdminQuery()),
   head: () => ({ meta: [{ title: 'Credit administration - Demandquake' },{name:'description',content:'Manage Demandquake credit balances, research costs and packages.'},{property:'og:title',content:'Credit administration - Demandquake'},{property:'og:description',content:'Secure credit and payment administration.'},{property:'og:type',content:'website'},{name:'twitter:card',content:'summary'}] }),
   component: CreditAdmin,
+  errorComponent: PageError,
+  notFoundComponent: () => <p className="p-6 text-muted-foreground">Credit administration unavailable.</p>,
 });
 function CreditAdmin() {
   const data = useSuspenseQuery(creditAdminQuery()).data;

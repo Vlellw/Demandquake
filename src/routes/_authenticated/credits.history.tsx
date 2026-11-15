@@ -4,11 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { creditAccountQuery } from '@/lib/credit-queries';
 import { Button } from '@/components/ui/button';
 import { StatRule } from '@/components/common/StatRule';
+import { PageError } from '@/components/common/PageError';
 
 export const Route = createFileRoute('/_authenticated/credits/history')({
   loader: async ({ context }) => { const { data: { user } } = await supabase.auth.getUser(); if (!user) throw new Error('Sign in required'); await context.queryClient.ensureQueryData(creditAccountQuery(user.id)); return { userId: user.id }; },
   head: () => ({ meta: [{ title: 'Credit transactions - Demandquake' }, { name: 'description', content: 'Your Demandquake credit balance, research charges and payment history.' }, { property: 'og:title', content: 'Credit transactions - Demandquake' }, { property: 'og:description', content: 'Review credit purchases, searches, refunds and adjustments.' }, { property: 'og:type', content: 'website' }, { name: 'twitter:card', content: 'summary' }] }),
   component: History,
+  errorComponent: PageError,
+  notFoundComponent: () => <p className="p-6 text-muted-foreground">Credit history unavailable.</p>,
 });
 export function CreditLedger({ rows }: { rows: Awaited<ReturnType<typeof import('@/lib/credits.functions').getCreditAccount>>['transactions'] }) {
   return <div className="overflow-x-auto"><table className="w-full min-w-[640px] text-left text-sm"><thead className="border-b-2 border-primary text-primary"><tr>{['Date (UTC)','Transaction','Credits','Balance after'].map(h => <th key={h} className="px-3 py-4 font-bold">{h}</th>)}</tr></thead><tbody>{rows.map(r => <tr key={r.id} className="border-b border-border"><td className="px-3 py-4">{new Date(r.created_at).toLocaleString('en-GB',{ timeZone:'UTC' })}</td><td className="px-3 py-4">{r.description}</td><td className="px-3 py-4 font-semibold">{r.delta > 0 ? '+' : ''}{r.delta.toLocaleString('en-US')}</td><td className="px-3 py-4">{r.balance_after.toLocaleString('en-US')}</td></tr>)}</tbody></table></div>;

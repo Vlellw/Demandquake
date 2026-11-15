@@ -80,6 +80,7 @@ function AuthPage() {
   async function onSignIn(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    try {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setBusy(false);
     if (error) {
@@ -87,6 +88,7 @@ function AuthPage() {
       return;
     }
     finish();
+    } catch { toast.error("Connection interrupted. Please try signing in again."); } finally { setBusy(false); }
   }
 
   async function onSignUp(e: React.FormEvent) {
@@ -96,6 +98,7 @@ function AuthPage() {
       return;
     }
     setBusy(true);
+    try {
     rememberTarget();
     const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
@@ -109,11 +112,13 @@ function AuthPage() {
     }
     if (data.session) finish();
     else setSentTo(email.trim());
+    } catch { toast.error("Connection interrupted. Check your inbox before trying again."); } finally { setBusy(false); }
   }
 
   async function onReset(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    try {
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${window.location.origin}/reset-password` });
     setBusy(false);
     if (error) {
@@ -122,6 +127,7 @@ function AuthPage() {
     }
     toast.success("Check your inbox for a password reset link.");
     setResetMode(false);
+    } catch { toast.error("Connection interrupted. Check your inbox before requesting another link."); } finally { setBusy(false); }
   }
 
   return (
