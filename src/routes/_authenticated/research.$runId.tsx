@@ -16,8 +16,7 @@ import { StartupCard } from "@/components/discovery/StartupCard";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatRule } from "@/components/common/StatRule";
-import { ObservedTag, InferredTag } from "@/components/common/Provenance";
-import { SourceFavicon } from "@/components/common/SourceFavicon";
+import { InferredTag } from "@/components/common/Provenance";
 import { industryColor } from "@/lib/taxonomy";
 import { markSearchDone } from "@/lib/journey";
 import { JourneySteps } from "@/components/journey/JourneySteps";
@@ -84,7 +83,6 @@ function ResearchPage() {
   const elapsed = useElapsed(run.created_at, run.completed_at ?? (run.status === "failed" ? run.updated_at : null));
   const idx = stageIndex(detail);
   const evidence = detail.sources.filter((s) => s.origin === "web" || s.origin === "news");
-  const competitors = detail.sources.filter((s) => s.origin === "competitor");
   const waitingUntil = run.stats.rate_wait_until ? new Date(run.stats.rate_wait_until).getTime() : 0;
   const [, tick] = useState(0);
   useEffect(() => {
@@ -221,47 +219,6 @@ function ResearchPage() {
                 </div>
               </section>
             )}
-
-            {/* Clusters */}
-            {detail.clusters.length > 0 && (
-              <section className="grid gap-3 md:grid-cols-2">
-                {detail.clusters.map((c) => {
-                  const compSources = competitors.filter((s) => c.competitor_source_ids.includes(s.id));
-                  return (
-                    <motion.div key={c.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="panel p-4">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            <span aria-hidden="true" className="size-1.5 rounded-full" style={{ background: industryColor(c.industry) }} />
-                            Problem #{c.rank + 1} · {c.category}
-                          </p>
-                          <h3 className="mt-1 font-display text-base font-semibold leading-snug text-foreground">{c.title}</h3>
-                        </div>
-                        <GenerationChip status={c.generation_status} />
-                      </div>
-                      <p className="mt-2 text-sm text-muted-foreground">{c.summary}</p>
-                      <div className="mt-3 flex flex-wrap items-center gap-1.5">
-                        <ObservedTag label="Sources" count={c.source_ids.length} />
-                        <Badge variant="outline" className="capitalize">{c.evidence_strength}</Badge>
-                      </div>
-                      {compSources.length > 0 && (
-                        <div className="mt-3 border-t border-border pt-3">
-                          <p className="data-label">Existing solutions checked</p>
-                          <div className="mt-2 flex flex-wrap gap-1.5">
-                            {compSources.slice(0, 6).map((s) => (
-                              <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-md border border-border px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground">
-                                <SourceFavicon domain={s.domain} className="size-3" /> {s.domain}
-                              </a>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      {c.generation_error && <p className="mt-2 text-xs text-negative">{c.generation_error}</p>}
-                    </motion.div>
-                  );
-                })}
-              </section>
-            )}
           </div>
         </div>
       </div>
@@ -269,28 +226,3 @@ function ResearchPage() {
   );
 }
 
-function GenerationChip({ status }: { status: string }) {
-  if (status === "done") return <Badge variant="positive">Startup generated</Badge>;
-  if (status === "running")
-    return (
-      <Badge variant="live">
-        <Loader2 className="animate-spin" /> Generating
-      </Badge>
-    );
-  if (status === "pending") return <Badge variant="outline">Queued</Badge>;
-  if (status === "failed") return <Badge variant="negative">Failed</Badge>;
-  return <Badge variant="secondary">Mapped only</Badge>;
-}
-
-function SkeletonSources({ active }: { active: boolean }) {
-  return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className={cn("h-[86px] overflow-hidden rounded-lg border border-border bg-surface-sunken/60", active && "shimmer-line")} />
-      ))}
-      <p className="col-span-full pt-1 text-center text-xs text-muted-foreground">
-        {active ? "Searching complaints, regulations, news and technology shifts…" : "No sources were retrieved."}
-      </p>
-    </div>
-  );
-}
