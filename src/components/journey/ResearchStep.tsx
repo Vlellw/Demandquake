@@ -12,6 +12,7 @@ import { canAfford } from "@/lib/credit-rules";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { InfoTip } from "@/components/common/InfoTip";
 import { Button } from "@/components/ui/button";
+import { CreditReadFeedback } from "@/components/credits/CreditReadFeedback";
 
 const NEXT_STEPS = [
   { n: "1", title: "We read the live web" },
@@ -225,15 +226,17 @@ export function ResearchStep({
             <dl className="mt-5 grid grid-cols-2 gap-4">
               <div className="stat-rule pt-3">
                 <dt className="text-sm text-primary">Cost if it succeeds</dt>
-                <dd className="font-display text-2xl font-bold text-primary">{cost ?? "…"} credits</dd>
+                <dd className="font-display text-lg font-bold text-primary">{cost !== undefined ? `${cost} credits` : catalog.isError ? 'Price unavailable' : 'Loading price…'}</dd>
               </div>
               <div className="stat-rule pt-3">
                 <dt className="text-sm text-primary">You have</dt>
-                <dd className="font-display text-2xl font-bold text-primary">
-                  {available === null ? "…" : `${available.toLocaleString("en-US")} credits`}
+                <dd className="font-display text-lg font-bold text-primary">
+                  {available === null ? account.isError ? 'Balance unavailable' : 'Loading balance…' : `${available.toLocaleString("en-US")} credits`}
                 </dd>
               </div>
             </dl>
+            <CreditReadFeedback query={account} hasData={Boolean(wallet)} />
+            <CreditReadFeedback query={catalog} hasData={cost !== undefined} label="credit price" />
 
             {wallet && !affordable && (
               <p role="alert" className="mt-4 rounded-[4px] border border-negative/40 p-3 text-sm text-negative">

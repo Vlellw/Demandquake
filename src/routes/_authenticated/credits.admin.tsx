@@ -11,6 +11,7 @@ import { getStripeEnvironment } from '@/lib/stripe';
 import { Button } from '@/components/ui/button';
 import { CreditLedger } from './credits.history';
 import { PageError } from '@/components/common/PageError';
+import { CreditReadFeedback } from '@/components/credits/CreditReadFeedback';
 
 export const Route = createFileRoute('/_authenticated/credits/admin')({
   loader: ({ context }) => context.queryClient.ensureQueryData(creditAdminQuery()),
@@ -23,7 +24,8 @@ const SETTING_LABELS = { welcome: 'Welcome credits', discovery: 'Discovery searc
 type SettingKey = keyof typeof SETTING_LABELS;
 
 function CreditAdmin() {
-  const data = useSuspenseQuery(creditAdminQuery()).data;
+  const account = useSuspenseQuery(creditAdminQuery());
+  const data = account.data;
   const qc = useQueryClient();
   const adjust = useServerFn(adjustCredits);
   const setting = useServerFn(updateCreditSetting);
@@ -36,7 +38,7 @@ function CreditAdmin() {
     finally { setBusy(false); }
   }
   const field = 'h-10 min-w-0 rounded border border-border bg-background px-3 text-sm';
-  return <div><div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 sm:px-6"><header><h1 className="section-title mt-2">Credits & payments</h1></header>
+  return <div><div className="mx-auto max-w-[1400px] space-y-10 px-4 py-10 sm:px-6"><header><h1 className="section-title mt-2">Credits & payments</h1><CreditReadFeedback query={account} hasData label="credit accounts" /></header>
     <section><h2 className="mb-4 text-xl font-bold text-primary">Credit costs</h2><div className="grid gap-4 sm:grid-cols-2">{data.settings.filter((s): s is typeof s & { key: SettingKey } => s.key in SETTING_LABELS).map(s => <form key={s.key} className="flex flex-wrap items-end gap-3" onSubmit={e => { e.preventDefault(); const f = new FormData(e.currentTarget); const key = s.key; action(() => setting({data:{key,value:Number(f.get('value'))}})); }}><label className="flex-1 text-sm font-semibold">{SETTING_LABELS[s.key]}<input aria-label={s.key} className={`${field} mt-2 block w-full`} name="value" type="number" min="0" max="1000000" defaultValue={s.value} required /></label><Button disabled={busy} type="submit" variant="outline"><Save />Save</Button></form>)}</div></section>
     <section><h2 className="mb-4 text-xl font-bold text-primary">Packages</h2><div className="divide-y divide-border">{data.packages.map(p => <form key={p.id} className="flex flex-wrap items-end gap-4 py-4" onSubmit={e => { e.preventDefault(); const f=new FormData(e.currentTarget); action(() => pkgUpdate({data:{id:p.id,credits:Number(f.get('credits')),amount:Math.round(Number(f.get('price'))*100),environment:getStripeEnvironment(),requestId:crypto.randomUUID()}})); }}><p className="w-24 pb-3 font-semibold">{p.name}</p><label className="text-sm">Credits<input className={`${field} mt-2 block w-32`} name="credits" type="number" min="1" defaultValue={p.credits} required /></label><label className="text-sm">Price (€)<input className={`${field} mt-2 block w-32`} name="price" type="number" min="0.5" step="0.01" defaultValue={p.amount/100} required /></label><Button disabled={busy} variant="outline" type="submit"><Save />Save</Button></form>)}</div></section>
     <section><h2 className="mb-4 text-xl font-bold text-primary">Adjust a balance</h2><form className="flex flex-wrap items-end gap-3" onSubmit={e => {e.preventDefault(); const f = new FormData(e.currentTarget); action(() => adjust({data:{userId:String(f.get('user')),delta:Number(f.get('delta')),reason:String(f.get('reason')),environment:getStripeEnvironment(),requestId:crypto.randomUUID()}}));}}><label className="min-w-0 flex-1 text-sm">Account<select className={`${field} mt-2 block w-full`} name="user" required>{data.wallets.map(w => <option key={w.user_id} value={w.user_id}>{w.user_id} · {w.balance} credits</option>)}</select></label><label className="text-sm">Adjustment<input className={`${field} mt-2 block w-32`} name="delta" type="number" min="-1000000" max="1000000" required /></label><label className="min-w-0 flex-1 text-sm">Reason<input className={`${field} mt-2 block w-full`} name="reason" minLength={5} maxLength={200} required /></label><Button disabled={busy} type="submit"><Plus />Apply adjustment</Button></form></section>

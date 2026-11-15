@@ -24,6 +24,7 @@ import { canAfford } from "@/lib/credit-rules";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { useAuthUser } from "@/hooks/use-auth";
 import type { ProjectDTO } from "@/lib/dto";
+import { CreditReadFeedback } from "@/components/credits/CreditReadFeedback";
 
 export function useProjectClaim(projectId: string) {
   return useQuery(projectClaimQuery(projectId));
@@ -109,11 +110,12 @@ function MakePrivate({ project, cost }: { project: ProjectDTO; cost: number }) {
           </div>
           <div className="stat-rule pt-3">
             <dt className="text-sm text-primary">You have</dt>
-            <dd className="font-display text-2xl font-bold text-primary">
-              {wallet ? `${(wallet.balance - wallet.reserved).toLocaleString("en-US")} credits` : "…"}
+            <dd className="font-display text-lg font-bold text-primary">
+              {wallet ? `${(wallet.balance - wallet.reserved).toLocaleString("en-US")} credits` : account.isError ? 'Balance unavailable' : 'Loading balance…'}
             </dd>
           </div>
         </dl>
+        <CreditReadFeedback query={account} hasData={Boolean(wallet)} />
         <p className="text-sm text-muted-foreground">You only pay the difference to a private claim. Nothing is charged if this fails.</p>
         {wallet && !affordable && (
           <p role="alert" className="rounded-[4px] border border-negative/40 p-3 text-sm text-negative">

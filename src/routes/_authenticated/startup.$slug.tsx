@@ -49,6 +49,7 @@ import { useAuthUser } from "@/hooks/use-auth";
 import { DIMENSION_META } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/format";
 import { creditAccountQuery, creditCatalogQuery } from "@/lib/credit-queries";
+import { CreditReadFeedback } from "@/components/credits/CreditReadFeedback";
 import { getStripeEnvironment } from "@/lib/stripe";
 import { canAfford, canClaimPrivately, claimPrices, type ClaimAccess } from "@/lib/credit-rules";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -576,11 +577,12 @@ function StartupPage() {
               </div>
               <div className="stat-rule pt-3">
                 <dt className="text-sm text-primary">You have</dt>
-                <dd className="font-display text-2xl font-bold text-primary">
-                  {wallet ? `${(wallet.balance - wallet.reserved).toLocaleString("en-US")} credits` : "…"}
+                <dd className="font-display text-lg font-bold text-primary">
+                  {wallet ? `${(wallet.balance - wallet.reserved).toLocaleString("en-US")} credits` : account.isError ? 'Balance unavailable' : 'Loading balance…'}
                 </dd>
               </div>
             </dl>
+            <CreditReadFeedback query={account} hasData={Boolean(wallet)} />
             <p className="mt-3 text-sm text-muted-foreground">Charged only when your workspace is created. A failed claim costs nothing.</p>
             {wallet && !affordable && (
               <p role="alert" className="mt-4 rounded-[4px] border border-negative/40 p-3 text-sm text-negative">
