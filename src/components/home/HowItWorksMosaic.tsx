@@ -19,7 +19,7 @@ type Tile = {
 const TILES = [
   {
     step: "Step 1",
-    title: "Search & Discover",
+    title: "How Demandquake works",
     body: "See how Demandquake searches the web, groups recurring problems and separates sourced facts from AI suggestions.",
     cta: "Read how it works",
     tone: "bg-primary text-primary-foreground",
@@ -27,7 +27,7 @@ const TILES = [
   },
   {
     step: "Step 2",
-    title: "Inspect the evidence",
+    title: "Explore startup ideas",
     body: "Browse the startup catalog and choose an idea to inspect. Its profile shows source-linked facts, competitors and labelled AI hypotheses.",
     cta: "Explore startup ideas",
     tone: "bg-tile-purple text-tile-foreground",
@@ -35,7 +35,7 @@ const TILES = [
   },
   {
     step: "Step 3",
-    title: "Claim & build",
+    title: "Manage your startups",
     body: "Open the startups you have already claimed to manage assumptions, notes, co-founder access and market scans in your workspace.",
     cta: "Open my startups",
     tone: "bg-tile-green text-tile-foreground",
