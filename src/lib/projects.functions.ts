@@ -3,7 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { Database } from "@/integrations/supabase/types";
-import type { InvitePreviewDTO, ProjectDTO, ProjectSummaryDTO, ProjectInviteDTO, ProjectTeamDTO } from "./dto";
+import type { InvitePreviewDTO, ProjectClaimDTO, ProjectDTO, ProjectSummaryDTO, ProjectInviteDTO, ProjectTeamDTO } from "./dto";
+import { claimPrices, otherBuilders, privateUpgradeCost } from "./credit-rules";
 import { buildProjectFromStartup, type StartupForClaim } from "./claim";
 
 const uuid = z.string().uuid();
@@ -39,9 +40,17 @@ function toProject(r: Record<string, unknown>, userId: string): ProjectDTO {
   };
 }
 
+const claimInput = z.object({
+  startupId: uuid,
+  environment: z.enum(["sandbox", "live"]),
+  access: z.enum(["public", "private"]),
+  expectedCost: z.number().int().min(0).max(1_000_000),
+});
+
+/** Public claims keep the startup in the shared catalog; private claims hide it from every other founder. */
 export const claimStartup = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { startupId: string; environment: 'sandbox' | 'live' }) => z.object({ startupId: uuid, environment: z.enum(['sandbox', 'live']) }).parse(d))
+  .inputValidator((d: z.input<typeof claimInput>) => claimInput.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: existing } = await supabase
@@ -50,11 +59,12 @@ export const claimStartup = createServerFn({ method: "POST" })
       .eq("user_id", userId)
       .eq("startup_id", data.startupId)
       .maybeSingle();
-    if (existing) return { projectId: existing.id, created: false };
+    if (existing) return { projectId: existing.id, created: false, cost: 0 };
 
+    // RLS hides startups another founder claimed privately.
     const { data: st, error } = await supabase.from("startups").select("*").eq("id", data.startupId).maybeSingle();
     if (error) throw error;
-    if (!st) throw new Error("This startup no longer exists.");
+    if (!st) throw new Error("This startup is no longer available. Another founder may have claimed it privately.");
 
     const ids = st.evidence_source_ids ?? [];
     const { data: sources } = ids.length
@@ -62,14 +72,88 @@ export const claimStartup = createServerFn({ method: "POST" })
       : { data: [] };
 
     const payload = buildProjectFromStartup(st as unknown as StartupForClaim, sources ?? [], new Date().toISOString());
-    const { supabaseAdmin } = await import('@/integrations/supabase/client.server');
-    const { data: result, error: claimError } = await supabaseAdmin.rpc('claim_startup_with_credits', {
-      p_user: userId, p_env: data.environment, p_startup: st.id,
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: result, error: claimError } = await supabaseAdmin.rpc("claim_startup_with_credits", {
+      p_user: userId,
+      p_env: data.environment,
+      p_startup: st.id,
       p_owner_name: nameFromClaims(context.claims as Record<string, unknown>),
-      p_payload: payload as unknown as Database['public']['Tables']['projects']['Row']['brand'],
+      p_payload: payload as unknown as Database["public"]["Tables"]["projects"]["Row"]["brand"],
+      p_private: data.access === "private",
+      p_expected_cost: data.expectedCost,
     });
     if (claimError) throw new Error(claimError.message);
     return z.object({ projectId: uuid, created: z.boolean(), cost: z.number() }).parse(result);
+  });
+
+/** Claim visibility for a workspace and, for the owner of a public claim, the price of going private. */
+export const getProjectClaim = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { projectId: string; environment: "sandbox" | "live" }) => ({
+    projectId: uuid.parse(d.projectId),
+    environment: z.enum(["sandbox", "live"]).parse(d.environment),
+  }))
+  .handler(async ({ data, context }): Promise<ProjectClaimDTO | null> => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("projects")
+      .select("id, user_id, startup_id, startup:startups!projects_startup_id_fkey(private_project_id, claim_count)")
+      .eq("id", data.projectId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!row) return null;
+    const startup = (row as unknown as { startup: { private_project_id: string | null; claim_count: number } | null }).startup;
+    if (!row.startup_id || !startup) return { access: null, other_builders: 0, can_make_private: false, upgrade_cost: null };
+    const access = startup.private_project_id === row.id ? "private" : "public";
+    const others = otherBuilders(startup.claim_count, true);
+    const owner = row.user_id === userId;
+    if (access === "private" || !owner) return { access, other_builders: others, can_make_private: false, upgrade_cost: null };
+
+    const [paidRes, priceRes] = await Promise.all([
+      supabase
+        .from("credit_transactions")
+        .select("delta")
+        .eq("user_id", userId)
+        .eq("environment", data.environment)
+        .eq("idempotency_key", `claim:${row.id}`)
+        .maybeSingle(),
+      supabase.from("credit_settings").select("key, value").in("key", ["claim", "claim_private"]),
+    ]);
+    if (paidRes.error) throw paidRes.error;
+    if (priceRes.error) throw priceRes.error;
+    const prices = claimPrices(Object.fromEntries((priceRes.data ?? []).map((r) => [r.key, r.value])));
+    const paid = paidRes.data ? -paidRes.data.delta : 0;
+    return {
+      access,
+      other_builders: others,
+      can_make_private: others === 0,
+      upgrade_cost: privateUpgradeCost(prices.private, paid),
+    };
+  });
+
+const privateInput = z.object({
+  projectId: uuid,
+  environment: z.enum(["sandbox", "live"]),
+  expectedCost: z.number().int().min(0).max(1_000_000),
+});
+
+/** Owner switches a public claim to private; the charge and the visibility change happen together. */
+export const makeProjectPrivate = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.input<typeof privateInput>) => privateInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await context.supabase.from("projects").select("user_id").eq("id", data.projectId).maybeSingle();
+    if (error) throw error;
+    if (!row || row.user_id !== context.userId) throw new Error("Only the founder who claimed this startup can make it private.");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: result, error: rpcError } = await supabaseAdmin.rpc("make_project_private_with_credits", {
+      p_user: context.userId,
+      p_env: data.environment,
+      p_project: data.projectId,
+      p_expected_cost: data.expectedCost,
+    });
+    if (rpcError) throw new Error(rpcError.message);
+    return z.object({ private: z.boolean(), cost: z.number(), changed: z.boolean() }).parse(result);
   });
 
 export const listMyProjects = createServerFn({ method: "GET" })
@@ -78,17 +162,18 @@ export const listMyProjects = createServerFn({ method: "GET" })
     // RLS returns projects the caller owns or was invited to.
     const { data, error } = await context.supabase
       .from("projects")
-      .select("id, startup_id, name, tagline, brand, updated_at, user_id, owner_name, checklist, assumptions, startup_slug:research->>startup_slug, industry:research->>industry, geography:research->>geography, project_members(count), startup:startups!projects_startup_id_fkey(banner_image_url)")
+      .select("id, startup_id, name, tagline, brand, updated_at, user_id, owner_name, checklist, assumptions, startup_slug:research->>startup_slug, industry:research->>industry, geography:research->>geography, project_members(count), startup:startups!projects_startup_id_fkey(banner_image_url, private_project_id)")
       .order("updated_at", { ascending: false });
     if (error) throw error;
     return ((data ?? []) as unknown as Record<string, unknown>[]).map((r): ProjectSummaryDTO => {
       const p = toProject(r, context.userId);
-      const startup = r["startup"] as { banner_image_url: string | null } | null;
+      const startup = r["startup"] as { banner_image_url: string | null; private_project_id: string | null } | null;
       return {
         id: p.id, startup_id: p.startup_id, name: p.name, tagline: p.tagline,
         brand: p.brand, updated_at: p.updated_at, is_owner: p.is_owner,
         owner_name: p.owner_name, member_count: p.member_count,
         banner_image_url: startup?.banner_image_url ?? null,
+        access: startup ? (startup.private_project_id === p.id ? "private" : "public") : null,
         research: { ...(typeof r["startup_slug"] === "string" ? { startup_slug: r["startup_slug"] } : {}), industry: r["industry"] as string | null, geography: r["geography"] as string | null },
         progress: { checks: p.checklist.length, checksDone: p.checklist.filter(c => c.done).length, assumptions: p.assumptions.length, tested: p.assumptions.filter(a => a.status !== "untested").length },
       };

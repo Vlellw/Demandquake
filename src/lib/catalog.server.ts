@@ -20,7 +20,7 @@ const SOURCE_COLS =
   "id, url, domain, title, snippet, highlights, publisher, published_at, retrieved_at, origin, article_type, search_intent, search_query, relevance, signal_type, scan_id";
 
 const CARD_COLS =
-  "id, slug, name, tagline, industry, geography, business_model_type, brand, banner_image_url, research_at, last_scanned_at, claim_count, evidence_source_ids, competitors, assessment, run_id, who_is_affected:problem->>who_is_affected, why_now:problem->>why_now, cluster:clusters!startups_cluster_id_fkey(title, evidence_strength), run:discovery_runs(query)";
+  "id, slug, name, tagline, industry, geography, business_model_type, brand, banner_image_url, research_at, last_scanned_at, claim_count, private_project_id, evidence_source_ids, competitors, assessment, run_id, who_is_affected:problem->>who_is_affected, why_now:problem->>why_now, cluster:clusters!startups_cluster_id_fkey(title, evidence_strength), run:discovery_runs(query)";
 
 type CardRow = {
   id: string;
@@ -35,6 +35,7 @@ type CardRow = {
   research_at: string;
   last_scanned_at: string | null;
   claim_count: number;
+  private_project_id: string | null;
   evidence_source_ids: string[];
   competitors: unknown;
   assessment: unknown;
@@ -58,6 +59,7 @@ function toCard(r: CardRow): StartupCardDTO {
     research_at: r["research_at"],
     last_scanned_at: r["last_scanned_at"],
     claim_count: r["claim_count"],
+    is_private: Boolean(r["private_project_id"]),
     evidence_count: r["evidence_source_ids"]?.length ?? 0,
     competitor_count: Array.isArray(r["competitors"]) ? (r["competitors"] as unknown[]).length : 0,
     assessment: (r["assessment"] as Assessment) ?? null,
@@ -297,6 +299,7 @@ export async function startupDetail(db: ResearchDb, slug: string): Promise<Start
       monitor_queries: st.monitor_queries ?? [],
       evidence_source_ids: st.evidence_source_ids ?? [],
       claim_count: st.claim_count,
+      is_private: Boolean(st.private_project_id),
       research_at: st.research_at,
       last_scanned_at: st.last_scanned_at,
       created_at: st.created_at,

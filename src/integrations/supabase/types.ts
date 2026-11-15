@@ -991,6 +991,7 @@ export type Database = {
           monitor_queries: string[]
           name: string
           pitch: Json
+          private_project_id: string | null
           problem: Json
           research_at: string
           run_id: string | null
@@ -1023,6 +1024,7 @@ export type Database = {
           monitor_queries?: string[]
           name: string
           pitch?: Json
+          private_project_id?: string | null
           problem?: Json
           research_at?: string
           run_id?: string | null
@@ -1055,6 +1057,7 @@ export type Database = {
           monitor_queries?: string[]
           name?: string
           pitch?: Json
+          private_project_id?: string | null
           problem?: Json
           research_at?: string
           run_id?: string | null
@@ -1071,6 +1074,13 @@ export type Database = {
             columns: ["cluster_id"]
             isOneToOne: false
             referencedRelation: "clusters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startups_private_project_id_fkey"
+            columns: ["private_project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
             referencedColumns: ["id"]
           },
           {
@@ -1123,11 +1133,15 @@ export type Database = {
         Args: { p_request: string; p_run: string }
         Returns: undefined
       }
+      can_access_project: { Args: { _project: string }; Returns: boolean }
+      can_view_startup: { Args: { _startup: string }; Returns: boolean }
       claim_startup_with_credits: {
         Args: {
           p_env: string
+          p_expected_cost?: number
           p_owner_name: string
           p_payload: Json
+          p_private?: boolean
           p_startup: string
           p_user: string
         }
@@ -1163,6 +1177,15 @@ export type Database = {
       is_project_owner: {
         Args: { _project: string; _user: string }
         Returns: boolean
+      }
+      make_project_private_with_credits: {
+        Args: {
+          p_env: string
+          p_expected_cost?: number
+          p_project: string
+          p_user: string
+        }
+        Returns: Json
       }
       preview_project_invite: {
         Args: { _token: string }

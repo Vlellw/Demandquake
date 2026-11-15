@@ -34,6 +34,8 @@ export interface StartupCardDTO {
   research_at: string;
   last_scanned_at: string | null;
   claim_count: number;
+  /** True when a founder claimed this startup privately; only their team can see it. */
+  is_private: boolean;
   evidence_count: number;
   competitor_count: number;
   assessment: Assessment | null;
@@ -149,6 +151,8 @@ export interface StartupDetailDTO {
     monitor_queries: string[];
     evidence_source_ids: string[];
     claim_count: number;
+    /** True when a founder claimed this startup privately; only their team can see it. */
+    is_private: boolean;
     research_at: string;
     last_scanned_at: string | null;
     created_at: string;
@@ -183,6 +187,8 @@ export interface ProjectSummaryDTO {
   owner_name: string | null;
   member_count: number;
   banner_image_url: string | null;
+  /** How the startup was claimed; null when the workspace is no longer linked to a catalog startup. */
+  access: "public" | "private" | null;
   research: Pick<ProjectResearch, "startup_slug" | "industry" | "geography">;
   progress: { checks: number; checksDone: number; assumptions: number; tested: number };
 }
@@ -206,6 +212,16 @@ export interface ProjectDTO {
   is_owner: boolean;
   owner_name: string | null;
   member_count: number;
+}
+
+/** Claim visibility of a workspace's startup, and what switching to private would cost the owner. */
+export interface ProjectClaimDTO {
+  access: "public" | "private" | null;
+  /** Founders other than this workspace's owner who claimed the same startup. */
+  other_builders: number;
+  can_make_private: boolean;
+  /** Credits charged to switch to private (private price minus what the claim already cost). */
+  upgrade_cost: number | null;
 }
 
 export interface ProjectAssumption {

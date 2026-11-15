@@ -134,7 +134,9 @@ export const startMarketScan = createServerFn({ method: "POST" }).middleware([re
   .handler(async ({ data, context }) => {
     const { startScan } = await import("./scan.server");
     const { userMessageOf } = await import("./pipeline.server");
+    const { visibleStartupId, UNAVAILABLE_STARTUP } = await import("./access.server");
     try {
+      if (!(await visibleStartupId(context.supabase, { id: data.startupId }))) return { ok: false as const, error: UNAVAILABLE_STARTUP };
       return { ok: true as const, ...(await startScan(data.startupId)) };
     } catch (err) {
       console.error("[startMarketScan]", err);
@@ -147,7 +149,9 @@ export const advanceMarketScan = createServerFn({ method: "POST" }).middleware([
   .handler(async ({ data, context }) => {
     const { advanceScan } = await import("./scan.server");
     const { userMessageOf } = await import("./pipeline.server");
+    const { canSeeScan, UNAVAILABLE_STARTUP } = await import("./access.server");
     try {
+      if (!(await canSeeScan(context.supabase, data.scanId))) return { ok: false as const, error: UNAVAILABLE_STARTUP };
       return { ok: true as const, ...(await advanceScan(data.scanId)) };
     } catch (err) {
       console.error("[advanceMarketScan]", err);
@@ -162,6 +166,8 @@ export const getCompetitorBrands = createServerFn({ method: "GET" }).middleware(
   .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
   .handler(async ({ data, context }) => {
     const { startupCompetitorBrands } = await import("./brands.server");
+    const { visibleStartupId, UNAVAILABLE_STARTUP } = await import("./access.server");
+    if (!(await visibleStartupId(context.supabase, { slug: data.slug }))) throw new Error(UNAVAILABLE_STARTUP);
     return startupCompetitorBrands(data.slug);
   });
 
@@ -169,6 +175,8 @@ export const enrichCompetitorBrands = createServerFn({ method: "POST" }).middlew
   .inputValidator((d: { slug: string }) => ({ slug: slugSchema.parse(d.slug) }))
   .handler(async ({ data, context }) => {
     const { enrichStartupCompetitorBrands } = await import("./brands.server");
+    const { visibleStartupId, UNAVAILABLE_STARTUP } = await import("./access.server");
+    if (!(await visibleStartupId(context.supabase, { slug: data.slug }))) throw new Error(UNAVAILABLE_STARTUP);
     return enrichStartupCompetitorBrands(data.slug);
   });
 

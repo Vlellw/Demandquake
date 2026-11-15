@@ -1,9 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { INITIAL_CREDIT_RULES, INITIAL_PACKAGES, shouldChargeDiscovery, canAfford, refundableCredits } from '@/lib/credit-rules';
+import { INITIAL_CREDIT_RULES, INITIAL_PACKAGES, shouldChargeDiscovery, canAfford, refundableCredits, claimPrices, privateUpgradeCost, canClaimPrivately, otherBuilders } from '@/lib/credit-rules';
 describe('credit business rules', () => {
   it('grants 25 welcome credits',()=>expect(INITIAL_CREDIT_RULES.welcome).toBe(25));
   it('sets discovery price to 5 credits',()=>expect(INITIAL_CREDIT_RULES.discovery).toBe(5));
-  it('sets a successful startup claim price to 5 credits',()=>expect(INITIAL_CREDIT_RULES.claim).toBe(5));
+  it('sets a public startup claim price to 5 credits',()=>expect(claimPrices().public).toBe(5));
+  it('sets a private startup claim price to 20 credits',()=>expect(claimPrices().private).toBe(20));
+  it('uses configured claim prices when advertised',()=>expect(claimPrices({claim:7,claim_private:30})).toEqual({public:7,private:30}));
+  it('charges 15 credits to make a 5-credit public claim private',()=>expect(privateUpgradeCost(20,5)).toBe(15));
+  it('charges the full private price when the claim was free',()=>expect(privateUpgradeCost(20,0)).toBe(20));
+  it('never charges a negative upgrade',()=>expect(privateUpgradeCost(20,25)).toBe(0));
+  it('allows a private claim only while nobody else is building',()=>{expect(canClaimPrivately(0,false)).toBe(true);expect(canClaimPrivately(1,false)).toBe(false);expect(canClaimPrivately(1,true)).toBe(true);expect(canClaimPrivately(2,true)).toBe(false);});
+  it('counts other builders without the viewer',()=>{expect(otherBuilders(3,true)).toBe(2);expect(otherBuilders(0,true)).toBe(0);});
   it('sets admin allocation to one million',()=>expect(INITIAL_CREDIT_RULES.admin).toBe(1_000_000));
   it.each([[0,100,500],[1,500,2000],[2,1500,5000],[3,5000,12000]])('package %i matches credits and euro cents', (i,credits,amount)=>expect(INITIAL_PACKAGES[i]).toMatchObject({credits,amount}));
   it('charges only completed research',()=>{expect(shouldChargeDiscovery('complete',false)).toBe(true);expect(shouldChargeDiscovery('failed',false)).toBe(false);expect(shouldChargeDiscovery('generating',false)).toBe(false);});

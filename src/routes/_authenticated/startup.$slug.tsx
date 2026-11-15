@@ -16,8 +16,10 @@ import {
   ChevronUp,
   FlaskConical,
   Flag,
+  Globe,
   ListChecks,
   Loader2,
+  Lock,
   NotebookPen,
   Radar,
   Rocket,
@@ -46,9 +48,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuthUser } from "@/hooks/use-auth";
 import { DIMENSION_META } from "@/lib/taxonomy";
 import { formatDate } from "@/lib/format";
-import { creditAccountQuery } from "@/lib/credit-queries";
+import { creditAccountQuery, creditCatalogQuery } from "@/lib/credit-queries";
 import { getStripeEnvironment } from "@/lib/stripe";
-import { INITIAL_CREDIT_RULES, canAfford } from "@/lib/credit-rules";
+import { canAfford, canClaimPrivately, claimPrices, type ClaimAccess } from "@/lib/credit-rules";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { QuakeTrace } from "@/components/discovery/QuakeFeed";
@@ -105,7 +107,7 @@ export const Route = createFileRoute("/_authenticated/startup/$slug")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <h1 className="section-title mt-2 text-3xl">This startup isn’t in the catalog</h1>
-      <p className="mt-3 text-sm text-muted-foreground">It may have been removed after a research refresh.</p>
+      <p className="mt-3 text-sm text-muted-foreground">Another founder may have claimed it privately, or it was removed after a research refresh.</p>
       <Button asChild variant="outline" className="mt-6">
         <Link to="/discover">Browse all startups</Link>
       </Button>
@@ -148,10 +150,16 @@ function StartupPage() {
   const queryClient = useQueryClient();
   const [claiming, setClaiming] = useState(false);
   const [claimConfirm, setClaimConfirm] = useState(false);
+  const [claimAccess, setClaimAccess] = useState<ClaimAccess>("public");
   const claimBusy = useRef(false);
   const account = useQuery({ ...creditAccountQuery(user?.id ?? ''), enabled: Boolean(user) });
+  const catalog = useQuery(creditCatalogQuery());
   const wallet = account.data?.wallet;
-  const claimCost = INITIAL_CREDIT_RULES.claim;
+  const prices = claimPrices(catalog.data?.settings);
+  // Anyone else already building it keeps the idea public.
+  const privateAvailable = canClaimPrivately(st.claim_count, false);
+  const access: ClaimAccess = privateAvailable ? claimAccess : "public";
+  const claimCost = prices[access];
   const affordable = wallet ? canAfford(wallet.balance, wallet.reserved, claimCost) : false;
   const [scanning, setScanning] = useState(false);
   const autoClaimed = useRef(false);
@@ -185,6 +193,7 @@ function StartupPage() {
       navigate({ to: "/auth", search: { redirect: `/startup/${slug}?claim=1` } });
       return;
     }
+    setClaimAccess("public");
     setClaimConfirm(true);
   }
 
@@ -193,15 +202,27 @@ function StartupPage() {
     claimBusy.current = true;
     setClaiming(true);
     try {
-      const res = await claimFn({ data: { startupId: st.id, environment: getStripeEnvironment() } });
+      const res = await claimFn({ data: { startupId: st.id, environment: getStripeEnvironment(), access, expectedCost: claimCost } });
       setClaimConfirm(false);
-      await queryClient.invalidateQueries({ queryKey: ["credit-account"] });
-      await queryClient.invalidateQueries({ queryKey: ["projects"] });
-      toast.success(res.created ? `${st.name} is now in your workspace` : "Opening your workspace");
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["credit-account"] }),
+        queryClient.invalidateQueries({ queryKey: ["projects"] }),
+        queryClient.invalidateQueries({ queryKey: ["startups"] }),
+        queryClient.invalidateQueries({ queryKey: ["startup", slug] }),
+      ]);
+      toast.success(
+        !res.created ? "Opening your workspace" : access === "private" ? `${st.name} is now private to your workspace` : `${st.name} is now in your workspace`,
+      );
       navigate({ to: "/workspace/$projectId", params: { projectId: res.projectId }, search: res.created ? { welcome: true } : {} });
     } catch (err) {
       console.error(err);
-      toast.error(err instanceof Error ? err.message : "Couldn’t claim this startup. No credits were charged.");
+      const message = err instanceof Error ? err.message : "";
+      if (/price changed/i.test(message)) void queryClient.invalidateQueries({ queryKey: ["credit-catalog"] });
+      if (/already building|claimed this startup privately|no longer available/i.test(message)) {
+        void queryClient.invalidateQueries({ queryKey: ["startup", slug] });
+        void queryClient.invalidateQueries({ queryKey: ["startups"] });
+      }
+      toast.error(message ? `${message} No credits were charged.` : "Couldn’t claim this startup. No credits were charged.");
     } finally {
       claimBusy.current = false;
       setClaiming(false);
@@ -279,9 +300,14 @@ function StartupPage() {
               <p className="mt-6 max-w-xl text-lg leading-snug opacity-95 sm:text-xl">{st.tagline}</p>
 
               <div className="mt-5 flex flex-wrap gap-2">
-                <Badge variant="inferred">AI-drafted idea · unclaimed</Badge>
+                <Badge variant="inferred">AI-drafted idea{st.claim_count === 0 ? " · unclaimed" : ""}</Badge>
+                {st.is_private && (
+                  <Badge variant="outline">
+                    <Lock /> Private to your workspace
+                  </Badge>
+                )}
                 {st.business_model_type && <Badge variant="outline">{st.business_model_type}</Badge>}
-                {st.claim_count > 0 && (
+                {st.claim_count > 0 && !st.is_private && (
                   <Badge variant="outline">
                     <Users /> {st.claim_count} founder{st.claim_count === 1 ? "" : "s"} building
                   </Badge>
@@ -297,7 +323,7 @@ function StartupPage() {
                   </Button>
                 ) : (
                   <Button size="lg" onClick={claim} disabled={claiming || !ready} className="bg-background font-bold text-foreground hover:bg-accent">
-                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup · {claimCost} credits
+                    {claiming ? <Loader2 className="animate-spin" /> : <Flag />} Claim this startup · {privateAvailable ? "from " : ""}{prices.public} credits
                   </Button>
                 )}
                 <Button variant="glass" size="lg" onClick={scan} disabled={scanning}>
@@ -487,8 +513,13 @@ function StartupPage() {
             <div className="min-w-0 flex-1">
               <p className="mt-2 font-display text-3xl font-bold">Build {st.name}</p>
               <p className="mt-2 max-w-2xl text-sm leading-relaxed text-primary-foreground/85">
-                Claiming copies the idea, its sources, the open assumptions and a validation checklist into your private
-                workspace. Other founders can claim it too, because the idea stays public.
+                {st.is_private
+                  ? "You claimed this idea privately. Other founders can’t find or claim it - only you and the co-founders you invite can open it."
+                  : user && existing
+                    ? "Your workspace holds the idea, its sources, the open assumptions and a validation checklist. The idea stays public, so other founders can claim it too."
+                    : privateAvailable
+                      ? `Claiming copies the idea, its sources, the open assumptions and a validation checklist into your workspace. Claim it publicly for ${prices.public} credits and others can still find it, or privately for ${prices.private} credits to take it out of everyone else’s search.`
+                      : `Claiming copies the idea, its sources, the open assumptions and a validation checklist into your workspace for ${prices.public} credits. Other founders are already building it, so it stays public.`}
               </p>
             </div>
             {user && existing ? (
@@ -499,7 +530,7 @@ function StartupPage() {
               </Button>
             ) : (
               <Button variant="glass" size="lg" onClick={claim} disabled={claiming || !ready}>
-                {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building · {claimCost} credits
+                {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim and start building · {privateAvailable ? "from " : ""}{prices.public} credits
               </Button>
             )}
           </div>
@@ -510,12 +541,20 @@ function StartupPage() {
           <div className="border-b border-border bg-surface-sunken px-6 pb-5 pt-6 sm:px-8">
             <DialogTitle className="section-title mt-2 text-2xl">Claim {st.name}</DialogTitle>
             <DialogDescription className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              You get a private workspace for this idea. The idea stays public, so other founders can claim it too.
+              Choose whether other founders can still find this idea. Your workspace is private either way.
             </DialogDescription>
           </div>
           <div className="px-6 py-6 sm:px-8">
-            <p className="text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">What you get</p>
-            <ul className="mt-3 space-y-3">
+            <ClaimOptions
+              value={access}
+              onChange={setClaimAccess}
+              prices={prices}
+              privateAvailable={privateAvailable}
+              builders={st.claim_count}
+              disabled={claiming}
+            />
+            <p className="mt-6 text-[0.6875rem] font-bold uppercase tracking-[0.06em] text-foreground">What you get</p>
+            <ul className="mt-3 grid gap-3 sm:grid-cols-2">
               {[
                 { icon: ListChecks, text: "A validation checklist to test the idea with real customers" },
                 { icon: FlaskConical, text: "The AI’s open assumptions, ready to mark as validated or not" },
@@ -545,7 +584,7 @@ function StartupPage() {
             <p className="mt-3 text-sm text-muted-foreground">Charged only when your workspace is created. A failed claim costs nothing.</p>
             {wallet && !affordable && (
               <p role="alert" className="mt-4 rounded-[4px] border border-negative/40 p-3 text-sm text-negative">
-                You need {claimCost} available credits to claim this startup.
+                You need {claimCost} available credits for a {access} claim.
               </p>
             )}
             <div className="mt-8 flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-end">
@@ -558,7 +597,8 @@ function StartupPage() {
                 </Button>
               ) : (
                 <Button disabled={claiming || !affordable} onClick={confirmClaim}>
-                  {claiming ? <Loader2 className="animate-spin" /> : <Rocket />} Claim · {claimCost} credits
+                  {claiming ? <Loader2 className="animate-spin" /> : access === "private" ? <Lock /> : <Rocket />}{" "}
+                  {access === "private" ? "Claim privately" : "Claim publicly"} · {claimCost} credits
                 </Button>
               )}
             </div>
@@ -566,6 +606,85 @@ function StartupPage() {
         </DialogContent>
       </Dialog>
     </SourceProvider>
+  );
+}
+
+const CLAIM_OPTIONS: { value: ClaimAccess; icon: typeof Globe; title: string; text: string }[] = [
+  { value: "public", icon: Globe, title: "Public claim", text: "Stays in search and the catalog. Other founders can claim it too." },
+  {
+    value: "private",
+    icon: Lock,
+    title: "Private claim",
+    text: "Removed from everyone else’s search and catalog. Only you and the co-founders you invite can open it.",
+  },
+];
+
+function ClaimOptions({
+  value,
+  onChange,
+  prices,
+  privateAvailable,
+  builders,
+  disabled,
+}: {
+  value: ClaimAccess;
+  onChange: (v: ClaimAccess) => void;
+  prices: Record<ClaimAccess, number>;
+  privateAvailable: boolean;
+  builders: number;
+  disabled: boolean;
+}) {
+  const refs = useRef<Record<ClaimAccess, HTMLButtonElement | null>>({ public: null, private: null });
+  const enabled = CLAIM_OPTIONS.filter((o) => o.value === "public" || privateAvailable).map((o) => o.value);
+  function onKeyDown(e: React.KeyboardEvent) {
+    if (!["ArrowRight", "ArrowDown", "ArrowLeft", "ArrowUp"].includes(e.key) || enabled.length < 2) return;
+    e.preventDefault();
+    const next = enabled[(enabled.indexOf(value) + (e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : enabled.length - 1)) % enabled.length]!;
+    onChange(next);
+    refs.current[next]?.focus();
+  }
+  return (
+    <div role="radiogroup" aria-label="Claim type" className="grid gap-3 sm:grid-cols-2" onKeyDown={onKeyDown}>
+      {CLAIM_OPTIONS.map(({ value: v, icon: Icon, title, text }) => {
+        const unavailable = v === "private" && !privateAvailable;
+        const selected = value === v;
+        return (
+          <button
+            key={v}
+            ref={(el) => {
+              refs.current[v] = el;
+            }}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            tabIndex={selected ? 0 : -1}
+            disabled={disabled || unavailable}
+            onClick={() => onChange(v)}
+            className={cn(
+              "flex h-full flex-col rounded-[4px] border-2 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              selected ? "border-primary bg-primary/5" : "border-border bg-background hover:border-primary/50",
+              unavailable && "cursor-not-allowed border-dashed opacity-70 hover:border-border",
+            )}
+          >
+            <span className="flex w-full items-center justify-between gap-3">
+              <span className="flex items-center gap-2 font-display text-base font-bold text-primary">
+                <Icon className="size-4" aria-hidden="true" /> {title}
+              </span>
+              <span
+                aria-hidden="true"
+                className={cn("grid size-4 shrink-0 place-items-center rounded-full border-2", selected ? "border-primary" : "border-ink/40")}
+              >
+                {selected && <span className="size-2 rounded-full bg-primary" />}
+              </span>
+            </span>
+            <span className="mt-2 font-display text-2xl font-bold text-foreground">{prices[v]} credits</span>
+            <span className="mt-1 text-sm leading-relaxed text-muted-foreground">
+              {unavailable ? `Unavailable - ${builders} founder${builders === 1 ? " is" : "s are"} already building this idea.` : text}
+            </span>
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
