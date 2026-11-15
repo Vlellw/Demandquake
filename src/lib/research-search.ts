@@ -2,11 +2,11 @@ import { normalizeUrl } from './research-utils';
 
 export const INITIAL_SEARCH = {
   intents: ['complaints', 'requests', 'forums', 'market_news'],
-  webResults: 5,
+  webResults: 3,
   redditQueries: 1,
-  redditResults: 6,
+  redditResults: 4,
   newsResults: 4,
-  maxSources: 30,
+  maxSources: 20,
 } as const;
 
 /** One focused search per essential intent, including previously saved plans. */

@@ -37,7 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
-- [x] Reduce initial research to at most 30 sources: four focused web queries (5 each), one Reddit search (6), industry news (4); drop low-relevance/duplicate hits and apply essential intent selection to saved plans. 46 focused tests pass; build OK. Existing research and deeper checks unchanged.
+- [x] Reduce initial research to at most 20 sources: four focused web queries (3 each), one Reddit search (4), industry news (4); drop low-relevance/duplicate hits and apply essential intent selection to saved plans. Existing research and deeper checks unchanged.
 - [x] Sweep missing-payment balance behavior across menu, search, claims/upgrades, history, administration, research drivers and database settlement; all use the shared fix or have no payment-configuration dependency. Signed-in confirmations show 10 credits; 28 credit tests pass. No settled records or configuration changed.
 - [x] Fix balance reads when payment configuration is missing; signed-in missing-token check shows the actual 10-credit wallet and existing history, phone layout passes, 26 credit tests pass. Payment setup and balances unchanged.
 - [x] Sweep credit-loading feedback: menu, research confirmation, claims, private upgrades, purchases and history use bounded reads with retry feedback; credit pricing and administration reads also time out instead of hanging. Settled records, settings and permissions unchanged.

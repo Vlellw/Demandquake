@@ -1,14 +1,14 @@
 import { expect, it } from 'vitest';
 import { INITIAL_SEARCH, essentialSearches, selectInitialSources } from '@/lib/research-search';
 
-it('requests at most 30 initial sources across web, news and Reddit', () => {
-  expect(INITIAL_SEARCH.intents.length * INITIAL_SEARCH.webResults + INITIAL_SEARCH.newsResults + INITIAL_SEARCH.redditQueries * INITIAL_SEARCH.redditResults).toBe(30);
-  expect(INITIAL_SEARCH.maxSources).toBe(30);
+it('requests at most 20 initial sources across web, news and Reddit', () => {
+  expect(INITIAL_SEARCH.intents.length * INITIAL_SEARCH.webResults + INITIAL_SEARCH.newsResults + INITIAL_SEARCH.redditQueries * INITIAL_SEARCH.redditResults).toBe(20);
+  expect(INITIAL_SEARCH.maxSources).toBe(20);
 });
 
-it('caps retained sources at 30', () => {
+it('caps retained sources at 20', () => {
   const sources = Array.from({ length: 50 }, (_, i) => ({ url: `https://example.com/${i}`, relevance: 'high' }));
-  expect(selectInitialSources(sources)).toHaveLength(30);
+  expect(selectInitialSources(sources)).toHaveLength(20);
 });
 
 it('keeps customer complaints, requests, forums and industry evidence from old plans', () => {
