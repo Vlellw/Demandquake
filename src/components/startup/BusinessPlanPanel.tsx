@@ -134,8 +134,7 @@ export function BusinessPlanPanel({
         <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {validation.map((v, i) => (
             <div key={i} className="flex flex-col rounded-xl border border-border bg-card p-4">
-              <span className="self-start rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-primary">{i + 1} · {v.method}</span>
-              <p className="mt-3 font-display text-base font-semibold leading-snug text-foreground">{v.title}</p>
+              <p className="font-display text-base font-semibold leading-snug text-foreground">{v.title}</p>
               <p className="mt-2 flex-1 text-sm leading-relaxed text-muted-foreground">{v.description}</p>
               <p className="mt-4 rounded-lg bg-muted/50 px-3 py-2.5 text-sm leading-relaxed text-foreground">
                 <span className="font-semibold text-positive">Signal: </span>{v.success_signal}
