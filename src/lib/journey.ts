@@ -158,28 +158,4 @@ export function rankSpotlights<C extends { evidence_strength: string | null; evi
     .slice(0, limit);
 }
 
-// ---------- Step 1 gate: the market opens only after a completed search ----------
-
-export const SEARCH_DONE_KEY = "dq-search-done";
-
-/** Pure check of the stored flag, so the rule is testable without a browser. */
-export function parseSearchDone(raw: string | null | undefined): boolean {
-  return raw === "1";
-}
-
-export function isSearchDone(): boolean {
-  try {
-    return parseSearchDone(window.localStorage.getItem(SEARCH_DONE_KEY));
-  } catch {
-    return false;
-  }
-}
-
-export function markSearchDone(): void {
-  try {
-    window.localStorage.setItem(SEARCH_DONE_KEY, "1");
-  } catch {
-    // Private browsing: the gate simply stays closed.
-  }
-}
 

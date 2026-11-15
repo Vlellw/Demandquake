@@ -9,7 +9,6 @@ import {
   journeyStepForPath,
   normalizeOverview,
   normalizeView,
-  parseSearchDone,
   rankSpotlights,
 } from "@/lib/journey";
 
@@ -115,13 +114,5 @@ describe("search gate", () => {
   it("maps old Search and Choose links to the merged first step", () => {
     expect(discoverSearchSchema.parse({ step: "1" }).step).toBe(1);
     expect(discoverSearchSchema.parse({ step: "2" }).step).toBe(1);
-  });
-  it("opens the market only when the stored flag is exactly set", () => {
-    expect(parseSearchDone("1")).toBe(true);
-    expect(parseSearchDone(null)).toBe(false);
-    expect(parseSearchDone(undefined)).toBe(false);
-    expect(parseSearchDone("")).toBe(false);
-    expect(parseSearchDone("yes")).toBe(false);
-    expect(parseSearchDone("0")).toBe(false);
   });
 });

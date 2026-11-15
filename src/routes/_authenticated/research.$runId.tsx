@@ -18,7 +18,6 @@ import { Badge } from "@/components/ui/badge";
 import { StatRule } from "@/components/common/StatRule";
 import { InferredTag } from "@/components/common/Provenance";
 import { industryColor } from "@/lib/taxonomy";
-import { markSearchDone } from "@/lib/journey";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 
 import type { RunDetailDTO } from "@/lib/dto";
@@ -105,11 +104,6 @@ function ResearchPage() {
 
   const isDone = run.status === "complete";
   const isFailed = !isDone && (run.status === "failed" || Boolean(driverError));
-
-  // A finished search reveals ideas within Search & Discover.
-  useEffect(() => {
-    if (isDone) markSearchDone();
-  }, [isDone]);
 
   return (
     <div className="relative">
