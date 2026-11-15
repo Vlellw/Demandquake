@@ -19,7 +19,6 @@ import {
   type PricingData,
   type ReviewsData,
   type VideosData,
-  type VoiceKind,
   type VoicesData,
   type WhyNowData,
 } from "@/lib/demand";
@@ -41,14 +40,13 @@ function ShowMore({ total, shown, onClick }: { total: number; shown: number; onC
 export function VoicesBody({ data }: { data: VoicesData }) {
   const [all, setAll] = useState(false);
   const posts = all ? data.posts : data.posts.slice(0, 5);
-  const kinds = (Object.keys(data.kinds) as VoiceKind[]).filter((k) => data.kinds[k] > 0);
   return (
     <div className="space-y-5">
       <p className="text-sm leading-relaxed text-foreground/90">
         <strong className="text-primary">{plural(data.relevant, "Reddit post")}</strong> from the last 12 months describe this problem, out of {data.scanned} that matched the
         searches. Together they drew {plural(data.upvotes, "upvote")} and {plural(data.comments, "comment")}.
       </p>
-      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_16rem]">
+      <div>
         <div className="min-w-0">
           <ul className="space-y-3">
             {posts.map((p) => (
@@ -83,33 +81,6 @@ export function VoicesBody({ data }: { data: VoicesData }) {
             ))}
           </ul>
           <ShowMore total={data.posts.length} shown={posts.length} onClick={() => setAll(true)} />
-        </div>
-        <div className="space-y-5">
-          {kinds.length > 0 && (
-            <div>
-              <SubHeading tag={<InferredTag label="AI sorted" />}>What the posts show</SubHeading>
-              <ul className="space-y-1.5 text-sm">
-                {kinds.map((k) => (
-                  <li key={k} className="flex items-center justify-between gap-2">
-                    <span className="text-foreground/85">{VOICE_KIND_LABEL[k]}</span>
-                    <span className="font-semibold tabular-nums text-primary">{data.kinds[k]}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {data.communities.length > 0 && (
-            <div>
-              <SubHeading>Communities</SubHeading>
-              <div className="flex flex-wrap gap-1.5">
-                {data.communities.map((c) => (
-                  <a key={c.name} href={c.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-0.5 text-xs text-foreground/80 hover:bg-accent">
-                    r/{c.name} <span className="font-semibold text-primary">{c.posts}</span>
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
       <p className="text-xs text-muted-foreground">Searched Reddit for {data.queries.map((q) => `"${q}"`).join(" and ")}.</p>
