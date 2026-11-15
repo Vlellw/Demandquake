@@ -43,9 +43,6 @@ export const Route = createFileRoute("/_authenticated/research/$runId")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <p className="font-display text-2xl text-foreground">Research run not found</p>
-      <Button asChild variant="outline" className="mt-6">
-        <Link to="/discover">Back to discovery</Link>
-      </Button>
     </div>
   ),
 });

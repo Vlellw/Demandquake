@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { KeyRound, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -76,9 +76,6 @@ function ResetPasswordPage() {
         ) : !valid ? (
           <div className="mt-4 space-y-4">
             <p className="text-sm text-muted-foreground">This reset link is invalid or has expired. Request a new one from the sign-in page.</p>
-            <Button asChild variant="outline">
-              <Link to="/auth">Back to sign in</Link>
-            </Button>
           </div>
         ) : (
           <form onSubmit={onSubmit} className="mt-6 space-y-4">

@@ -11,6 +11,8 @@ import {
   ArrowRight,
   CalendarClock,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
   FlaskConical,
   Flag,
   ListChecks,
@@ -31,6 +33,7 @@ import { SourceProvider, Cite, type Citation } from "@/components/startup/Source
 import { EvidenceMap } from "@/components/startup/EvidenceMap";
 import { SourceStream } from "@/components/research/SourceStream";
 import { DemandEvidence } from "@/components/startup/demand/DemandEvidence";
+import { useDemandEvidence } from "@/hooks/use-demand-evidence";
 import { MarketLandscape } from "@/components/startup/MarketLandscape";
 import { AssessmentPanel } from "@/components/startup/AssessmentPanel";
 import { OpportunityTimeline } from "@/components/startup/OpportunityTimeline";
@@ -132,6 +135,9 @@ function StartupPage() {
   const { data: detail } = useSuspenseQuery(startupDetailQuery(slug));
   if (!detail) throw notFound();
   const st = detail.startup;
+  const demandState = useDemandEvidence(st.slug);
+  const [expandedEvidenceSlug, setExpandedEvidenceSlug] = useState<string | null>(null);
+  const showMoreEvidence = expandedEvidenceSlug === st.slug;
   const banner = useStartupBanner(st);
   const { user, ready } = useAuthUser();
   const { data: myProjects } = useQuery({ ...myProjectsQuery, enabled: !!user });
@@ -346,6 +352,18 @@ function StartupPage() {
                   <EvidenceMap cluster={detail.cluster} competitors={st.competitors} startup={{ name: st.name, tagline: st.tagline, brand: st.brand }} />
                 </div>
               </section>
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  aria-expanded={showMoreEvidence}
+                  aria-controls="detailed-evidence"
+                  onClick={() => setExpandedEvidenceSlug(showMoreEvidence ? null : st.slug)}
+                >
+                  {showMoreEvidence ? "Show less evidence" : "Show more evidence"}
+                  {showMoreEvidence ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </Button>
+              </div>
+              <div id="detailed-evidence" hidden={!showMoreEvidence} className="space-y-6">
               {st.problem.facts.length > 0 && (
                 <section className="panel p-5">
                   <div className="flex items-center justify-between">
@@ -369,7 +387,7 @@ function StartupPage() {
                   </ul>
                 </section>
               )}
-              <DemandEvidence slug={st.slug} />
+              <DemandEvidence state={demandState} />
               <section className="panel p-5">
                 <div className="flex items-center justify-between">
                   <h2 className="font-display text-xl font-semibold text-foreground">Original publications</h2>
@@ -379,6 +397,7 @@ function StartupPage() {
                   <SourceStream sources={evidence} limit={evidence.length} />
                 </div>
               </section>
+              </div>
             </TabsContent>
 
             <TabsContent value="compare" className="mt-0">

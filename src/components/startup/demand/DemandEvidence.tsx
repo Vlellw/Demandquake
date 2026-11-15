@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { InfoTip } from "@/components/common/InfoTip";
 import { ObservedTag } from "@/components/common/Provenance";
 import { TimeAgo } from "@/components/common/TimeAgo";
-import { useDemandEvidence } from "@/hooks/use-demand-evidence";
+import type { useDemandEvidence } from "@/hooks/use-demand-evidence";
 import { VISIBLE_SECTIONS, formatCount, type DemandEvidenceDTO, type DemandSection } from "@/lib/demand";
 import { cn } from "@/lib/utils";
 import { DemandPanel } from "./parts";
@@ -57,8 +57,8 @@ function Glance({ s }: { s: Sections }) {
   );
 }
 
-export function DemandEvidence({ slug }: { slug: string }) {
-  const { evidence, loading, loadError, driverError, retry, retrying, restart } = useDemandEvidence(slug);
+export function DemandEvidence({ state }: { state: ReturnType<typeof useDemandEvidence> }) {
+  const { evidence, loading, loadError, driverError, retry, retrying, restart } = state;
 
   if (loading) {
     return (

@@ -37,6 +37,10 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [ ] Email weekly web watch results to the requesting founder (blocked: sender domain setup required).
+- [ ] Complete existing Stripe payment setup (blocked: checkout reports configuration missing; four credit packages exist, no payment taken).
+- [x] Remove page Back buttons across all pages; retain browser history and Back to top.
+- [x] Group detailed evidence behind Show more evidence; inspection owns its driver so loading starts immediately on any tab. Expansion/collapse, signed-in startup and phone width verified; 51 evidence/navigation tests pass.
 - [x] Demand checks on the Evidence tab (customer posts, competitor reviews and complaint themes, competitor prices, funded companies and announcements, competitor apps, how-to video views, dated rule changes, verified market-size figures, local businesses when relevant), cached per startup with a counts strip, loading/failure/retry states and 20 rule tests; two real startups verified signed in, desktop and phone.
 - [x] Weekly web watch in founder workspaces (web topic plus a competitor pricing page); start, sync, stop and cleanup verified end to end; no watchers left running.
 - [ ] Warm demand checks for existing startups in the background so the first visitor doesn't wait about 4 minutes (about 55 Context.dev credits per startup; waits on an owner decision about the spend)

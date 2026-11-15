@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { Flag, ListChecks, Loader2, MailCheck, Radar, Users } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -176,9 +176,6 @@ function AuthPage() {
             <Button type="submit" variant="hero" className="w-full" disabled={busy}>
               {busy && <Loader2 className="animate-spin" />} Send reset link
             </Button>
-            <button type="button" onClick={() => setResetMode(false)} className="w-full text-center text-xs text-muted-foreground hover:text-foreground">
-              Back to sign in
-            </button>
           </form>
         ) : (
           <>
@@ -240,12 +237,6 @@ function AuthPage() {
             </Tabs>
           </>
         )}
-        <p className="mt-8 border-t border-border pt-5 text-center text-xs text-muted-foreground">
-          Want to learn more before signing in?{" "}
-          <Link to="/" className="font-semibold text-primary underline-offset-4 hover:underline">
-            Back to the introduction
-          </Link>
-        </p>
         </div>
       </div>
     </div>

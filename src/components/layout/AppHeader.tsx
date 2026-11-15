@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link, useCanGoBack, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
+import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DemandquakeLogo } from "@/components/brand/DemandquakeLogo";
 import { SiteSearch } from "@/components/layout/SiteSearch";
@@ -14,15 +14,11 @@ import { supabase } from "@/integrations/supabase/client";
  */
 export function AppHeader() {
   const navigate = useNavigate();
-  const router = useRouter();
-  const canGoBack = useCanGoBack();
   const queryClient = useQueryClient();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [searchOpen, setSearchOpen] = useState(false);
-  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setHydrated(true);
     function onKey(e: KeyboardEvent) {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -58,11 +54,6 @@ export function AppHeader() {
             </div>
           </div>
           <div className="ml-auto flex items-center gap-1 md:ml-4">
-            {hydrated && canGoBack && pathname !== "/" && (
-              <Button variant="ghost" size="icon" onClick={() => router.history.back()} aria-label="Back" title="Back">
-                <ArrowLeft className="size-5" />
-              </Button>
-            )}
             <Button
               variant="ghost" size="icon"
               onClick={() => setSearchOpen(true)}

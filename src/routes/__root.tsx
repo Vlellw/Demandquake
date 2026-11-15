@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
-  Link,
   createRootRouteWithContext,
   useRouter,
   HeadContent,
@@ -27,11 +26,6 @@ function NotFoundComponent() {
         <p className="mt-3 text-base text-muted-foreground">
           This page doesn't exist. The link may be incomplete, or the startup was removed.
         </p>
-        <div className="mt-6">
-          <Button asChild variant="hero">
-            <Link to="/">Back to the start page</Link>
-          </Button>
-        </div>
       </div>
     </div>
   );
