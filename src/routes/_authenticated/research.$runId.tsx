@@ -4,14 +4,13 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { motion } from "motion/react";
-import { Clock3, Hourglass, Loader2, RotateCcw, Search, Sparkles, TriangleAlert } from "lucide-react";
+import { Clock3, Hourglass, Loader2, RotateCcw, TriangleAlert } from "lucide-react";
 import { runDetailQuery } from "@/lib/queries";
 import { getStripeEnvironment } from '@/lib/stripe';
 import { useAuthUser } from '@/hooks/use-auth';
 import { retryDiscovery } from "@/lib/research.functions";
 import { useRunDriver } from "@/hooks/use-run-driver";
 import { StageRail, stageIndex } from "@/components/research/StageRail";
-import { SourceStream, intentLabel } from "@/components/research/SourceStream";
 import { ResearchConstellation } from "@/components/research/ResearchConstellation";
 import { StartupCard } from "@/components/discovery/StartupCard";
 import { Button } from "@/components/ui/button";
@@ -261,62 +260,6 @@ function ResearchPage() {
                     </motion.div>
                   );
                 })}
-              </section>
-            )}
-
-            {/* Sources */}
-            <section className="panel p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <h2 className="mt-1 font-display text-lg font-semibold text-foreground">Sources retrieved by Context.dev</h2>
-                </div>
-                <ObservedTag label="Observed" count={evidence.length} />
-              </div>
-              <div className="mt-4">
-                {evidence.length === 0 ? (
-                  <SkeletonSources active={!isFailed} />
-                ) : (
-                  <SourceStream sources={evidence} limit={isDone ? 12 : 24} />
-                )}
-              </div>
-            </section>
-
-            {/* Plan */}
-            {run.plan.searches && run.plan.searches.length > 0 && (
-              <section className="panel p-5">
-                <div className="flex items-center justify-between">
-                  <InferredTag label="AI planned" />
-                </div>
-                <div className="mt-4 grid gap-2 md:grid-cols-2">
-                  {run.plan.searches.map((q, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3"
-                    >
-                      <Search className="mt-0.5 size-4 shrink-0 text-primary" />
-                      <div className="min-w-0">
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                          {intentLabel(q.intent)} · {run.stats.by_intent?.[q.intent] != null ? `${run.stats.by_intent[q.intent]} sources` : idx > 1 ? "0 sources" : "queued"}
-                        </p>
-                        <p className="mt-0.5 text-sm text-foreground/90">{q.query}</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                  {run.plan.news_query && (
-                    <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-sunken/60 p-3 md:col-span-2">
-                      <Sparkles className="mt-0.5 size-4 shrink-0 text-observed" />
-                      <div>
-                        <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                          News search · {run.stats.news != null ? `${run.stats.news} articles` : "queued"}
-                        </p>
-                        <p className="mt-0.5 text-sm text-foreground/90">{run.plan.news_query}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
               </section>
             )}
           </div>
