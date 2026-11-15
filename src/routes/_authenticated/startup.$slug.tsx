@@ -354,18 +354,6 @@ function StartupPage() {
                   <EvidenceMap cluster={detail.cluster} competitors={st.competitors} startup={{ name: st.name, tagline: st.tagline, brand: st.brand }} />
                 </div>
               </section>
-              <div className="flex justify-center">
-                <Button
-                  variant="outline"
-                  aria-expanded={showMoreEvidence}
-                  aria-controls="detailed-evidence"
-                  onClick={() => setExpandedEvidenceSlug(showMoreEvidence ? null : st.slug)}
-                >
-                  {showMoreEvidence ? "Show less evidence" : "Show more evidence"}
-                  {showMoreEvidence ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-                </Button>
-              </div>
-              <div id="detailed-evidence" hidden={!showMoreEvidence} className="space-y-6">
               {st.problem.facts.length > 0 && (
                 <section className="panel p-5">
                   <div className="flex items-center justify-between">
@@ -389,6 +377,18 @@ function StartupPage() {
                   </ul>
                 </section>
               )}
+              <div className="flex justify-center">
+                <Button
+                  variant="outline"
+                  aria-expanded={showMoreEvidence}
+                  aria-controls="detailed-evidence"
+                  onClick={() => setExpandedEvidenceSlug(showMoreEvidence ? null : st.slug)}
+                >
+                  {showMoreEvidence ? "Show less evidence" : "Show more evidence"}
+                  {showMoreEvidence ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+                </Button>
+              </div>
+              <div id="detailed-evidence" hidden={!showMoreEvidence} className="space-y-6">
               <DemandEvidence state={demandState} />
               <section className="panel p-5">
                 <div className="flex items-center justify-between">
