@@ -22,6 +22,7 @@ export function useRunDriver(runId: string, status: string | undefined, enabled 
     running.current = true;
     let cancelled = false;
     let finished = false;
+    let currentStatus = status;
     setDriverError(null);
 
     const stopped = () => cancelled || finished || TERMINAL.has(
@@ -31,24 +32,26 @@ export function useRunDriver(runId: string, status: string | undefined, enabled 
     const worker = async (id: number) => {
       let networkFailures = 0;
       while (!stopped()) {
+        // One worker advances serial stages; the others join only for generation.
+        // Sleeping locally avoids repeated auth/database calls competing with research.
+        if (id > 0 && currentStatus !== "generating") {
+          await sleep(250);
+          continue;
+        }
         try {
           const res = await advance({ data: { runId } });
-          await queryClient.invalidateQueries({ queryKey: ["run", runId] });
+          void queryClient.invalidateQueries({ queryKey: ["run", runId] });
           if (stopped()) return;
           if (!res.ok) {
             setDriverError(res.error);
             return;
           }
           networkFailures = 0;
+          currentStatus = res.status;
           if (TERMINAL.has(res.status)) {
             finished = true;
             setDriverError(null);
             return;
-          }
-          // Only the generation phase benefits from parallel workers
-          if (id > 0 && res.status !== "generating") {
-            await sleep(2500);
-            continue;
           }
           if (res.busy) await sleep(2500);
         } catch (err) {

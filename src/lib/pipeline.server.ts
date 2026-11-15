@@ -628,13 +628,13 @@ async function stageAnalyze(run: RunRow) {
     clusters: ClusterOut[];
   }>({
     name: "problem_clusters",
-    effort: "medium",
+    effort: "low",
     instructions: `You are Demandquake's evidence analyst. You receive real web sources retrieved minutes ago by Context.dev.
 Your job: extract factual signals from the sources and group them into recurring BUSINESS PROBLEMS that a new company could solve.
 Rules:
 - Only use what the sources actually say. Every signal.claim must be a faithful, specific paraphrase of its referenced source (ref like "S4"). Never invent numbers, names, dates or quotes.
 - A cluster must be supported by at least 2 different sources. Prefer problems with evidence from different signal types (complaints + regulation + news...).
-- Produce 3 to 5 clusters, strongest first. Each cluster: 2-7 signals. Skip sources that are off-topic or promotional fluff.
+- Produce up to 3 clusters, strongest first. Each cluster: 2-5 signals. Skip sources that are off-topic or promotional fluff. Be concise: each signal is one short sentence; keep all source citations.
 - title: 3-8 words naming the problem (not a solution). summary: 2 sentences describing the problem grounded in the evidence. affected_users: who experiences it. why_now: what recent change makes it timely, citing the evidence in plain words (no refs).
 - category: a 1-3 word problem category (e.g. "Compliance burden", "Labor shortage").
 - competitor_query: a natural-language web search query that would find EXISTING software/products/companies already addressing this problem (e.g. "software tools for managing supplier compliance documents for manufacturers").
@@ -704,9 +704,7 @@ Rules:
     })
     .filter((x) => x.sourceIds.length >= 2)
     .sort((a, b) => b.sourceIds.length - a.sourceIds.length || b.types.length - a.types.length)
-    // Competitor research runs one search per cluster in parallel; 5 keeps it within the server's
-    // per-request connection budget.
-    .slice(0, 5);
+    .slice(0, MAX_STARTUPS_PER_RUN);
 
   if (clusters.length === 0) {
     throw new PipelineError("The evidence did not reveal a recurring problem backed by multiple sources. Try a broader topic.");
@@ -879,22 +877,27 @@ export async function generateStartup(run: RunRow, clusterId: string) {
   const evidenceIds = cluster.source_ids ?? [];
   const competitorIds = cluster.competitor_source_ids ?? [];
 
-  const { data: srcRows } = await db
+  const [sourceResult, datedResult, namesResult] = await Promise.all([db
     .from("sources")
     .select("id, url, domain, title, snippet, highlights, published_at, retrieved_at, origin, search_intent, signal_type, publisher")
-    .in("id", [...new Set([...evidenceIds, ...competitorIds])]);
-  const byId = new Map(((srcRows ?? []) as SourceRow[]).map((r) => [r.id, r]));
-
-  // Also offer other dated news from the run for the timeline
-  const { data: datedRows } = await db
+    .in("id", [...new Set([...evidenceIds, ...competitorIds])]),
+  // Also offer other dated news from the run for the timeline.
+  db
     .from("sources")
     .select("id, url, domain, title, snippet, highlights, published_at, retrieved_at, origin, search_intent, signal_type, publisher")
     .eq("run_id", run.id)
     .not("published_at", "is", null)
-    .limit(12);
+    .limit(12),
+  db.from("startups").select("name").order("created_at", { ascending: false }).limit(300)]);
+  for (const result of [sourceResult, datedResult, namesResult]) {
+    if (result.error) throw result.error;
+  }
+  const srcRows = sourceResult.data;
+  const datedRows = datedResult.data;
+  const byId = new Map(((srcRows ?? []) as SourceRow[]).map((r) => [r.id, r]));
   for (const r of (datedRows ?? []) as SourceRow[]) if (!byId.has(r.id)) byId.set(r.id, r);
 
-  const { data: nameRows } = await db.from("startups").select("name").order("created_at", { ascending: false }).limit(300);
+  const nameRows = namesResult.data;
   const takenNames = (nameRows ?? []).map((r) => r.name);
 
   const refToId = new Map<string, string>();
@@ -926,7 +929,7 @@ export async function generateStartup(run: RunRow, clusterId: string) {
 
   const out = await generateJSON<GenOut>({
     name: "startup_profile",
-    effort: "medium",
+    effort: "low",
     instructions: `You are Demandquake's venture architect. You turn ONE evidence-backed problem cluster into a commercially plausible, unclaimed startup concept.
 Hard rules on provenance:
 - Facts must come from the sources. Any factual claim (problem.facts, assessment reasoning, timeline notes) must cite refs like "S2" or "C1" that actually support it. Never invent statistics, customer quotes, company names, funding, or dates.
@@ -939,6 +942,7 @@ Hard rules on provenance:
 - brand.hue: integer 0-359 that fits the brand mood. brand.glyph: one of the allowed logomark shapes. brand.motto: 2-5 words.
 - business_model.target_scope / target_segment: where this startup intends to position itself on the same scope (point / suite / platform) and segment (smb / mid_market / enterprise) axes used for competitors, ideally in visible whitespace.
 - features: 3-4. customers: 2-3 segments. validation_steps: 4 concrete experiments. hypotheses: 4-6 key assumptions that must be tested. business_plan.roadmap: 3 phases. monitor_queries: 2 natural-language news queries to watch for future developments affecting this opportunity.
+- Keep the complete profile concise: 3-5 source-linked facts, 3 timeline events when supported, 4 hypotheses, 2 differentiation points, 3 go-to-market steps and 3 key risks. Descriptions and reasoning should be one sentence each, at most 25 words. Preserve all six assessment dimensions, five pitch slides, four validation experiments and provenance rules; never pad unsupported evidence.
 - Never write ref labels (like S2 or C1) inside prose text. Put citations ONLY in the ref/refs fields; prose should read naturally (e.g. \"Reuters reports…\").`,
     input: `Original research request: ${run.query}
 Industry: ${cluster.industry}; Geography: ${cluster.geography}
@@ -1090,8 +1094,8 @@ ${competitorBlock.length ? competitorBlock.join("\n\n") : "(competitor search re
     ...evidenceIds,
     ...facts.flatMap((f) => f.source_ids),
     ...dims.flatMap((d) => d.source_ids),
-    ...timeline.map((t) => t.source_id!).filter(Boolean),
-    ...competitors.map((c) => c.source_id!).filter(Boolean),
+    ...timeline.flatMap((t) => t.source_id ? [t.source_id] : []),
+    ...competitors.flatMap((c) => c.source_id ? [c.source_id] : []),
   ]);
 
   const name = out.name.trim().slice(0, 60) || cluster.title;
@@ -1132,13 +1136,8 @@ ${competitorBlock.length ? competitorBlock.join("\n\n") : "(competitor search re
 
   await ensureUniqueName(startup.id, name);
 
-  // Decorative banner artwork; a failure here must never fail the run.
-  try {
-    const { generateStartupBanner } = await import("./banner.server");
-    await generateStartupBanner({ id: startup.id, name, tagline: out.tagline, industry: cluster.industry, brand: { hue } });
-  } catch (err) {
-    console.error(`Banner generation failed for ${startup.id}:`, err);
-  }
+  // Artwork is generated on demand by useStartupBanner when a card/profile appears.
+  // Never hold research completion or credit settlement behind decorative image calls.
 
   await db
     .from("clusters")

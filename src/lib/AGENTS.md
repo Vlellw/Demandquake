@@ -3,6 +3,7 @@
 - Free package grants use an authenticated function and service-only atomic RPC that reads package amounts server-side and logs adjustments; request keys deduplicate retries without imposing a per-account grant cap.
 
 - Initial research request and retention budgets live in `research-search.ts`; select one query per essential intent and reject low-relevance/duplicate hits so smaller pools remain demand-focused.
+- Initial discovery uses concise low-effort analysis with up to three supported clusters; only generation uses parallel browser workers and artwork loads separately so it cannot delay research completion or settlement.
 
 - Query recovery retries only browser network TypeErrors twice with delayed backoff; application/provider failures and mutations are never automatically replayed. Page error recovery invalidates failed reads before resetting the route.
 

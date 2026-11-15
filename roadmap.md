@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Bring initial research closer to two minutes: artwork loads separately, concise low-effort analysis and generation, parallel profile reads, single serial-stage driver without display-refresh waits. Fresh signed-in search completed in 118 seconds with 20 sources and two source-backed ideas; completion persists on reopening, 51 focused tests pass. Provider congestion can still extend times.
 - [x] Replace credit checkout with unlimited free package grants for signed-in users; two Starter grants verified 0 → 100 → 200, persisted after reload and logged as free adjustments. Server-owned amounts and authenticated identity tested; existing paid records unchanged.
 - [x] Reduce initial research to at most 20 sources: four focused web queries (3 each), one Reddit search (4), industry news (4); drop low-relevance/duplicate hits and apply essential intent selection to saved plans. Existing research and deeper checks unchanged.
 - [x] Sweep missing-payment balance behavior across menu, search, claims/upgrades, history, administration, research drivers and database settlement; all use the shared fix or have no payment-configuration dependency. Signed-in confirmations show 10 credits; 28 credit tests pass. No settled records or configuration changed.
