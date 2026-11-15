@@ -48,8 +48,8 @@ export function VoicesBody({ data }: { data: VoicesData }) {
         <strong className="text-primary">{plural(data.relevant, "Reddit post")}</strong> from the last 12 months describe this problem, out of {data.scanned} that matched the
         searches. Together they drew {plural(data.upvotes, "upvote")} and {plural(data.comments, "comment")}.
       </p>
-      <div className="grid gap-5 md:grid-cols-[1fr_16rem]">
-        <div>
+      <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_16rem]">
+        <div className="min-w-0">
           <ul className="space-y-3">
             {posts.map((p) => (
               <li key={p.id} className="rounded-lg border border-border p-3">
@@ -296,7 +296,7 @@ export function PricingBody({ data }: { data: PricingData }) {
                     <li key={i} className="rounded-md bg-muted/60 px-3 py-2">
                       <p className="text-xs text-muted-foreground">{p.name}</p>
                       <p className="font-semibold text-foreground">{planPrice(p)}</p>
-                      {p.unit && <p className="text-xs text-muted-foreground">{p.unit}</p>}
+                      {p.unit && !/^(flat|flat rate|n\/a|none)$/i.test(p.unit.trim()) && <p className="text-xs text-muted-foreground">{p.unit}</p>}
                     </li>
                   ))}
                 </ul>

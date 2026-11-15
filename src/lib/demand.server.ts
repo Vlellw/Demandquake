@@ -72,7 +72,7 @@ const REFRESH_MS = 30 * 24 * 60 * MIN;
 const ERROR_RETRY_MS = 6 * 60 * MIN;
 const STALE_RUN_MS = 6 * MIN;
 const BUSY_RETRY_MS = 20_000;
-const RETRY_COOLDOWN_MS = MIN;
+const RETRY_COOLDOWN_MS = 10 * MIN;
 const BG = { background: true } as const;
 
 type Row = Database["public"]["Tables"]["demand_evidence"]["Row"];

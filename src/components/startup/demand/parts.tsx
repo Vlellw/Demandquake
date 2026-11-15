@@ -138,7 +138,7 @@ export function DemandPanel<T>({
   const showData = data !== null && (status === "done" || status === "running");
   const loading = !showData && (status === "pending" || status === "running");
   return (
-    <section id={id} aria-labelledby={`${id}-title`} className={cn("panel scroll-mt-36 p-5", className)} aria-busy={loading || undefined}>
+    <section id={id} aria-labelledby={`${id}-title`} className={cn("panel min-w-0 scroll-mt-36 p-5", className)} aria-busy={loading || undefined}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h3 id={`${id}-title`} className="flex items-center gap-1.5 font-display text-lg font-semibold text-foreground">
           {title}
