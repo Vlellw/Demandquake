@@ -1,6 +1,6 @@
 import { createFileRoute, stripSearchParams, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { DISCOVER_DEFAULTS, discoverSearchSchema, isSearchDone } from "@/lib/journey";
+import { DISCOVER_DEFAULTS, discoverSearchSchema } from "@/lib/journey";
 import { JourneySteps } from "@/components/journey/JourneySteps";
 import { ResearchStep } from "@/components/journey/ResearchStep";
 import { lazy, Suspense, useEffect, useState } from "react";
@@ -35,9 +35,6 @@ export const Route = createFileRoute("/_authenticated/discover")({
 function DiscoverPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/discover" });
-  // Ideas remain hidden until a search has completed on this browser.
-  const [marketOpen, setMarketOpen] = useState(false);
-  useEffect(() => setMarketOpen(isSearchDone()), []);
 
 
   // "Research a market" buttons jump back up to Step 1 instead of opening a pop-up.
@@ -70,9 +67,9 @@ function DiscoverPage() {
         rerun={search.rerun}
         focusKey={focusKey}
       />
-      {marketOpen && <Suspense fallback={<div role="status" className="mx-auto max-w-[1400px] px-6 py-12 text-muted-foreground">Loading startups…</div>}>
+      <Suspense fallback={<div role="status" className="mx-auto max-w-[1400px] px-6 py-12 text-muted-foreground">Loading startups…</div>}>
         <MarketResults search={search} onResearch={goToSearch} />
-      </Suspense>}
+      </Suspense>
     </div>
   );
 }
