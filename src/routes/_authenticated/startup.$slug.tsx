@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TimeAgo } from "@/components/common/TimeAgo";
+import { PageError } from "@/components/common/PageError";
 import { InfoTip } from "@/components/common/InfoTip";
 import { VerdictBadge } from "@/components/startup/VerdictBadge";
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
@@ -100,6 +101,7 @@ export const Route = createFileRoute("/_authenticated/startup/$slug")({
     };
   },
   component: StartupPage,
+  errorComponent: PageError,
   notFoundComponent: () => (
     <div className="mx-auto max-w-md px-4 py-24 text-center">
       <h1 className="section-title mt-2 text-3xl">This startup isn’t in the catalog</h1>
