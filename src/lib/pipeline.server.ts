@@ -21,6 +21,7 @@ import {
   type DimensionKey,
 } from "./types";
 import { computeEvidenceStrength, normalizeQueryKey, normalizeUrl, slugify, randomSuffix, cleanRefLabels, replaceBrandName } from "./research-utils";
+import { INITIAL_SEARCH, essentialSearches, selectInitialSources } from './research-search';
 
 const db = supabaseAdmin;
 const STALE_MS = 4 * 60 * 1000;
@@ -282,11 +283,8 @@ async function maybeFinalize(runId: string): Promise<boolean> {
 // ---------------------------------------------------------------------------
 // Stage 1: research plan
 // ---------------------------------------------------------------------------
-const SEARCH_INTENTS = ["complaints", "requests", "forums", "regulation", "market_news", "technology"] as const;
-/** Web queries per run plus Reddit post searches; together with news this yields roughly 40-50 sources. */
-const WEB_QUERIES = SEARCH_INTENTS.length;
-const REDDIT_QUERIES = 2;
-const MAX_RUN_SOURCES = 50;
+const SEARCH_INTENTS = INITIAL_SEARCH.intents;
+const REDDIT_QUERIES = INITIAL_SEARCH.redditQueries;
 
 async function stagePlan(run: RunRow) {
   const constraints = [
@@ -300,9 +298,9 @@ async function stagePlan(run: RunRow) {
     name: "research_plan",
     instructions: `You are the research planner for Demandquake, a platform that discovers startup opportunities from live web evidence.
 Turn the user's request into a web research plan that surfaces REAL, CURRENT business problems - not solutions.
-Write exactly 6 web search queries, one per intent: complaints (pain points, frustrations, bad reviews of existing tools), requests (people asking for a tool, service or workaround that does not exist yet, or saying they would pay for one), forums (practitioner discussions in industry forums, communities and Q&A sites where the affected people talk shop), regulation (new or upcoming rules and policy changes), market_news (industry developments, shortages, cost pressures), technology (shifts that create new needs or break old workflows).
+Write exactly 4 focused web search queries, one per intent: complaints (specific pain points and bad reviews of existing tools), requests (people asking for a missing tool or workaround, especially willingness to pay), forums (practitioner discussions in industry communities and Q&A sites), market_news (credible industry evidence of shortages, cost pressures or changing demand). Prioritize direct customer problems and independently documented demand. Avoid generic trend roundups, promotional pages and speculative technology coverage. Include regulation or technology changes only within market_news when they directly affect the target customers.
 Each query must be a natural-language query a search engine answers well: concrete nouns, the target customer, and the geography if one is implied. No boolean operators, no quotes, no site: filters. Today is ${new Date().toISOString().slice(0, 10)}; prefer recent framing.
-Also write exactly 2 reddit_queries: short Reddit searches (2-6 words) in the words affected people would use when complaining or asking for help. No brand names, no quotes or operators.
+Also write exactly 1 reddit_queries entry: a short Reddit search (2-6 words) in the words affected people would use when complaining, seeking a workaround or expressing willingness to pay. No brand names, no quotes or operators.
 Also write one news_query describing the developments to look for in news coverage.
 Pick the single best-fitting industry and geography from the allowed lists.`,
     input: `User request: ${run.query}\n${constraints}`,
@@ -321,7 +319,7 @@ Pick the single best-fitting industry and geography from the allowed lists.`,
     .filter((q) => q.length >= 4)
     .slice(0, REDDIT_QUERIES)
     .map((query) => ({ intent: "reddit", query }));
-  const web = (plan.searches ?? []).filter((q) => q.query?.trim()).slice(0, WEB_QUERIES);
+  const web = essentialSearches(plan.searches ?? []);
   const searches = [...web, ...reddit];
   if (searches.length === 0) throw new PipelineError("The AI could not build a research plan for this topic. Try rephrasing.");
   const cleanPlan: ResearchPlan = {
@@ -361,7 +359,7 @@ async function stageSearch(run: RunRow) {
   const fresh = await loadRun(run.id);
   const plan = (fresh.plan as ResearchPlan) ?? {};
   const all = plan.searches ?? [];
-  const searches = all.filter((q) => q.intent !== "reddit").slice(0, WEB_QUERIES);
+  const searches = essentialSearches(all);
   const redditSearches = all.filter((q) => q.intent === "reddit").slice(0, REDDIT_QUERIES);
   const yearAgo = Date.now() - 365 * 24 * 3600_000;
   const onWait = waitReporter(run.id);
@@ -371,27 +369,27 @@ async function stageSearch(run: RunRow) {
   const webTasks = searches.map((sq) =>
     gate(() => webSearch({
       query: sq.query,
-      numResults: 10,
+      numResults: INITIAL_SEARCH.webResults,
       highlightChars: 1000,
       excludeDomains: EXCLUDE_DOMAINS,
       freshness: sq.intent === "complaints" || sq.intent === "requests" ? undefined : "last_year",
       onWait,
     })).then((r) => ({ sq, ...r })),
   );
-  const newsTask = gate(() => newsSearch({ query: plan.news_query || run.query, limit: 12, fromMs: yearAgo, onWait }));
+  const newsTask = gate(() => newsSearch({ query: plan.news_query || run.query, limit: INITIAL_SEARCH.newsResults, fromMs: yearAgo, onWait }));
   const redditTasks = redditSearches.map((sq) =>
     gate(() =>
       scrapeParsed<{ posts?: RedditPost[] }>(
         `https://www.reddit.com/search/?q=${encodeURIComponent(sq.query)}&type=posts&sort=relevance&t=year`,
         "reddit-search",
-        { limit: 20 },
+        { limit: INITIAL_SEARCH.redditResults },
       ),
     ).then((r) => ({ sq, ...r })),
   );
 
   const settled = await Promise.allSettled([...webTasks, newsTask]);
   const redditSettled = await Promise.allSettled(redditTasks);
-  const rows: SourceInsert[] = [];
+  let rows: SourceInsert[] = [];
   const seen = new Set<string>();
   let credits = 0;
   let firstError: unknown = null;
@@ -408,10 +406,10 @@ async function stageSearch(run: RunRow) {
       const ranked = [...value.results].sort((a, b) => rel(b.relevance) - rel(a.relevance));
       let kept = 0;
       for (const r of ranked) {
-        if (kept >= 6) break;
+        if (kept >= INITIAL_SEARCH.webResults) break;
         const key = normalizeUrl(r.url);
         if (seen.has(key)) continue;
-        if (r.relevance === "low" && kept >= 3) continue;
+        if (r.relevance === "low") continue;
         seen.add(key);
         kept++;
         byIntent[value.sq.intent] = (byIntent[value.sq.intent] ?? 0) + 1;
@@ -436,7 +434,7 @@ async function stageSearch(run: RunRow) {
       credits += value.meta.creditsUsed;
       let kept = 0;
       for (const a of value.articles) {
-        if (kept >= 8) break;
+        if (kept >= INITIAL_SEARCH.newsResults) break;
         const key = normalizeUrl(a.url);
         if (seen.has(key)) continue;
         seen.add(key);
@@ -475,7 +473,7 @@ async function stageSearch(run: RunRow) {
       .sort((a, b) => (b.score ?? 0) + (b.comment_count ?? 0) - ((a.score ?? 0) + (a.comment_count ?? 0)));
     let kept = 0;
     for (const p of posts) {
-      if (kept >= 7) break;
+      if (kept >= INITIAL_SEARCH.redditResults) break;
       const key = normalizeUrl(p.url!);
       if (seen.has(key)) continue;
       seen.add(key);
@@ -498,11 +496,13 @@ async function stageSearch(run: RunRow) {
       });
     }
   }
-  // Keep the pool at ~50: drop low-relevance web hits first so Reddit and news voices survive.
-  for (let i = rows.length - 1; i >= 0 && rows.length > MAX_RUN_SOURCES; i--) {
-    if (rows[i]!.relevance === "low") rows.splice(i, 1);
+  rows = selectInitialSources(rows);
+  // Report only the sources retained for analysis, not discarded candidates.
+  for (const key of Object.keys(byIntent)) delete byIntent[key];
+  for (const row of rows) {
+    const intent = row.search_intent ?? 'unknown';
+    byIntent[intent] = (byIntent[intent] ?? 0) + 1;
   }
-  if (rows.length > MAX_RUN_SOURCES) rows.splice(MAX_RUN_SOURCES);
 
   if (firstError) await mergeStats(run.id, { billing_api_failed: true });
   if (rows.length === 0 && firstError) throw firstError;

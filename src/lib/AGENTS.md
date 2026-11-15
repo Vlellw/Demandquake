@@ -1,5 +1,7 @@
 # src/lib rules
 
+- Initial research request and retention budgets live in `research-search.ts`; select one query per essential intent and reject low-relevance/duplicate hits so smaller pools remain demand-focused.
+
 - Query recovery retries only browser network TypeErrors twice with delayed backoff; application/provider failures and mutations are never automatically replayed. Page error recovery invalidates failed reads before resetting the route.
 
 - Demand checks are cached per startup and section in a service-only table and run one section per call (`advanceDemandEvidence`), driven from the Evidence tab; they use background Context.dev requests that yield to paid research, so they never slow searches and resume on the next visit.
