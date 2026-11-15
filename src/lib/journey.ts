@@ -146,7 +146,7 @@ export const EVIDENCE_LABEL: Record<string, string> = {
  */
 export function rankSpotlights<C extends { evidence_strength: string | null; evidence_count: number; research_at: string }>(
   cards: C[],
-  limit = 3,
+  limit = 4,
 ): C[] {
   return [...cards]
     .sort(

@@ -20,7 +20,7 @@ type Stats = { startups: number; sources: number; domains: number; lastResearchA
 const pill =
   "inline-flex h-10 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
-/** Step 1 of the founder journey: pick an industry, see its three best-documented ideas, then choose a next action. */
+/** Step 1 of the founder journey: pick an industry, see its four best-documented ideas, then choose a next action. */
 export function GuidedDiscover({
   cards,
   stats,
@@ -34,14 +34,14 @@ export function GuidedDiscover({
 }) {
   const { user } = useAuthUser();
   const { data: projects } = useQuery({ ...myProjectsQuery, enabled: !!user });
-  const picks = useMemo(() => (projects ? recommendStartups(cards, projects, 3) : []), [cards, projects]);
+  const picks = useMemo(() => (projects ? recommendStartups(cards, projects, 4) : []), [cards, projects]);
   const choices = useMemo(() => industryChoices(cards), [cards]);
 
   // "For you" only exists once a founder has claimed something with related ideas.
   const selected = industry === FOR_YOU && picks.length === 0 ? "all" : industry;
   const pool = selected === "all" ? cards : selected === FOR_YOU ? picks.map((p) => p.card) : cards.filter((c) => c.industry === selected);
   const spotlights =
-    selected === FOR_YOU ? picks : rankSpotlights(pool, 3).map((card) => ({ card, reason: undefined as string | undefined }));
+    selected === FOR_YOU ? picks : rankSpotlights(pool, 4).map((card) => ({ card, reason: undefined as string | undefined }));
   const industryLabel = selected === "all" || selected === FOR_YOU ? null : selected;
   const projectNames = (projects ?? []).slice(0, 3).map((p) => p.name);
 
@@ -125,7 +125,7 @@ export function GuidedDiscover({
                 </div>
               </div>
             ) : (
-              <ol className="mt-8 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              <ol className="mt-8 grid gap-6 md:grid-cols-2">
                 {spotlights.map(({ card, reason }, i) => (
                   <SpotlightCard key={card.id} card={card} index={i} reason={reason} />
                 ))}

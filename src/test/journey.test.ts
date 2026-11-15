@@ -57,9 +57,9 @@ describe("journey steps", () => {
 });
 
 describe("step 1 spotlights", () => {
-  it("shows three ideas at most", () => {
+  it("shows four ideas at most", () => {
     const cards = Array.from({ length: 6 }, (_, i) => card({ id: String(i) }));
-    expect(rankSpotlights(cards)).toHaveLength(3);
+    expect(rankSpotlights(cards)).toHaveLength(4);
   });
   it("ranks strong evidence above moderate even with fewer sources", () => {
     const ranked = rankSpotlights([card({ id: "many", evidence_count: 40 }), card({ id: "strong", evidence_strength: "strong", evidence_count: 8 })]);
