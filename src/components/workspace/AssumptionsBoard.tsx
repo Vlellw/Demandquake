@@ -60,32 +60,26 @@ export function AssumptionsBoard({ assumptions, readOnly = false, onChange }: {
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <Badge variant="inferred">Assumption</Badge>
                     <div className="flex items-center gap-2">
-                    {readOnly ? (
-                      <span className={`flex items-center gap-2 text-sm font-semibold ${current.tone}`}>
-                        <current.icon className="size-4" />{current.label}
-                      </span>
-                    ) : (
-                      <>
-                        <Select value={a.status} onValueChange={(value) => {
-                          const status = statuses.find((s) => s.value === value)?.value;
-                          if (status) onChange(assumptions.map((item) => item.id === a.id ? { ...item, status } : item));
-                        }}>
-                          <SelectTrigger aria-label={`Status for ${a.text}`} className={`w-40 shrink-0 ${current.tone}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {statuses.map(({ value, label, icon: StatusIcon, tone }) => (
-                              <SelectItem key={value} value={value}>
-                                <span className={`flex items-center gap-2 ${tone}`}><StatusIcon className="size-4" />{label}</span>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                      <Select value={a.status} onValueChange={(value) => {
+                        const status = statuses.find((s) => s.value === value)?.value;
+                        if (status) onChange(assumptions.map((item) => item.id === a.id ? { ...item, status } : item));
+                      }}>
+                        <SelectTrigger aria-label={`Status for ${a.text}`} className={`w-40 shrink-0 ${current.tone}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {statuses.map(({ value, label, icon: StatusIcon, tone }) => (
+                            <SelectItem key={value} value={value}>
+                              <span className={`flex items-center gap-2 ${tone}`}><StatusIcon className="size-4" />{label}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {!readOnly && (
                         <Button variant="ghost" size="icon" title="Delete assumption" aria-label={`Delete assumption: ${a.text}`} onClick={() => {
                           if (window.confirm("Delete this assumption?")) onChange(assumptions.filter((item) => item.id !== a.id));
                         }}><Trash2 className="size-4 text-negative" /></Button>
-                      </>
-                    )}
+                      )}
                     </div>
                   </div>
                   <p className="break-words text-base leading-relaxed text-foreground">{a.text}</p>
