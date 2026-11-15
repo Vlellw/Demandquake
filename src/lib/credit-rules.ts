@@ -1,4 +1,4 @@
-export const INITIAL_CREDIT_RULES = { welcome: 25, discovery: 5, claim: 5, claimPrivate: 20, admin: 1_000_000 };
+export const INITIAL_CREDIT_RULES = { welcome: 50, discovery: 5, claim: 5, claimPrivate: 20, admin: 1_000_000 };
 
 /** Public claims keep the startup in everyone's catalog; private claims hide it from other founders. */
 export type ClaimAccess = 'public' | 'private';

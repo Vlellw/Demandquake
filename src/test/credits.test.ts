@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { INITIAL_CREDIT_RULES, INITIAL_PACKAGES, shouldChargeDiscovery, canAfford, refundableCredits, claimPrices, privateUpgradeCost, canClaimPrivately, otherBuilders } from '@/lib/credit-rules';
 describe('credit business rules', () => {
-  it('grants 25 welcome credits',()=>expect(INITIAL_CREDIT_RULES.welcome).toBe(25));
+  it('grants 50 welcome credits',()=>expect(INITIAL_CREDIT_RULES.welcome).toBe(50));
   it('sets discovery price to 5 credits',()=>expect(INITIAL_CREDIT_RULES.discovery).toBe(5));
   it('sets a public startup claim price to 5 credits',()=>expect(claimPrices().public).toBe(5));
   it('sets a private startup claim price to 20 credits',()=>expect(claimPrices().private).toBe(20));
