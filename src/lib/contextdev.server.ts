@@ -12,7 +12,7 @@ export type WaitReporter = (waitMs: number) => void | Promise<void>;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-async function reserveSlot(onWait?: WaitReporter): Promise<void> {
+async function reserveSlot(onWait?: WaitReporter, maxWaitMs = MAX_GATE_WAIT_MS): Promise<void> {
   const rpm = Math.max(1, Number(process.env["CONTEXT_DEV_RPM"] ?? 10) - 1);
   const started = Date.now();
   for (;;) {
@@ -27,7 +27,8 @@ async function reserveSlot(onWait?: WaitReporter): Promise<void> {
     }
     const wait = Number(data ?? 0);
     if (wait <= 0) return;
-    if (Date.now() - started + wait > MAX_GATE_WAIT_MS) {
+    if (Date.now() - started + wait > maxWaitMs) {
+      if (maxWaitMs < MAX_GATE_WAIT_MS) throw new ContextDevBusy();
       throw new ContextDevError("Rate gate wait budget exceeded", 429, friendlyMessage(429));
     }
     await onWait?.(wait);
@@ -54,6 +55,19 @@ export class ContextDevError extends Error {
   }
 }
 
+/**
+ * Thrown by background requests (demand checks) instead of waiting for a busy rate gate, so
+ * cached background work always yields to paid research runs. The caller retries later.
+ */
+export class ContextDevBusy extends ContextDevError {
+  constructor() {
+    super("Context.dev capacity is busy; background request yielded", 429, friendlyMessage(429));
+    this.name = "ContextDevBusy";
+  }
+}
+
+const BACKGROUND_GATE_WAIT_MS = 25_000;
+
 function friendlyMessage(status: number): string {
   if (status === 401 || status === 403) return "Context.dev rejected the API key. Check the key in project secrets.";
   if (status === 402) return "The Context.dev account is out of credits.";
@@ -71,9 +85,19 @@ export interface CallMeta {
 async function call<T>(
   path: string,
   body: unknown,
-  opts: { timeoutMs?: number; onWait?: WaitReporter | undefined; method?: "GET" | "POST" } = {},
+  opts: {
+    timeoutMs?: number | undefined;
+    onWait?: WaitReporter | undefined;
+    method?: "GET" | "POST" | "DELETE";
+    /** Yield (throw ContextDevBusy) instead of waiting long for the shared rate gate. */
+    background?: boolean | undefined;
+    /** Management endpoints (watchers) have their own limits and skip the research rate gate. */
+    ungated?: boolean;
+  } = {},
 ): Promise<{ data: T; meta: CallMeta }> {
   const isGet = opts.method === "GET";
+  const isDelete = opts.method === "DELETE";
+  const hasQuery = isGet || isDelete;
   const timeoutMs = opts.timeoutMs ?? 45_000;
   const apiKey = process.env["CONTEXT_DEV_API_KEY"];
   if (!apiKey) {
@@ -83,25 +107,25 @@ async function call<T>(
   let lastError: ContextDevError | null = null;
   let rateRetries = 0;
   for (let attempt = 0; attempt < 4; attempt++) {
-    await reserveSlot(opts.onWait);
+    if (!opts.ungated) await reserveSlot(opts.onWait, opts.background ? BACKGROUND_GATE_WAIT_MS : MAX_GATE_WAIT_MS);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const url = isGet
-        ? `${BASE_URL}${path}?${new URLSearchParams(body as Record<string, string>).toString()}`
-        : `${BASE_URL}${path}`;
+      const qs = hasQuery && body ? new URLSearchParams(body as Record<string, string>).toString() : "";
+      const url = qs ? `${BASE_URL}${path}?${qs}` : `${BASE_URL}${path}`;
       const res = await fetch(url, {
-        method: isGet ? "GET" : "POST",
-        headers: isGet
+        method: opts.method ?? "POST",
+        headers: hasQuery
           ? { Authorization: `Bearer ${apiKey}` }
           : { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        ...(isGet ? {} : { body: JSON.stringify(body) }),
+        ...(hasQuery ? {} : { body: JSON.stringify(body) }),
         signal: controller.signal,
       });
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         console.error(`[context.dev] ${path} -> ${res.status}: ${text.slice(0, 400)}`);
         lastError = new ContextDevError(`Context.dev ${path} failed: ${res.status}`, res.status, friendlyMessage(res.status));
+        if (res.status === 429 && opts.background) throw new ContextDevBusy();
         if (res.status === 429 && rateRetries < 2) {
           rateRetries++;
           const wait = Math.min(retryDelayMs(res, text) + 500 + Math.random() * 1500, 62_000);
@@ -159,11 +183,14 @@ export async function webSearch(opts: {
   excludeDomains?: string[];
   highlightChars?: number;
   onWait?: WaitReporter | undefined;
+  /** Skip highlight extraction (cheaper) when only titles and URLs are needed. */
+  noHighlights?: boolean | undefined;
+  background?: boolean | undefined;
 }): Promise<{ results: WebResult[]; meta: CallMeta }> {
   const body: Record<string, unknown> = {
     query: opts.query.slice(0, 480),
     numResults: opts.numResults ?? 8,
-    highlightsOptions: { enabled: true, maxCharacters: opts.highlightChars ?? 1200 },
+    ...(opts.noHighlights ? {} : { highlightsOptions: { enabled: true, maxCharacters: opts.highlightChars ?? 1200 } }),
     timeoutOpts: { milliseconds: 30_000, behavior: "return-partial" },
   };
   if (opts.freshness) body["freshness"] = opts.freshness;
@@ -177,7 +204,7 @@ export async function webSearch(opts: {
       relevance?: string;
       highlights?: { highlights?: string[]; code?: string };
     }>;
-  }>("/web/search", body, { onWait: opts.onWait });
+  }>("/web/search", body, { onWait: opts.onWait, background: opts.background });
 
   const results: WebResult[] = (data.results ?? [])
     .filter((r) => typeof r.url === "string" && r.url.startsWith("http"))
@@ -362,4 +389,350 @@ export async function brandSearch(name: string, opts: { onWait?: WaitReporter } 
   return (data.results ?? [])
     .filter((r): r is { domain: string; name: string; description?: string } => typeof r.domain === "string" && typeof r.name === "string")
     .map((r) => ({ domain: r.domain.toLowerCase().replace(/^www\./, ""), name: r.name, description: r.description ?? null }));
+}
+
+// ---------------------------------------------------------------------------
+// Demand checks: page readers, company data, sourced answers (background requests)
+// ---------------------------------------------------------------------------
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+type BgOpts = { background?: boolean | undefined; timeoutMs?: number | undefined };
+
+interface ScrapeEnvelope {
+  parsed?: { success?: boolean | null; data?: unknown; message?: unknown };
+  json?: { success?: boolean | null; data?: unknown };
+  markdown?: { success?: boolean | null; data?: string | null };
+  metadata?: { publishedTime?: string | null; title?: string | null } | null;
+}
+
+/** Runs a Context.dev prebuilt parser (Reddit, G2, app stores, Google Maps). Null when the page could not be parsed. */
+export async function scrapeParsed<T>(
+  url: string,
+  parser: string,
+  extra: { limit?: number; sort?: string } = {},
+  opts: BgOpts = {},
+): Promise<{ data: T | null; meta: CallMeta }> {
+  const parseParams: Record<string, unknown> = { type: "prebuilt", parser };
+  if (extra.limit) parseParams["limit"] = extra.limit;
+  if (extra.sort) parseParams["sort"] = extra.sort;
+  try {
+    const { data, meta } = await call<ScrapeEnvelope>(
+      "/web/scrape",
+      { url, formats: { parse: true }, parseParams, maxAgeMs: 3 * DAY_MS, timeoutOpts: { milliseconds: 40_000, behavior: "return-partial" } },
+      { timeoutMs: opts.timeoutMs ?? 50_000, background: opts.background },
+    );
+    return { data: data.parsed?.success ? ((data.parsed.data as T) ?? null) : null, meta };
+  } catch (err) {
+    if (err instanceof ContextDevError && [400, 404, 422].includes(err.status)) return { data: null, meta: { creditsUsed: 0, cacheStatus: null } };
+    throw err;
+  }
+}
+
+/** Extracts page facts into a JSON Schema shape (5 credits). Null when extraction failed. */
+export async function scrapeJson<T>(
+  url: string,
+  schema: Record<string, unknown>,
+  instructions: string,
+  opts: BgOpts = {},
+): Promise<{ data: T | null; meta: CallMeta }> {
+  try {
+    const { data, meta } = await call<ScrapeEnvelope>(
+      "/web/scrape",
+      { url, formats: { json: true }, jsonParams: { schema, instructions }, maxAgeMs: 3 * DAY_MS, timeoutOpts: { milliseconds: 40_000, behavior: "return-partial" } },
+      { timeoutMs: opts.timeoutMs ?? 50_000, background: opts.background },
+    );
+    return { data: data.json?.success ? ((data.json.data as T) ?? null) : null, meta };
+  } catch (err) {
+    if (err instanceof ContextDevError && [400, 404, 422].includes(err.status)) return { data: null, meta: { creditsUsed: 0, cacheStatus: null } };
+    throw err;
+  }
+}
+
+/** Reads a page as Markdown plus its metadata (used for YouTube video facts). */
+export async function scrapeMarkdown(
+  url: string,
+  opts: BgOpts = {},
+): Promise<{ markdown: string | null; publishedTime: string | null; meta: CallMeta }> {
+  try {
+    const { data, meta } = await call<ScrapeEnvelope>(
+      "/web/scrape",
+      { url, formats: { markdown: true }, maxAgeMs: 3 * DAY_MS, timeoutOpts: { milliseconds: 30_000, behavior: "return-partial" } },
+      { timeoutMs: opts.timeoutMs ?? 40_000, background: opts.background },
+    );
+    return {
+      markdown: data.markdown?.success ? (data.markdown.data ?? null) : null,
+      publishedTime: data.metadata?.publishedTime ?? null,
+      meta,
+    };
+  } catch (err) {
+    if (err instanceof ContextDevError && [400, 404, 422].includes(err.status)) return { markdown: null, publishedTime: null, meta: { creditsUsed: 0, cacheStatus: null } };
+    throw err;
+  }
+}
+
+export interface MappedUrl {
+  url: string;
+  title: string | null;
+  description: string | null;
+}
+
+/** Lists a site's URLs most relevant to a topic (2 credits with search). */
+export async function mapUrls(domain: string, search: string, opts: BgOpts & { maxLinks?: number } = {}): Promise<{ urls: MappedUrl[]; meta: CallMeta }> {
+  try {
+    const { data, meta } = await call<{ urls?: { url?: string; title?: string | null; description?: string | null }[] }>(
+      "/web/urls",
+      { domain, search, maxLinks: String(opts.maxLinks ?? 6) },
+      { method: "GET", timeoutMs: opts.timeoutMs ?? 40_000, background: opts.background },
+    );
+    return {
+      urls: (data.urls ?? [])
+        .filter((u): u is { url: string; title?: string | null; description?: string | null } => typeof u.url === "string" && u.url.startsWith("http"))
+        .map((u) => ({ url: u.url, title: u.title ?? null, description: u.description ?? null })),
+      meta,
+    };
+  } catch (err) {
+    if (err instanceof ContextDevError && [400, 404, 422].includes(err.status)) return { urls: [], meta: { creditsUsed: 0, cacheStatus: null } };
+    throw err;
+  }
+}
+
+export interface CompanyRecord {
+  name: string;
+  domain: string;
+  description: string | null;
+  founded_year: number | null;
+  employees: { count: number | null; min: number | null; max: number | null } | null;
+  hq_country: string | null;
+  operating_status: string | null;
+  funding: {
+    total_usd: number | null;
+    round_count: number;
+    stage: string | null;
+    latest_round: { type: string | null; date: string | null; amount_usd: number | null } | null;
+  };
+  crunchbase: string | null;
+  linkedin: string | null;
+}
+
+/** Company directory search with headcount, founding year and funding (2 credits per page). */
+export async function companySearch(query: string, opts: BgOpts = {}): Promise<{ companies: CompanyRecord[]; meta: CallMeta }> {
+  type Raw = {
+    name?: string;
+    domain?: string;
+    description?: string | null;
+    founded_year?: number | null;
+    operating_status?: string | null;
+    employees?: { count?: number | null; min?: number | null; max?: number | null } | null;
+    headquarters?: { country_code?: string | null } | null;
+    socials?: { crunchbase?: string | null; linkedin?: string | null } | null;
+    funding?: {
+      total_usd?: number | null;
+      round_count?: number | null;
+      stage?: string | null;
+      latest_round?: { type?: string | null; date?: string | null; amount_usd?: number | null } | null;
+    } | null;
+  };
+  try {
+    const { data, meta } = await call<{ results?: Raw[] }>("/company/search", { query: query.slice(0, 480) }, { timeoutMs: opts.timeoutMs ?? 45_000, background: opts.background });
+    const companies: CompanyRecord[] = (data.results ?? [])
+      .filter((c): c is Raw & { name: string; domain: string } => typeof c.name === "string" && typeof c.domain === "string")
+      .map((c) => ({
+        name: c.name,
+        domain: c.domain.toLowerCase().replace(/^www\./, ""),
+        description: c.description ?? null,
+        founded_year: typeof c.founded_year === "number" ? c.founded_year : null,
+        employees: c.employees ? { count: c.employees.count ?? null, min: c.employees.min ?? null, max: c.employees.max ?? null } : null,
+        hq_country: c.headquarters?.country_code ?? null,
+        operating_status: c.operating_status ?? null,
+        funding: {
+          total_usd: typeof c.funding?.total_usd === "number" ? c.funding.total_usd : null,
+          round_count: Number(c.funding?.round_count ?? 0),
+          stage: c.funding?.stage ?? null,
+          latest_round: c.funding?.latest_round
+            ? { type: c.funding.latest_round.type ?? null, date: c.funding.latest_round.date ?? null, amount_usd: c.funding.latest_round.amount_usd ?? null }
+            : null,
+        },
+        crunchbase: c.socials?.crunchbase ?? null,
+        linkedin: c.socials?.linkedin ?? null,
+      }));
+    return { companies, meta };
+  } catch (err) {
+    if (err instanceof ContextDevError && [400, 404, 422].includes(err.status)) return { companies: [], meta: { creditsUsed: 0, cacheStatus: null } };
+    throw err;
+  }
+}
+
+/** News search restricted to article types such as press releases. */
+export async function newsByType(opts: {
+  query: string;
+  types: ("editorial" | "press_release" | "regulatory_filing" | "advisory")[];
+  fromMs?: number;
+  limit?: number;
+  background?: boolean;
+}): Promise<{ articles: NewsArticle[]; meta: CallMeta }> {
+  const filterBy: Record<string, unknown> = { articleType: opts.types };
+  if (opts.fromMs) filterBy["date"] = { from: Math.floor(opts.fromMs) };
+  const { data, meta } = await call<{
+    data?: Array<{ id: string; story_id?: string | null; url: string; title?: string; description?: string; published_at?: string | null; type?: string | null; source?: { name?: string | null; domain?: string | null } }>;
+  }>("/news/search", { searchBy: { type: "natural_language", query: opts.query.slice(0, 900) }, filterBy, limit: opts.limit ?? 12 }, { background: opts.background });
+  const seen = new Set<string>();
+  const articles: NewsArticle[] = [];
+  for (const a of data.data ?? []) {
+    if (!a.url) continue;
+    const key = a.story_id ?? a.title ?? a.url;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    articles.push({
+      id: a.id,
+      storyId: a.story_id ?? null,
+      url: a.url,
+      title: (a.title ?? a.url).trim(),
+      description: (a.description ?? "").trim(),
+      publishedAt: a.published_at ?? null,
+      type: a.type ?? null,
+      sourceName: a.source?.name ?? null,
+      sourceDomain: a.source?.domain ?? null,
+    });
+  }
+  return { articles, meta };
+}
+
+/** Context.dev research assistant: a sourced answer in the given example shape (10 credits in fast mode). */
+export async function answerTask<T>(task: string, example: Record<string, unknown>, opts: BgOpts = {}): Promise<{ answer: T | null; sources: string[]; partial: boolean; meta: CallMeta }> {
+  const { data, meta } = await call<{ json_content?: T | null; sources?: string[]; partial?: boolean }>(
+    "/web/answers",
+    { mode: "fast", task: task.slice(0, 1990), json_format: example, timeoutOpts: { milliseconds: 38_000, behavior: "return-partial" } },
+    { timeoutMs: opts.timeoutMs ?? 48_000, background: opts.background },
+  );
+  return {
+    answer: data.json_content ?? null,
+    sources: (data.sources ?? []).filter((u) => typeof u === "string" && u.startsWith("http")),
+    partial: Boolean(data.partial),
+    meta,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Weekly web watch (Context.dev monitors). Management calls skip the research rate gate.
+// ---------------------------------------------------------------------------
+
+export interface MonitorInfo {
+  id: string;
+  status: string;
+  lastRunAt: string | null;
+  nextRunAt: string | null;
+  lastError: string | null;
+}
+
+export interface MonitorChange {
+  id: string;
+  title: string;
+  summary: string | null;
+  url: string | null;
+  importance: string | null;
+  detectedAt: string;
+  matched: { url: string; title: string | null; snippet: string | null }[];
+}
+
+function toMonitorInfo(m: { id?: string; status?: string; last_run_at?: string | null; next_run_at?: string | null; last_error?: unknown }): MonitorInfo {
+  const err = m.last_error;
+  return {
+    id: String(m.id ?? ""),
+    status: m.status ?? "unknown",
+    lastRunAt: m.last_run_at ?? null,
+    nextRunAt: m.next_run_at ?? null,
+    lastError: typeof err === "string" ? err : err && typeof err === "object" && "message" in err ? String((err as { message: unknown }).message) : null,
+  };
+}
+
+export async function monitorLimits(): Promise<{ used: number; limit: number }> {
+  const { data } = await call<{ monitors_used?: number; monitors_limit?: number }>("/monitors/limits", null, { method: "GET", ungated: true, timeoutMs: 15_000 });
+  return { used: Number(data.monitors_used ?? 0), limit: Number(data.monitors_limit ?? 0) };
+}
+
+export async function createMonitor(input: {
+  name: string;
+  target: { type: "search"; query: string; instructions: string } | { type: "page"; url: string; instructions: string };
+  everyDays: number;
+}): Promise<MonitorInfo> {
+  const { data } = await call<{ id?: string; status?: string; last_run_at?: string | null; next_run_at?: string | null; last_error?: unknown }>(
+    "/monitors",
+    {
+      name: input.name.slice(0, 120),
+      target: input.target,
+      change_detection: { type: "semantic", confidence_threshold: 0.75 },
+      schedule: { type: "interval", frequency: input.everyDays, unit: "days" },
+    },
+    { ungated: true, timeoutMs: 20_000 },
+  );
+  if (!data.id) throw new ContextDevError("Monitor create returned no id", 502, friendlyMessage(502));
+  return toMonitorInfo(data);
+}
+
+export async function getMonitor(id: string): Promise<MonitorInfo | null> {
+  try {
+    const { data } = await call<{ id?: string; status?: string; last_run_at?: string | null; next_run_at?: string | null; last_error?: unknown }>(
+      `/monitors/${encodeURIComponent(id)}`,
+      null,
+      { method: "GET", ungated: true, timeoutMs: 15_000 },
+    );
+    return toMonitorInfo(data);
+  } catch (err) {
+    if (err instanceof ContextDevError && err.status === 404) return null;
+    throw err;
+  }
+}
+
+export async function deleteMonitor(id: string): Promise<void> {
+  try {
+    await call<unknown>(`/monitors/${encodeURIComponent(id)}`, null, { method: "DELETE", ungated: true, timeoutMs: 15_000 });
+  } catch (err) {
+    if (err instanceof ContextDevError && err.status === 404) return;
+    throw err;
+  }
+}
+
+export async function listMonitorChanges(id: string, sinceIso: string | null): Promise<MonitorChange[]> {
+  type RawEvidence = { url?: string | null; after?: unknown };
+  type RawChange = {
+    id?: string;
+    title?: string;
+    summary?: string | null;
+    url?: string | null;
+    importance?: string | null;
+    detected_at?: string;
+    matched_urls?: string[] | null;
+    evidence?: RawEvidence[] | null;
+  };
+  const params: Record<string, string> = { limit: "25" };
+  if (sinceIso) params["since"] = sinceIso;
+  const { data } = await call<{ data?: RawChange[] }>(`/monitors/${encodeURIComponent(id)}/changes`, params, { method: "GET", ungated: true, timeoutMs: 15_000 });
+  const textOf = (v: unknown, key: string): string | null => {
+    if (v && typeof v === "object" && key in v) {
+      const x = (v as Record<string, unknown>)[key];
+      return typeof x === "string" && x.trim() ? x.trim() : null;
+    }
+    return null;
+  };
+  return (data.data ?? [])
+    .filter((c): c is RawChange & { id: string; title: string; detected_at: string } => typeof c.id === "string" && typeof c.title === "string" && typeof c.detected_at === "string")
+    .map((c) => {
+      const byUrl = new Map<string, { url: string; title: string | null; snippet: string | null }>();
+      for (const e of c.evidence ?? []) {
+        if (typeof e.url !== "string" || !e.url.startsWith("http")) continue;
+        byUrl.set(e.url, { url: e.url, title: textOf(e.after, "title"), snippet: textOf(e.after, "snippet") ?? textOf(e.after, "description") });
+      }
+      for (const u of c.matched_urls ?? []) {
+        if (typeof u === "string" && u.startsWith("http") && !byUrl.has(u)) byUrl.set(u, { url: u, title: null, snippet: null });
+      }
+      return {
+        id: c.id,
+        title: c.title.trim(),
+        summary: c.summary?.trim() || null,
+        url: c.url && c.url.startsWith("http") ? c.url : null,
+        importance: c.importance ?? null,
+        detectedAt: c.detected_at,
+        matched: [...byUrl.values()].slice(0, 6),
+      };
+    });
 }

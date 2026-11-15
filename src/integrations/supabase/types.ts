@@ -427,6 +427,56 @@ export type Database = {
         }
         Relationships: []
       }
+      demand_evidence: {
+        Row: {
+          attempt_after: string
+          created_at: string
+          credits_used: number
+          data: Json | null
+          error: string | null
+          retrieved_at: string | null
+          section: string
+          started_at: string | null
+          startup_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          attempt_after?: string
+          created_at?: string
+          credits_used?: number
+          data?: Json | null
+          error?: string | null
+          retrieved_at?: string | null
+          section: string
+          started_at?: string | null
+          startup_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          attempt_after?: string
+          created_at?: string
+          credits_used?: number
+          data?: Json | null
+          error?: string | null
+          retrieved_at?: string | null
+          section?: string
+          started_at?: string | null
+          startup_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demand_evidence_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       discovery_runs: {
         Row: {
           completed_at: string | null
@@ -759,6 +809,152 @@ export type Database = {
           },
           {
             foreignKeyName: "sources_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      startup_watch_changes: {
+        Row: {
+          created_at: string
+          detected_at: string
+          id: string
+          importance: string | null
+          kind: string
+          matched: Json
+          startup_id: string
+          summary: string | null
+          title: string
+          url: string | null
+          watch_id: string
+        }
+        Insert: {
+          created_at?: string
+          detected_at: string
+          id: string
+          importance?: string | null
+          kind: string
+          matched?: Json
+          startup_id: string
+          summary?: string | null
+          title: string
+          url?: string | null
+          watch_id: string
+        }
+        Update: {
+          created_at?: string
+          detected_at?: string
+          id?: string
+          importance?: string | null
+          kind?: string
+          matched?: Json
+          startup_id?: string
+          summary?: string | null
+          title?: string
+          url?: string | null
+          watch_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_watch_changes_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_watch_changes_watch_id_fkey"
+            columns: ["watch_id"]
+            isOneToOne: false
+            referencedRelation: "startup_watches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      startup_watch_subscribers: {
+        Row: {
+          created_at: string
+          project_id: string
+          startup_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          project_id: string
+          startup_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          project_id?: string
+          startup_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_watch_subscribers_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_watch_subscribers_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      startup_watches: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          error: string | null
+          id: string
+          kind: string
+          label: string | null
+          last_checked_at: string | null
+          monitor_id: string | null
+          startup_id: string
+          status: string
+          target: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          id?: string
+          kind: string
+          label?: string | null
+          last_checked_at?: string | null
+          monitor_id?: string | null
+          startup_id: string
+          status?: string
+          target: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          error?: string | null
+          id?: string
+          kind?: string
+          label?: string | null
+          last_checked_at?: string | null
+          monitor_id?: string | null
+          startup_id?: string
+          status?: string
+          target?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_watches_startup_id_fkey"
             columns: ["startup_id"]
             isOneToOne: false
             referencedRelation: "startups"

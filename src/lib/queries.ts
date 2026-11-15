@@ -13,6 +13,7 @@ import {
   getRecentQuakes,
 } from "./research.functions";
 import { getProject, getProjectTeam, listMyProjects, previewInvite } from "./projects.functions";
+import { getDemandEvidence } from "./demand.functions";
 
 export const startupCardsQuery = queryOptions({
   queryKey: ["startups"],
@@ -110,4 +111,11 @@ export const startupScansQuery = (slug: string) =>
     queryKey: ["startup-scans", slug],
     queryFn: () => getStartupScans({ data: { slug } }),
     staleTime: 30_000,
+  });
+
+export const demandEvidenceQuery = (slug: string) =>
+  queryOptions({
+    queryKey: ["demand-evidence", slug],
+    queryFn: () => getDemandEvidence({ data: { slug } }),
+    staleTime: 60_000,
   });

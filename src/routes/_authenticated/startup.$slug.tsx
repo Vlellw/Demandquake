@@ -30,6 +30,7 @@ import { useStartupBanner } from "@/hooks/use-startup-banner";
 import { SourceProvider, Cite, type Citation } from "@/components/startup/SourceDrawer";
 import { EvidenceMap } from "@/components/startup/EvidenceMap";
 import { SourceStream } from "@/components/research/SourceStream";
+import { DemandEvidence } from "@/components/startup/demand/DemandEvidence";
 import { MarketLandscape } from "@/components/startup/MarketLandscape";
 import { AssessmentPanel } from "@/components/startup/AssessmentPanel";
 import { OpportunityTimeline } from "@/components/startup/OpportunityTimeline";
@@ -368,6 +369,7 @@ function StartupPage() {
                   </ul>
                 </section>
               )}
+              <DemandEvidence slug={st.slug} />
               <section className="panel p-5">
                 <div className="flex items-center justify-between">
                   <h2 className="font-display text-xl font-semibold text-foreground">Original publications</h2>

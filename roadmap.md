@@ -25,7 +25,6 @@
 - [x] Guided founder journey (Choose → Inspect → Claim): step tracker on Discover, startup pages and new workspaces; industry pills with three best-documented ideas; Guided / Full catalog toggle with linkable filters; research in a focused dialog with credit confirmation; market overview tabs (map, changes, past research); startup tab check-offs with next-check guidance, related-problem map and latest scan trace; claim window listing what you get; workspace welcome panel
 
 ## Ready next
-- Deeper demand evidence from Context.dev for the Evidence tab (customer complaints from Reddit, competitor reviews, competitor pricing, funding landscape, sourced market size, app traction, regulation triggers). Blocked: waiting for the team to pick which signals to build first.
 - [x] Five-credit startup claims: atomic workspace creation and charge, confirmation, duplicate/failure protection. Verified 25 → 20 credits, one charge, existing workspace opens without another charge, and direct workspace inserts are blocked.
 - [x] Credit wallets and auditable history, 25 welcome credits, 5-credit successful discovery with confirmation, atomic idempotent reservations and settlement, public package page and protected admin controls. Verified a signed-in cached search: 25 → 20 credits, one ledger entry, no phone overflow.
 - Credit payments: test-mode payments connected with four products, embedded checkout and signed webhook fulfillment/refunds. Blocked: live payments need the owner to finish payment onboarding; a full test purchase has not been run end to end.
@@ -38,6 +37,15 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [ ] Demand checks on the Evidence tab, fetched once per startup and cached:
+  - [ ] What customers say: Reddit posts from the last 12 months, upvotes, communities, verbatim quotes
+  - [ ] Where competitors fall short: G2, Google Play and App Store reviews, complaint themes, reviewer segments
+  - [ ] What people already pay: competitor pricing pages, plans, free plans, quote-only pricing, price range
+  - [ ] Money in the market: similar companies with funding, team size, founding year; funding announcements; app downloads and ratings; how-to video views
+  - [ ] Why now: dated rule changes and reported market-size figures, each with its source
+  - [ ] Local demand (local-business ideas only): Google Maps businesses, ratings and complaints
+  - [ ] At-a-glance counts strip, loading and failure states, rule tests
+- [ ] Weekly web watch for claimed startups (Context.dev watchers run on their own; founders see new findings in the workspace)
 - [x] Move the market scan cardiograph from behind the statistics to replace the divider above What changed; signed-in scan page verified.
 - [x] Sweep completion handling across research, scan details, workspace manual/automatic scans and credit settlement; 23 regression tests and signed-in completed research/scan requests verified; settled records unchanged.
 - [x] Keep Edit wording in both modes; use a light inactive fill and navy active fill. Preview builds pass; signed-in toggle recheck unavailable because the injected account has no accessible workspace.
