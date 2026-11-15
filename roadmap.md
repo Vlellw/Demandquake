@@ -25,6 +25,7 @@
 - [x] Guided founder journey (Choose → Inspect → Claim): step tracker on Discover, startup pages and new workspaces; industry pills with three best-documented ideas; Guided / Full catalog toggle with linkable filters; research in a focused dialog with credit confirmation; market overview tabs (map, changes, past research); startup tab check-offs with next-check guidance, related-problem map and latest scan trace; claim window listing what you get; workspace welcome panel
 
 ## Ready next
+- Deeper demand evidence from Context.dev for the Evidence tab (customer complaints from Reddit, competitor reviews, competitor pricing, funding landscape, sourced market size, app traction, regulation triggers). Blocked: waiting for the team to pick which signals to build first.
 - [x] Five-credit startup claims: atomic workspace creation and charge, confirmation, duplicate/failure protection. Verified 25 → 20 credits, one charge, existing workspace opens without another charge, and direct workspace inserts are blocked.
 - [x] Credit wallets and auditable history, 25 welcome credits, 5-credit successful discovery with confirmation, atomic idempotent reservations and settlement, public package page and protected admin controls. Verified a signed-in cached search: 25 → 20 credits, one ledger entry, no phone overflow.
 - Credit payments: test-mode payments connected with four products, embedded checkout and signed webhook fulfillment/refunds. Blocked: live payments need the owner to finish payment onboarding; a full test purchase has not been run end to end.
