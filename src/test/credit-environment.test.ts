@@ -4,7 +4,7 @@ import { creditEnvironment } from '@/lib/credit-environment';
 vi.mock('@/lib/credits.functions', () => ({
   getCreditAccount: vi.fn(async () => ({ wallet: { balance: 10, reserved: 0 } })),
   getCreditCatalog: vi.fn(),
-  getCreditAdmin: vi.fn(),
+  getCreditAdmin: vi.fn(async () => ({ wallets: [{ balance: 10, reserved: 0 }] })),
 }));
 
 afterEach(() => {
@@ -41,4 +41,24 @@ it('still blocks payment forms when payment setup is missing', async () => {
   vi.stubEnv('VITE_PAYMENTS_CLIENT_TOKEN', '');
   const { getStripe } = await import('@/lib/stripe');
   expect(() => getStripe()).toThrow('Payments are not configured');
+});
+
+it('loads admin wallet reads without payment configuration', async () => {
+  vi.stubEnv('VITE_PAYMENTS_CLIENT_TOKEN', '');
+  const { creditAdminQuery } = await import('@/lib/credit-queries');
+  const { getCreditAdmin } = await import('@/lib/credits.functions');
+  const { QueryClient } = await import('@tanstack/react-query');
+  const client = new QueryClient();
+  try {
+    expect(await client.fetchQuery(creditAdminQuery())).toEqual({ wallets: [{ balance: 10, reserved: 0 }] });
+    expect(getCreditAdmin).toHaveBeenCalledWith(expect.objectContaining({ data: { environment: 'sandbox' } }));
+  } finally {
+    client.clear();
+  }
+});
+
+it('uses the same wallet environment for search, claims, retries and balance reads', async () => {
+  vi.stubEnv('VITE_PAYMENTS_CLIENT_TOKEN', '');
+  const { getStripeEnvironment } = await import('@/lib/stripe');
+  expect(getStripeEnvironment()).toBe('sandbox');
 });

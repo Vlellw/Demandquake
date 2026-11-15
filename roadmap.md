@@ -37,6 +37,7 @@
 - Remember inspection check-offs per account instead of per browser, so progress follows a founder across devices
 
 ## In progress
+- [x] Sweep missing-payment balance behavior across menu, search, claims/upgrades, history, administration, research drivers and database settlement; all use the shared fix or have no payment-configuration dependency. Signed-in confirmations show 10 credits; 28 credit tests pass. No settled records or configuration changed.
 - [x] Fix balance reads when payment configuration is missing; signed-in missing-token check shows the actual 10-credit wallet and existing history, phone layout passes, 26 credit tests pass. Payment setup and balances unchanged.
 - [x] Sweep credit-loading feedback: menu, research confirmation, claims, private upgrades, purchases and history use bounded reads with retry feedback; credit pricing and administration reads also time out instead of hanging. Settled records, settings and permissions unchanged.
 - [x] Public (5 credits, stays searchable) and private (20 credits, hidden from other founders) startup claims, with owner upgrade from public to private for the difference. Verified with two temporary accounts: private claim hidden from the other account (page, catalog, clusters, sources, scans), private option blocked when others build, upgrade charged 15, deleting a private workspace makes the idea public again; test accounts removed.
