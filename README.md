@@ -398,7 +398,7 @@ The project is developed and published through [Lovable](https://lovable.dev), w
 4. Publish through Lovable when ready.
 5. Check the published application and its custom domain after deployment.
 
-A Git commit saves source changes; it does not itself publish the website. Deployment must preserve Worker-compatible code and the configured authentication, AI and connector access.
+A Git commit saves source changes, it does not itself publish the website. Deployment must preserve Worker-compatible code and the configured authentication, AI and connector access.
 
 ## Limitations and configuration
 
